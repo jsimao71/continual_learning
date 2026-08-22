@@ -108,6 +108,14 @@ In the frozen-Qwen audit, surface-control Spearman is $-0.027$ and the structura
 \label{fig:prediction}
 \end{figure}
 
+\section{Series-Level Interpretation}
+
+The four-paper sequence supports a coherent but deliberately narrowing account. Paper 0 defines an evidence ladder in which recurrence and geometry are observations, interventions establish causal relevance, and persistence requires held-out utility. Paper 0.5 then shows why that separation matters: n-gram component responsibility changes with transformation and intervention, while motif specificity is unrelated to SA causal contribution ($\rho=-0.009$). Paper 0.6 generalizes the discrepancy to semantics: hierarchy-neighbor recovery exceeds permutation (0.477 versus 0.254), yet semantic motif specificity is negative ($-0.012$), and parent/root resolution recruits different component mixtures.
+
+Paper 1 supplies the first direct sparse-control test. It shows that task-conditioned aggregate structure can matter: reserving a weak cross-community bridge changes the controlled frontier, whereas monotone score sharpening cannot alter exact top-$k$ membership. But the natural pretrained audit is null. The combined interpretation is therefore not that attention motifs become latent symbols or that abstraction rises monotonically through depth. It is that recurrent computation exposes multiple candidate structural summaries, some of which become useful only relative to a task, budget, and outcome. The appropriate learning signal is validated marginal utility, not recurrence, magnitude, geometric clarity, or human interpretability alone.
+
+This distinction also explains the current stop decision. The controlled result demonstrates mechanism sufficiency under a known generator; the pretrained audit tests limited observational transfer and fails. Neither substitutes for candidate-level natural task intervention. The scientific next step is thus to close that evidence gap, not to add a more expressive learner that could absorb the generator's bias.
+
 \section{Systems Discipline}
 
 All selectors enforce exact cardinality; the artifact reports zero budget violations. Traces contain candidate IDs, selected IDs, evidence IDs for diagnostics, seed, condition, and budget, while explicitly recording that full attention is not retained. Offline Python selector time is separated from hypothetical K/V materialization. It is not presented as GPU serving latency.
@@ -140,7 +148,7 @@ The controlled generator encodes the mechanism that structural features are desi
 
 \section{Conclusion}
 
-Transient graph structure can be an effective frozen sparse-control signal when weak cross-community bridges are causally necessary. That result is not yet enough for continual learning. The retained pretrained evidence is observationally null after surface controls, and the natural candidate-level intervention required by the gate remains absent. Paper 1 therefore contributes a reusable selector/trace framework, a positive controlled mechanism test, and a clear negative boundary: do not consolidate until natural matched-budget causal utility is demonstrated.
+Transient graph structure can be an effective frozen sparse-control signal when weak cross-community bridges are causally necessary. That result is not yet enough for continual learning. Across the series, observable motifs repeatedly separate from causal utility, hierarchy geometry remains task-conditioned, and only the controlled bridge mechanism shifts a matched-budget frontier. The retained pretrained evidence is observationally null after surface controls, and the natural candidate-level intervention required by the gate remains absent. Paper 1 therefore contributes a reusable selector/trace framework, a positive controlled mechanism test, and a clear negative boundary: do not consolidate until natural matched-budget causal utility is demonstrated.
 
 \begin{thebibliography}{9}
 \bibitem{titans} A. Behrouz, P. Zhong, and V. Mirrokni. \emph{Titans: Learning to Memorize at Test Time}. arXiv:2501.00663.
