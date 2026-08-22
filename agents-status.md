@@ -117,13 +117,18 @@ Key measured results:
 - Frozen-Qwen audit: 84 identity-disjoint 2WikiMultiHopQA/MuSiQue examples.
 - Natural audit Spearman: `-0.0273` to `-0.0048`; corresponding `R^2` values are negative.
 - Fixed-power and entropy-adaptive monotone sharpening reproduce exact base top-k membership.
+- Natural candidate intervention: eight validation and eight test identities per dataset, 12 fixed candidates, and 64/128/192-token native K/V budgets.
+- Bridge-minus-base answer-logprob deltas are positive in all six cells: HotpotQA `+1.086/+0.413/+0.640`; QASPER `+0.542/+0.011/+0.503`.
+- Every paired 95% bootstrap interval includes zero. The combined structural selector is negative in five of six cells.
+- Natural candidate-removal prediction has negative held-out `R^2` with and without structure on both datasets.
 
-Interpretation: explicit bridge preservation can shift a controlled matched-budget frontier. The perfect combined-selector result is a generator-specific diagnostic ceiling, not an external-validity claim. The retained pretrained summaries are observationally null after surface controls and do not include candidate removal or task-generation outcomes.
+Interpretation: explicit bridge preservation shifts the controlled frontier and has a directionally consistent natural mean effect, but the diagnostic natural run does not establish reproducibility or learned-selector transfer. The perfect synthetic S5 result remains generator-specific. Paper 2 stays blocked.
 
 Reproduction command:
 
 ```powershell
 python -m cl.experiments.paper1_structural_control
+PYTHONPATH=src python -m cl.experiments.paper1_natural_gate
 ```
 
 ## Implementation map
@@ -146,18 +151,16 @@ Keep experiment-specific code under `src/cl/`. Put only reusable, architecture-i
 
 Paper 2 prototype/adaptor consolidation is **blocked**. Do not implement an online learner merely to continue the sequence.
 
-The next decisive experiment is a natural candidate-level frozen-Qwen study on HotpotQA and QASPER:
+The natural candidate-level frozen-Qwen diagnostic is now complete. It regenerated model-derived candidate features, preserved identity-disjoint Hotpot example/QASPER paper splits, compared B0--B3 and S1--S5 at exact native K/V token budgets, measured answer likelihood/evidence/systems outcomes, and computed a removal-utility subset. Artifacts are under `docs/papers/paper1/results/natural/`.
 
-1. Regenerate candidate-level model features rather than relying on the retained example-level graph summaries.
-2. Preserve identity-disjoint validation/test splits and record exact model/tokenizer revision, dataset IDs, seed, resolved configuration, package versions, and candidate-cache hash.
-3. Retain candidate IDs, surface scores, lexical/semantic controls, compact layer/head graph summaries, and actual task/evidence labels.
-4. Perform real matched-budget candidate selection and K/V materialization; do not report accounting-equivalent bytes as measured native latency.
-5. Compare B0--B3 and S1--S5 using identical candidate sets and exact token/byte budgets.
-6. Measure task quality, evidence recall, complete-path recovery, materialized tokens/bytes, selection overhead, end-to-end latency, and peak memory.
-7. On a feasible diagnostic subset, compute candidate removal utility
-   `U_i = Q(C) - Q(C \ {c_i})`.
-8. Fit identity-disjoint held-out models using surface controls first, then surface plus structural features. Retain calibration/correlation and negative `R^2`; the main decision is the quality/materialization frontier.
-9. Run both HotpotQA and QASPER. A result limited to the synthetic bridge generator is not sufficient.
+The exact next work is a preregistered larger replication of the unchanged bridge-versus-base protocol:
+
+1. Increase held-out identities and use multiple seeds without changing candidate construction, feature definitions, selectors, budgets, or endpoints.
+2. Keep 64/128/192-token native K/V budgets and paired answer-logprob differences primary.
+3. Preserve Hotpot example and QASPER paper identity separation; never tune on test identities.
+4. Expand removal utility enough to estimate incremental prediction with uncertainty.
+5. Treat S5's present failure as substantive; do not add flexibility to rescue it.
+6. Proceed to Paper 2 only if the fixed replication resolves a natural frontier improvement or incremental causal-utility prediction.
 
 The gate passes only if at least one result is reproducible on natural held-out data:
 
@@ -183,20 +186,15 @@ If both fail, record the null result and keep Paper 2 stopped. Do not respond by
 After the cross-paper narrative update:
 
 ```text
-python -m pytest -q       -> 17 passed
+python -m pytest -q       -> 18 passed
 python -m compileall -q src tests -> passed
 ```
 
-All four PDFs built successfully and all 33 rendered pages were visually inspected. No clipping, overlap, malformed glyphs, or unreadable figures/tables were found. Rebuild and visually inspect affected PDFs whenever their TeX sources change.
+All four PDFs built successfully and all 34 rendered pages were visually inspected. No clipping, overlap, malformed glyphs, or unreadable figures/tables were found. Rebuild and visually inspect affected PDFs whenever their TeX sources change.
 
 ## Workspace hygiene
 
-At the time this handoff was written, this machine had two unrelated local changes:
-
-- `.gitignore` modified by the user;
-- `tmp/` untracked build/render artifacts.
-
-They are not part of the research commits and must not be staged, reverted, deleted, or moved as part of paper work. A fresh clone on another machine will not contain those local changes. Always inspect `git status --short --branch` before editing and stage files explicitly.
+The tracked worktree was clean before this milestone. `tmp/` contains ignored dataset, model-build, and PDF-render caches and must not be staged. Always inspect `git status --short --branch` before editing and stage files explicitly.
 
 ## Startup checklist for the next Codex instance
 
@@ -205,6 +203,6 @@ They are not part of the research commits and must not be staged, reverted, dele
 3. Inspect `git status --short --branch`; preserve unrelated changes.
 4. Read the three result summaries and manifests before interpreting or regenerating experiments.
 5. Run `python -m pytest -q` before starting a new experiment family.
-6. Continue with the natural candidate-level gate above; do not start Paper 2 first.
+6. Continue with the fixed natural replication gate above; do not start Paper 2 first.
 7. Update result summaries, decisions, paper text, this handoff file, and generated PDFs from committed machine-readable artifacts.
 8. Build, render, and inspect changed papers; commit and push coherent milestones.

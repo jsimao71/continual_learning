@@ -11,7 +11,7 @@
 \maketitle
 
 \begin{abstract}
-Transformer inference repeatedly constructs relational statistics that disappear after the request. Before consolidating them into persistent state, we test a narrower frozen-control hypothesis: can compact graph features select sparse memory better than tuned score-only rules at exactly matched materialization budgets? We implement B0--B3 and S1--S5, deterministic graph features, compact traces, a controlled weak-bridge suite, and a residualized audit of retained Qwen3-0.6B graph summaries. Across 600 held-out controlled examples (five seeds), four-chunk base top-$k$ obtains quality 0.297 and complete-path rate 0.068. Reserving graph-bridge capacity raises these to 0.627 and 0.480; a validation-fitted base-plus-structure selector reaches 1.000 in this deliberately diagnostic generator. Structural features raise held-out causal-utility Spearman from 0.486 to 0.528. The natural pretrained audit is null: adding graph summaries to surface controls changes identity-disjoint Spearman only from $-0.027$ to $-0.005$, with negative $R^2$ in both cases. Thus transient structure is useful under a known bridge mechanism, but current natural evidence does not pass the gate for online consolidation. Candidate-level HotpotQA/QASPER regeneration and task-quality Pareto evaluation remain required.
+Transformer inference repeatedly constructs relational statistics that disappear after the request. Before consolidating them into persistent state, we ask whether compact graph features select sparse memory better than score-only rules at matched materialization budgets. A controlled weak-bridge suite establishes mechanism sufficiency: at four chunks, bridge preservation raises quality from 0.297 to 0.627, while a validation-fitted structural selector reaches a generator-specific ceiling. We then close the candidate-level natural-data gap with frozen Qwen3-0.6B on identity-disjoint HotpotQA and QASPER examples. Twelve 32-token candidates are evaluated at 64, 128, and 192 native K/V tokens; every condition performs actual causal K/V prefill and answer-likelihood scoring. Bridge preservation has positive mean answer-logprob deltas in all six dataset/budget cells, from $+0.011$ to $+1.086$, but every paired 95\% bootstrap interval includes zero. The validation-fitted combined selector is mostly negative, and structural candidate-removal models retain negative held-out $R^2$. Natural bridge structure is therefore suggestive but not reproducible at this diagnostic scale. The gate for online consolidation remains closed.
 \end{abstract}
 
 \section{Question and Evidence Gate}
@@ -86,6 +86,12 @@ The available PRA artifact retains layerwise graph summaries, but intentionally 
 
 The target is the fraction of layers with complete native graph recovery, aggregated to one row per example before evaluation. Surface controls are candidate/parent count, annotated hops, graph density, layer, dataset, and graph type. Added structural predictors are duplicate-neighbor rate, reciprocal-edge rate, effective branching factor, unique neighbors, shortcut rate, giant-component fraction, and mean out-degree. This analysis is predictive and identity-disjoint, but not causal: it has neither candidate removal outcomes nor task-generation quality.
 
+\section{Natural Candidate-Level Intervention}
+
+We regenerate candidate features directly from frozen Qwen3-0.6B revision \texttt{c1899de...}. The diagnostic slice contains eight validation and eight test identities from each of HotpotQA and QASPER. Hotpot identities are examples; QASPER identities are papers, with at most one question per paper, so no paper crosses the split. Each example supplies twelve fixed 32-token candidates. Five depth samples and four channel groups produce compact query--candidate scores and candidate similarities; traces retain derived persistence, agreement, communities, and bridge mass, never full attention matrices.
+
+Selection uses budgets of 64, 128, and 192 tokens. Selected tokens are passed through the model's native causal prefill with \texttt{use\_cache}; K/V bytes are counted from the resulting tensors. These budgets materialize 7.34, 14.68, and 22.02 MB respectively. The primary quality endpoint is mean target-answer token log probability under the frozen model. Evidence recall and complete evidence recovery are diagnostics. Candidate-removal utility is computed on one predeclared validation and test example per dataset because each candidate requires another native forward pass.
+
 \section{Results}
 
 \input{docs/papers/paper1/results/tables/main_results.tex}
@@ -102,6 +108,16 @@ Candidate removal provides exact causal utility in the controlled generator. Ave
 
 In the frozen-Qwen audit, surface-control Spearman is $-0.027$ and the structural model reaches only $-0.005$. Corresponding $R^2$ values are $-0.352$ and $-0.348$. The improvement is negligible and both models underperform the test-set mean. Retaining this negative result prevents observational graph richness from being mistaken for predictive utility.
 
+\input{docs/papers/paper1/results/natural/tables/natural_results.tex}
+
+Bridge preservation improves the mean at all six natural operating points. On HotpotQA its paired answer-logprob deltas are $+1.086$, $+0.413$, and $+0.640$ at 64, 128, and 192 tokens. QASPER deltas are $+0.542$, $+0.011$, and $+0.503$. The pattern is directionally consistent, and evidence recall generally rises, but all paired intervals cross zero. S5 does not inherit the synthetic ceiling: its deltas are negative in five of six cells. On removal utility, adding structure changes HotpotQA Spearman from $-0.385$ to $0.021$ while worsening $R^2$ from $-0.135$ to $-5.391$; on QASPER it changes Spearman from $0.161$ to $-0.028$ and $R^2$ from $-0.265$ to $-1.661$. These small diagnostic removal subsets do not support incremental causal prediction.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.88\linewidth]{docs/papers/paper1/results/natural/figures/natural_quality_materialization.png}
+\caption{Natural frozen-Qwen quality versus measured native K/V tokens. Bridge means exceed B0 throughout, but paired uncertainty includes zero; S5 fails to generalize reliably.}
+\label{fig:natural-frontier}
+\end{figure}
+
 \begin{figure}[H]\centering
 \includegraphics[width=.82\linewidth]{docs/papers/paper1/results/figures/incremental_prediction.png}
 \caption{Left: controlled candidate-removal utility. Right: observational pretrained graph recovery after identity-disjoint fitting. Structural prediction is positive only in the known synthetic mechanism.}
@@ -112,13 +128,13 @@ In the frozen-Qwen audit, surface-control Spearman is $-0.027$ and the structura
 
 The four-paper sequence supports a coherent but deliberately narrowing account. Paper 0 defines an evidence ladder in which recurrence and geometry are observations, interventions establish causal relevance, and persistence requires held-out utility. Paper 0.5 then shows why that separation matters: n-gram component responsibility changes with transformation and intervention, while motif specificity is unrelated to SA causal contribution ($\rho=-0.009$). Paper 0.6 generalizes the discrepancy to semantics: hierarchy-neighbor recovery exceeds permutation (0.477 versus 0.254), yet semantic motif specificity is negative ($-0.012$), and parent/root resolution recruits different component mixtures.
 
-Paper 1 supplies the first direct sparse-control test. It shows that task-conditioned aggregate structure can matter: reserving a weak cross-community bridge changes the controlled frontier, whereas monotone score sharpening cannot alter exact top-$k$ membership. But the natural pretrained audit is null. The combined interpretation is therefore not that attention motifs become latent symbols or that abstraction rises monotonically through depth. It is that recurrent computation exposes multiple candidate structural summaries, some of which become useful only relative to a task, budget, and outcome. The appropriate learning signal is validated marginal utility, not recurrence, magnitude, geometric clarity, or human interpretability alone.
+Paper 1 supplies the first direct sparse-control test. It shows that task-conditioned aggregate structure can matter: reserving a weak cross-community bridge changes the controlled frontier, whereas monotone score sharpening cannot alter exact top-$k$ membership. The natural intervention adds a weaker result: bridge means move in the same favorable direction on both tasks, but uncertainty, S5 failure, and removal-prediction failure prevent a gate pass. The combined interpretation is therefore not that attention motifs become latent symbols or that abstraction rises monotonically through depth. Recurrent computation exposes candidate summaries whose utility is conditional on task, budget, and outcome; favorable averages are not yet a persistent-learning signal.
 
-This distinction also explains the current stop decision. The controlled result demonstrates mechanism sufficiency under a known generator; the pretrained audit tests limited observational transfer and fails. Neither substitutes for candidate-level natural task intervention. The scientific next step is thus to close that evidence gap, not to add a more expressive learner that could absorb the generator's bias.
+This distinction also explains the current stop decision. The candidate-level experiment closes the instrumentation gap but not the statistical one. The next step is a preregistered, larger multi-seed replication of the same frozen intervention, not a more expressive learner that could absorb the small validation slice.
 
 \section{Systems Discipline}
 
-All selectors enforce exact cardinality; the artifact reports zero budget violations. Traces contain candidate IDs, selected IDs, evidence IDs for diagnostics, seed, condition, and budget, while explicitly recording that full attention is not retained. Offline Python selector time is separated from hypothetical K/V materialization. It is not presented as GPU serving latency.
+All selectors enforce exact cardinality; both artifact families report zero budget violations. Natural traces contain candidate, selection, and evidence IDs and explicitly record that full attention is not retained. Unlike the controlled accounting estimate, the natural study separately records selector time, native K/V prefill time, end-to-end answer scoring, materialized tensor bytes, and device allocation. These research-code timings are not production serving claims.
 
 \begin{figure}[H]\centering
 \includegraphics[width=.72\linewidth]{docs/papers/paper1/results/figures/selector_overhead.png}
@@ -130,25 +146,24 @@ The implementation is opt-in. With NSC disabled, the adapter boundary calls exac
 
 \section{Decision Gate and Falsification}
 
-The controlled suite supports H1--H3 under its explicit generator: structural variables predict known removal utility, bridge preservation shifts the controlled frontier, and monotone sharpening cannot protect a low-score bridge. H4 is not established. The pretrained audit is null, and no natural task-quality frontier was measured. Online prototypes or adapters therefore remain blocked.
-
-The next decisive run must regenerate candidate-level frozen-Qwen features for HotpotQA and QASPER, preserve identity-disjoint validation/test splits, measure task quality or answer likelihood after actual native K/V materialization, and sweep equal token/byte budgets. Success requires a paired frontier improvement or incremental causal-utility prediction beyond score and lexical/semantic controls on both task families. A second null result should stop the consolidation program rather than motivate a more flexible learner.
+The controlled suite supports H1--H3 only under its explicit generator. The natural intervention satisfies the engineering requirements---candidate regeneration, identity separation, actual K/V materialization, equal budgets, task quality, and removal diagnostics---but does not satisfy reproducibility. All bridge means are favorable, yet every paired interval includes zero; S5 and held-out removal prediction fail. Online prototypes or adapters therefore remain blocked. A larger multi-seed replication may test the directional bridge pattern once, but no test-set tuning or learner expansion is justified.
 
 \section{Reproducibility and Provenance}
 
 The exact command is
 \begin{verbatim}
 python -m cl.experiments.paper1_structural_control
+PYTHONPATH=src python -m cl.experiments.paper1_natural_gate
 \end{verbatim}
-with \texttt{PYTHONPATH=src}. The manifest records configuration, source SHA-256, the frozen model revision, Paper 0.6 manifest hash, and an aggregate artifact hash. Machine-readable outputs include 24,000 candidate-feature rows, 30,000 selector/example/budget rows, compact traces, fitted coefficients, pretrained predictions, bootstrap summaries, figures, and the generated table. The committed pretrained rows make the audit inspectable without the omitted tensor cache.
+The manifests record resolved configuration, exact model/tokenizer revision, identities, cache hashes, package versions, device/dtype, and artifact hashes. The natural artifact adds 372 candidate rows, 480 selector rows, 48 removal rows, paired intervals, compact traces, measured systems fields, a generated table, and a figure.
 
 \section{Limitations}
 
-The controlled generator encodes the mechanism that structural features are designed to detect; its perfect S5 ceiling is diagnostic, not an external validity claim. Its quality function is known evidence-path recovery, not generated-answer quality. Qwen-equivalent bytes are accounting estimates. The pretrained audit reuses 2WikiMultiHopQA/MuSiQue summaries rather than the requested HotpotQA/QASPER candidate cache, averages eight correlated layer measurements to the example level, and predicts graph recovery rather than causal task utility. No native K/V was materialized in this repository, no end-to-end latency was measured, and no larger architecture was evaluated.
+The controlled generator encodes the mechanism that structural features are designed to detect; its perfect S5 ceiling is diagnostic. The natural study is also deliberately small: eight held-out identities per dataset, one seed, twelve fixed candidates, coarse paragraph-derived evidence labels, one removal example per split, one model size, and answer likelihood rather than full answer generation. Its channel groups summarize representation subspaces rather than literal attention heads. Native K/V and latency are measured, but on Apple MPS research code rather than an optimized serving stack. These constraints make the favorable bridge direction a replication target, not a gate pass.
 
 \section{Conclusion}
 
-Transient graph structure can be an effective frozen sparse-control signal when weak cross-community bridges are causally necessary. That result is not yet enough for continual learning. Across the series, observable motifs repeatedly separate from causal utility, hierarchy geometry remains task-conditioned, and only the controlled bridge mechanism shifts a matched-budget frontier. The retained pretrained evidence is observationally null after surface controls, and the natural candidate-level intervention required by the gate remains absent. Paper 1 therefore contributes a reusable selector/trace framework, a positive controlled mechanism test, and a clear negative boundary: do not consolidate until natural matched-budget causal utility is demonstrated.
+Transient graph structure is an effective frozen sparse-control signal when weak bridges are known to be causal. On natural HotpotQA and QASPER candidates, bridge reservation improves the mean quality--materialization frontier consistently but inconclusively; intervals include zero, S5 fails, and removal prediction remains out of sample. Paper 1 therefore contributes a reusable selector/trace/materialization framework, a positive controlled mechanism test, a suggestive natural direction, and a negative decision: do not consolidate without larger reproducible natural utility.
 
 \begin{thebibliography}{9}
 \bibitem{titans} A. Behrouz, P. Zhong, and V. Mirrokni. \emph{Titans: Learning to Memorize at Test Time}. arXiv:2501.00663.

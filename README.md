@@ -55,3 +55,11 @@ python -m cl.experiments.paper1_structural_control
 ```
 
 This runs the matched-budget controlled bridge suite and the residualized frozen-Qwen graph audit. Results and the explicit no-go decision for online consolidation are under `docs/papers/paper1/results/`.
+
+Paper 1 natural candidate-level gate:
+
+```bash
+PYTHONPATH=src python -m cl.experiments.paper1_natural_gate
+```
+
+This evaluates frozen Qwen3-0.6B on identity-disjoint HotpotQA and QASPER candidates with actual native K/V prefill, exact token budgets, answer-likelihood frontiers, and a diagnostic removal-utility subset. Its committed artifacts are under `docs/papers/paper1/results/natural/`. Favorable bridge means remain statistically unresolved, so Paper 2 is still blocked.

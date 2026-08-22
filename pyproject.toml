@@ -9,6 +9,15 @@ description = "Causal experiments on recurrent Transformer computation"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.24", "torch>=2.1", "matplotlib>=3.7"]
 
+[project.optional-dependencies]
+natural = [
+  "datasets>=3,<5",
+  "transformers>=4.51,<5",
+  "psutil>=5.9,<8",
+  "sentencepiece>=0.2",
+]
+test = ["pytest>=8,<9"]
+
 [tool.setuptools]
 package-dir = {"" = "src"}
 
@@ -18,4 +27,3 @@ where = ["src"]
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
-

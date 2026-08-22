@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import importlib.metadata
 import json
 import os
 import platform
@@ -58,7 +59,9 @@ def write_csv(path: str | Path, rows: Iterable[Mapping[str, Any]]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = sorted(set().union(*(row.keys() for row in materialized))) if materialized else []
     with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(
+            stream, fieldnames=fields, extrasaction="ignore", lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(materialized)
     return path
@@ -137,10 +140,21 @@ class RunMetadata:
             timestamp_utc=datetime.now(timezone.utc).isoformat(),
             python=sys.version.split()[0],
             platform=platform.platform(),
-            package_versions={"numpy": numpy.__version__, "torch": torch.__version__},
+            package_versions={
+                name: importlib.metadata.version(name)
+                for name in ("numpy", "torch", "matplotlib", "transformers", "datasets")
+                if _package_available(name)
+            },
             data_hash=data_hash,
         )
 
     def as_dict(self) -> dict[str, Any]:
         return asdict(self)
 
+
+def _package_available(name: str) -> bool:
+    try:
+        importlib.metadata.version(name)
+    except importlib.metadata.PackageNotFoundError:
+        return False
+    return True
