@@ -1,0 +1,26 @@
+[
+  {
+    "criterion": "neighbor recovery above permuted control",
+    "layers": [
+      0,
+      1,
+      2
+    ],
+    "natural": false,
+    "onset": 0,
+    "persistence": 3,
+    "reentries": []
+  },
+  {
+    "criterion": "neighbor recovery above permuted control",
+    "layers": [
+      0,
+      1,
+      2
+    ],
+    "natural": true,
+    "onset": 0,
+    "persistence": 3,
+    "reentries": []
+  }
+]

@@ -1,0 +1,132 @@
+\documentclass[11pt]{article}
+\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}\usepackage{lmodern}
+\usepackage[a4paper,margin=22mm]{geometry}\usepackage{microtype,amsmath,amssymb,booktabs,graphicx,float}
+\usepackage[hidelinks]{hyperref}
+\title{Hierarchical Semantic Invariants Across Transformer Depth\\\large Abstraction, Residual Dynamics, and Layerwise Representation}
+\author{Jorge Sim\~ao\\EInnovator R\&D --- Center for the Sciences of Computation, Cognition, and Complexity}
+\date{Paper 0.6 --- Controlled Experiment Report --- August 2026}
+\begin{document}\maketitle
+\begin{abstract}
+We implement a controlled framework for measuring hierarchical semantic invariants across Transformer depth. Paper 0.6 reuses Paper 0.5's exact self-attention (SA), feed-forward (FFN), residual, intervention, artifact, and checkpoint infrastructure; only hierarchy construction and geometry are new. Balanced noun, action, and relation families contain natural-label and arbitrary-label synthetic trees, parent and root queries, three templates, and permuted-parent controls. Two inspectable causal Transformer settings are trained with two seeds and measured at four checkpoints. Across post-block layers, normalized parent separation is 0.110, hierarchy-distance/activation-distance RSA is 0.194, and nearest-neighbor parent recovery is 0.477 versus 0.254 under the permuted control. Natural hierarchies are stronger than synthetic ones (separation 0.142 versus 0.078), while cross-template cosine is high (0.960). Component responsibility changes with requested resolution: parent prediction is FFN-heavy under zero ablation (1.117 versus 0.211 nats), whereas root prediction is SA-heavy (0.987 versus 0.671). Semantic attention-motif specificity is slightly negative ($-0.012$), providing no motif-invariance evidence. These results support weak, distributed, task-conditioned hierarchy geometry in the controlled regime, not a literal taxonomy or monotone abstraction ladder. Pretrained replication with natural-corpus n-gram residualization remains necessary.
+\end{abstract}
+
+\section{Motivation}
+Paper 0.5 asks how familiar sequential regularities are represented and transformed across attention, FFN, and the residual stream. N-grams provide a clean statistical probe. Paper 0.6 supplies the semantic counterpart: do hidden states organize concepts as nested invariances, and how does that organization evolve across depth? The goal is not another demonstration that categories can be decoded by a probe, but a mechanistic account of emergence, persistence, transformation, and causal relevance.
+
+\section{Relation to Paper 0.5}
+The papers should share instrumentation but remain separate. Paper 0.5 controls recurrent token/sequential patterns and studies continuation relations. Paper 0.6 controls semantic hierarchy/specificity and studies category and relational invariants. N-gram frequency and next-token predictability become mandatory confounds in Paper 0.6: semantic effects should survive matching, stratification, or residualization against surface statistics.
+
+\section{Abstraction as Nested Invariance}
+Let $x\sim_k y$ mean that $x$ and $y$ are equivalent at abstraction level $k$. Falcon and penguin are equivalent under bird; falcon and dog become equivalent under animal. This induces nested classes $C_0(x)\subset C_1(x)\subset C_2(x)\ldots$. If $T_k$ is a family of substitutions preserving category $k$, an invariant representation satisfies $r_k(Tx)\approx r_k(x)$ for $T\in T_k$. Higher abstraction is therefore operationally stability under a larger transformation family.
+
+\section{Research Questions}
+At which layers do instance, category, superclass, action, and relation invariants emerge? Are abstraction levels monotonic with depth or do they coexist and re-enter? Does within-category variability contract while between-category separation increases? Does activation geometry correlate with known tree distance? Do residual increments share category-specific directions or subspaces? Which effects arise across attention versus FFN? How much is explained by lexical frequency, syntax, tokenization, or n-gram familiarity?
+
+\section{Controlled Datasets}
+The implemented corpus uses six balanced binary trees: natural-label and arbitrary-label versions of nouns, actions, and relations. Natural examples include falcon/penguin $\rightarrow$ bird $\rightarrow$ entity, walk/crawl $\rightarrow$ movement $\rightarrow$ act, and above/below $\rightarrow$ spatial $\rightarrow$ relation. Synthetic trees use arbitrary labels introduced by definition chains. Each leaf is queried for its parent and root under three template tokens. All labels are single tokens; query/template counts and local training frequency are balanced. A cross-category leaf with the same template supplies activation and motif controls, and shuffled parent identities supply a metric-level negative control. Micro-to-macro coarse-graining remains E9 and is not conflated with the taxonomy experiment.
+
+\section{Layerwise Metrics}
+For layer $l$, collect hidden state $h_l(x)$ and candidate residual update $\Delta h_l(x)=h_{l+1}(x)-h_l(x)$. For a parent class $C$, define within-class dispersion $D_W$, matched between-class dispersion $D_B$, and normalized separation
+\begin{equation}
+S_l(C)=\frac{D_B-D_W}{D_B+\epsilon}.
+\end{equation}
+Pairwise cosine-distance matrices are compared with exact tree distances by Spearman RSA. Tree recovery is the fraction of leaves whose nearest representational neighbor has the same parent; parent labels are permuted within the matched family/domain for a negative control. Cross-template invariance averages representation cosine for the same item and requested abstraction under three templates. Effective rank and shared-update explained variance measure concentration without assuming that compression is abstraction.
+
+Following the shared metric ontology, we also retain $\|\Delta_l\|$, $\|\Delta_l\|/\|h_l\|$, $\cos(h_l,\Delta_l)$, update--update cosine, and category-conditioned update rank. Positive, orthogonal, or negative geometry remains a refinement, complementarity, or interference \emph{candidate}; geometry alone is never called causal interference. For layer masks above the permuted-control criterion, onset, consecutive persistence, disappearance, and re-entry are computed explicitly rather than assuming monotonicity.
+
+\section{SA versus FFN}
+Capture pre/post-attention and pre/post-FFN states using Paper 0.5's exact convention,
+\begin{align}
+r'_l &= r_l+\Delta^{\rm SA}_l,\\
+r_{l+1} &= r'_l+\Delta^{\rm FF}_l.
+\end{align}
+Signed target-logit progress is diagnostic. Causal outcomes use intact-minus-intervened target log probability under zero update, matched batch mean, cross-category matched activation replacement, selective head ablation, and complete FFN-layer ablation. Parent and root queries create a contextual-resolution comparison for the same leaves. This design tests, rather than assumes, that attention retrieves relations and FFNs store concepts.
+
+\section{Invariant Taxonomy}
+Distinguish lexical invariance, syntactic invariance, sequential/n-gram invariance, category invariance, hierarchical invariance, relational invariance, abstraction invariance, and task invariance. A useful summary object is I(layer, abstraction level, transformation family), enabling heatmaps and comparisons across models and semantic families.
+
+\section{Controls and Causality}
+Token length, syntactic role, templates, number of occurrences, and local training frequency are balanced by construction. The semantic atlas uses Paper 0.5's frequency, continuation-entropy, top-probability, and content-hash schema, and records the hierarchy and Paper 0.5 manifest hashes. Natural labels are compared with arbitrary synthetic labels; exact tree metrics are compared with shuffled parent identities; and invariance is tested across templates. Bootstrap intervals use model/seed/family cells rather than raw token occurrences. Linear probes are unnecessary for the primary result and are not used as evidence. Subspace projection and cross-template direction transfer remain for pretrained follow-up.
+
+\section{Hypotheses}
+H1 Hierarchical geometry: activation distances reflect semantic tree distance in a subset of layers. H2 Non-monotonic abstraction: abstraction is not a single early-to-late ladder. H3 Residual commonality: members of a semantic class share reliable residual-update components/subspaces. H4 Cross-domain partial universality: some signatures generalize across nouns, actions, and relations. H5 Surface-statistics insufficiency: matched n-gram and lexical controls reduce but do not eliminate hierarchical effects.
+
+\section{Local Rules, Symmetry, and Coarse-Graining}
+The same hierarchy-recovery metrics can be applied to transformer representations and networks trained with local rules on known hierarchical generators, giving a shared quantitative language without claiming architectural identity. Concepts can also be treated as stable under families of meaning-preserving transformations, connecting the experiment to symmetry/invariance. Residual increments permit tests of low-dimensional local generators. Micro-to-macro descriptions provide a separate, operational analogy with coarse-graining.
+
+\section{Implemented Experimental Sequence}
+E1 constructs the versioned semantic atlas and exact tree-distance matrix. E2 records layer/location hierarchy geometry. E3 reuses Paper 0.5's diagnostic and causal SA/FFN decomposition. E4 evaluates semantic attention motifs against cross-category controls. E5 contrasts natural with arbitrary synthetic hierarchies. E6 compares parent versus root contextual resolution. E7 replicates across nouns, actions, and relations. E8 repeats geometry at training steps 0, 40, 100, and 160. The model matrix is identical to Paper 0.5: widths/layers/heads 32/2/2 and 48/3/3, seeds 11 and 23. E9 micro/macro coarse-graining is deferred.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/concept.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/hierarchy_design.png}
+\caption{Operational design. Left: abstraction is traced through SA, FFN, and residual updates. Right: a balanced hierarchy with exact distances and substitution classes.}
+\label{fig:paper06-design}
+\end{figure}
+
+\section{Controlled Pilot Results}
+The artifact set contains 4,320 representation rows, 2,880 causal component rows, 108 aggregate geometry rows, 13 regenerated figures, and four dense checkpoints for the first model/seed. Final language-model loss ranges from 0.457 to 0.530.
+
+\input{docs/papers/paper0_6/results/tables/main_results.tex}
+
+Natural-label geometry is stronger than arbitrary-label geometry, but both exceed their permuted-parent controls. Across post-block cells, normalized separation is 0.110, hierarchy RSA is 0.194, and parent-neighbor recovery is 0.477 versus 0.254 after label permutation. Cross-template cosine is 0.960. These values support weak approximate invariance; they do not support a literal taxonomy or a clean symbolic code.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/invariance_heatmap.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/hierarchy_rsa.png}
+\caption{Layerwise hierarchy geometry. Left: normalized separation by tensor location and layer. Right: tree-distance/activation-distance RSA for natural and synthetic labels.}
+\label{fig:paper06-geometry}
+\end{figure}
+
+\subsection{Dispersion, invariance, and residual commonality}
+Between-parent distance exceeds within-parent distance on average, while high cross-template cosine shows that the same item/requested level remains stable across the three controlled forms. The invariant criterion is already above the permuted control at layer 0 and persists for all measured layers in both natural and synthetic conditions. This is evidence against a simple late-onset abstraction ladder: part of the geometry is present in the learned embedding/context state before deeper transformation. Shared-update explained variance is reported as residual commonality, not as a literal group generator.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/within_between.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/template_invariance.png}
+\caption{Left: within- versus between-parent cosine dispersion. Right: invariance of an item's representation across matched templates.}
+\label{fig:paper06-dispersion}
+\end{figure}
+
+\subsection{Task-conditioned component responsibility}
+Zero ablation gives opposite component orderings for the two requested levels. Parent prediction is FFN-heavy (1.117 versus 0.211 nats for SA); root prediction is SA-heavy (0.987 versus 0.671). Matched replacement changes the root ordering (FFN $-0.223$, SA 0.268), again showing intervention sensitivity. The same leaf therefore recruits different component mixtures under fine versus coarse resolution, supporting task-conditioned coexistence rather than a fixed layer-to-abstraction map.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/component_contributions.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/contextual_resolution.png}
+\caption{Left: SA/FFN causal contribution by abstraction target. Right: aggregate parent (fine) versus root (coarse) resolution. Signed values are retained.}
+\label{fig:paper06-components}
+\end{figure}
+
+\subsection{Motif null and cross-domain variation}
+Mean semantic motif specificity is $-0.012$: within-equivalence attention rows are no more stable than cross-category, position-matched controls. E4 is therefore negative even though hidden-state geometry exceeds permuted control. Across domains, normalized separation/RSA/neighbor recovery are 0.060/0.095/0.427 for actions, 0.120/0.185/0.443 for nouns, and 0.150/0.302/0.563 for relations. H4 is at most partial: the direction generalizes, but magnitude is domain-dependent.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_motifs.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/natural_synthetic_controls.png}
+\caption{Left: semantic attention-motif specificity, which averages slightly below zero. Right: natural/synthetic geometry and exact hierarchy recovery against the permuted-parent control.}
+\label{fig:paper06-controls}
+\end{figure}
+
+\subsection{Development and update organization}
+Hierarchy separation changes across checkpoints rather than rising as a guaranteed monotone developmental ladder. Category-conditioned residual updates share some variance, but their commonality differs across SA, FFN, and depth. These measurements retain the clocks distinguished in Paper 0: layer depth $l$ is not training time $\tau$.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.32\linewidth]{docs/papers/paper0_6/results/figures/onset_persistence.png}\hfill
+\includegraphics[width=.32\linewidth]{docs/papers/paper0_6/results/figures/training_dynamics.png}\hfill
+\includegraphics[width=.32\linewidth]{docs/papers/paper0_6/results/figures/update_commonality.png}
+\caption{Left: persistence above the permuted-control criterion. Center: hierarchy separation during local training. Right: category-conditioned shared-update explained variance.}
+\label{fig:paper06-development}
+\end{figure}
+
+\section{Reproducibility and Reuse}
+The exact command is \texttt{python -m cl.experiments.paper06\_abstraction --steps 160 --checkpoints 0 40 100 160 --seeds 11,23 --device cpu}. The manifest records the hierarchy hash, Paper 0.5 manifest hash, resolved model matrix, and artifact hash. Per-run metadata records the source commit/dirty flag, command, model/data identity, seed, device/dtype, package versions, timestamp, and corpus hash. The committed reuse map identifies every shared module and extension. Tests cover tree paths/distances, parent/depth/sibling consistency, deterministic generation, balanced templates, known-geometry recovery, Paper 0.5 join determinism, trace parity, residual identities, intervention locality, and serialization.
+
+\section{Falsification, Contribution, and Limitations}
+The controlled experiment weakens a monotone layer-to-abstraction account and finds no semantic attention-motif invariant. It does recover above-permutation hierarchy geometry in natural and synthetic conditions and a causal change in component responsibility with requested resolution. The supported contribution is thus a reusable causal/geometric framework plus evidence for weak, distributed, task-conditioned hierarchy structure.
+
+Only two small locally trained architectures and two seeds are studied. All labels are single tokens and templates are controlled tokens rather than natural paraphrases. Balancing removes measured Paper 0.5 confounds but does not estimate their effects in natural language. Activation replacement can be off-manifold; generic layer utility is not eliminated; head 0 is diagnostic rather than corrected search; no subspace projection or direction transfer is attempted. Micro-to-macro language, pretrained replication, natural-corpus residualization, mixed-effects inference, and cross-template causal transfer remain required.
+
+\section{Conclusion}
+Treating abstraction as invariance under nested substitutions turns ``abstraction across layers'' into a quantitative causal problem. In this controlled regime, hierarchy geometry exceeds a permuted control and transfers across templates, but is weak, present early, non-universal across domains, and unsupported by semantic attention motifs. Parent and root queries recruit different SA/FFN mixtures. Paper 0.6 therefore rejects a simple depth ladder while preserving a narrower hypothesis: Transformers can construct approximate hierarchy-conditioned representations whose causal realization depends on the requested level of resolution.
+\end{document}

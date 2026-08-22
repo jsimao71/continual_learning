@@ -39,3 +39,11 @@ python -m cl.experiments.paper05_ngram --steps 160 --checkpoints 0 40 100 160 --
 ```
 
 Its exact artifacts and retained negative results are documented in `docs/papers/paper0_5/results/summary.md`. Paper 0.6 reuses the same model adapter, trace locations, interventions, metric ontology, and artifact schema.
+
+Paper 0.6 controlled run:
+
+```powershell
+python -m cl.experiments.paper06_abstraction --steps 160 --checkpoints 0 40 100 160 --seeds 11,23 --device cpu
+```
+
+The semantic results, reuse map, hierarchy controls, and artifact manifest are under `docs/papers/paper0_6/results/`.
