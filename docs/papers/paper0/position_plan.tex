@@ -1,0 +1,167 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,enumitem,hyperref,microtype,tabularx}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\title{Neural Structural Consolidation:\\Learning from Transient Relational Structure at Inference Time\\\large Position Paper and Research Plan}
+\author{Jorge Sim\~ao\\EInnovator R\&D --- Center for the Sciences of Computation, Cognition, and Complexity}\date{August 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Transformer inference repeatedly constructs rich relational objects---attention matrices, residual trajectories, token graphs, routing decisions, and task-conditioned substructures---but normally discards most of their episode-specific structure after the current computation. Training exploits these quantities indirectly through end-to-end gradients, yet deployed models generally lack a mechanism for explicitly accumulating recurrent relational regularities observed during use. We call the broader opportunity \emph{Neural Structural Consolidation} (NSC): extracting stable structure from transient neural computation and progressively consolidating it into routing, sparse attention, prototype memories, adapters, fast weights, residual controllers, or, at the slowest timescale, backbone parameters. The proposal is deliberately staged. Token n-gram prediction and semantic hierarchy mapping first establish what recurrent transformations exist, where they appear across self-attention (SA), feed-forward networks (FFNs), and residual depth, and whether descriptive signatures survive causal controls. Only then do sparse control and learning experiments test whether those signatures are useful state for continual adaptation. This ordering turns an expansive idea about emergent symbolic reasoning into a sequence of falsifiable measurement, intervention, and consolidation gates.
+\end{abstract}
+\section{Scope and Contributions}
+NSC is a research program rather than a claim that attention graphs are symbols or that inference-time learning is universally beneficial. Its proposed contributions are: (i) an operational unit of recurrent structure; (ii) a common metric and artifact contract across sequential, semantic, retrieval, and residual experiments; (iii) causal tests separating visible structure from useful computation; (iv) a hierarchy of persistence mechanisms with matched-capacity controls; and (v) explicit decision gates that allow the program to stop after a negative result.
+
+The immediate scope is frozen or locally trained small Transformers with inspectable blocks. Production continual learning, unrestricted self-modification, and claims of brain--Transformer equivalence are outside the initial program. A successful measurement paper need not produce an online learner, and a successful learner need not establish symbolic computation.
+\section{Position}
+For layer $l$, a Transformer creates
+\[
+A_l(x)=\mathrm{softmax}(Q_lK_l^\top/\sqrt d),
+\]
+a dense context-specific relational structure. Training gradients pass through $A_l$, so training does not ignore attention structure. The asymmetry is subtler: sample-level relational structures are usually not retained as explicit reusable learned objects. At inference time, a model may repeatedly rediscover stable edges, communities, bridge relations, layer-persistent motifs, residual refinements, and task-conditioned subgraphs without accumulating those observations into persistent structural knowledge.
+
+\begin{quote}\textbf{NSC hypothesis: relations produced during inference are themselves potential training data. Recurrent, useful relational structure should be measured, validated, and selectively consolidated.}\end{quote}
+
+The unit of analysis is an episode-level structural observation
+\begin{equation}
+o_t=(c_t,S_t,u_t,m_t),
+\end{equation}
+where $c_t$ records context and controls, $S_t$ is a compact structural summary, $u_t$ is a task-conditioned causal utility estimate, and $m_t$ is complete provenance. Consolidation is warranted only for equivalence classes of observations that recur across held-out lexical items, templates, tasks, or episodes. Recurrence without transfer is memorization; stability without causal utility is description; utility without a matched baseline is not evidence for structural learning.
+
+\section{Three Clocks and Four Evidential Levels}
+Depth $\ell$, interaction episode $t$, and slower learning or development $\tau$ are distinct clocks. A pattern that persists across layers is not thereby learned across episodes, and an association that emerges over training checkpoints is not an online memory. Every claim should identify its clock.
+
+We distinguish four evidential levels:
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Observation:} a reproducible statistic exists, such as an aligned attention motif, residual trajectory, hierarchy geometry, or routing graph.
+\item \textbf{Prediction:} the statistic predicts held-out target progress or causal utility beyond lexical, frequency, score, and generic-layer controls.
+\item \textbf{Intervention:} ablation, patching, replacement, or matched-budget selection changes behavior as predicted.
+\item \textbf{Consolidation:} persistent state learned from the statistic improves future episodes while retaining override behavior and avoiding matched unrelated harm.
+\end{enumerate}
+Claims must not silently move upward in this hierarchy.
+
+\section{Relation to Existing Approaches}
+Titans introduces neural long-term memory learned during test-time processing and combines it with attention \cite{titans}. TTT layers make recurrent hidden state a model updated by self-supervised learning \cite{ttt}. Linear attention has been related formally to fast-weight programming \cite{fast}. Infini-attention combines local attention with bounded compressive memory \cite{infini}. These demonstrate that inference need not be read-only. NSC generalizes the question from ``what content should persist?'' to ``what recurrent computational structure should persist, where, and on what timescale?''
+
+\begin{table}[h]\centering\small
+\begin{tabular}{p{.22\linewidth}p{.27\linewidth}p{.39\linewidth}}\toprule
+Family & Persistent state & Main distinction from NSC\\\midrule
+KV/context memory & token representations & stores content rather than recurrent relational statistics\\
+Compressive memory & bounded summary & compresses history into fixed state\\
+Fast weights / linear attention & associative mapping & online binding is itself the state update\\
+TTT & trainable hidden model & self-supervised gradient updates at test time\\
+Titans & neural long-term memory & surprise-driven associative memory update\\
+Continual/LoRA adaptation & adapter/backbone parameters & typically optimized from task/self-supervised loss\\
+NSC & structural summaries and parameters & explicitly learns from relational/dynamical statistics\\
+\bottomrule\end{tabular}\caption{Conceptual positioning.}
+\end{table}
+
+\section{Structural Signals}
+Candidate signals include attention entropy and concentration, edge persistence across layers or repeated episodes, cross-head agreement, graph communities, bridge centrality, motifs, token-role correlations, residual-update geometry, causal skip utility, task/goal state $Z$, and validation outcomes:
+\[
+S_t=\Phi(A_{1:L},R_{1:L},Z,\mathrm{routing},\mathrm{outcome}).
+\]
+A central methodological rule is to distinguish correlation from utility. A consistently large edge is not necessarily causally useful, while a weak edge may be an essential bridge for multi-hop inference.
+
+\section{Common Measurement Contract}
+For a pre-normalized block, record tensor locations explicitly:
+\begin{align}
+r_\ell &\rightarrow r'_\ell=r_\ell+\Delta^{\mathrm{SA}}_\ell,\\
+r'_\ell &\rightarrow r_{\ell+1}=r'_\ell+\Delta^{\mathrm{FF}}_\ell.
+\end{align}
+Descriptive target progress, such as the signed logit change produced by an update, is not a causal effect. Primary mechanistic claims require interventions and generic-layer controls. Residual geometry includes update norm, update-to-state norm ratio, state--update cosine, update--update cosine, effective rank, and representational similarity. Positive, orthogonal, or negative alignment are labeled \emph{refinement candidates}, \emph{complementarity candidates}, or \emph{interference candidates}; strong interference additionally requires negative task-conditioned utility and later repair.
+
+Every artifact records run and schema identifiers, git commit, command, resolved configuration, model and tokenizer revision, dataset and split, seed, device/dtype, package versions, timestamp, and the exact atlas or hierarchy hash. Raw rows are aggregated at the scientific unit---n-gram, semantic item/branch, candidate memory, or episode---rather than treating correlated token occurrences as independent evidence. Paper values and figures must regenerate from committed machine-readable artifacts.
+
+\section{Two Measurement Gates Before Continual Learning}
+\paragraph{Paper 0.5: recurrent token prediction.}
+For token prefix $g$ and continuation $y$, the corpus supplies frequency, continuation entropy, and association strength. Layerwise SA/FFN updates, causal interventions, attention-motif controls, contextual override, and checkpoint trajectories test whether the relation is compiled, retrieved, distributed, or repaired. Corpus counts for opaque pretrained models are explicitly reference-corpus proxies, not training frequency.
+
+\paragraph{Paper 0.6: semantic abstraction.}
+Natural and synthetic hierarchies supply known instance--category--superclass distances and transformation families. Within/between dispersion, hierarchy--activation correspondence, invariant onset/persistence/re-entry, SA/FFN interventions, and cross-template transfer test whether approximate abstraction invariants emerge. Lexical and Paper 0.5 n-gram statistics are mandatory controls. Probe accuracy and geometric resemblance alone are insufficient.
+
+These gates determine the candidate structural state $S_t$ and the outcome signal $u_t$ for later consolidation. If stable signatures vanish under matched controls, or causal measurements disagree with descriptive ones, later learners must not be engineered around the preferred story.
+
+\section{Mechanism Spectrum}
+\subsection{Training-free contrast adaptation}
+A minimal intervention is
+\[
+a'_i=\frac{a_i^\gamma}{\sum_j a_j^\gamma},\quad \gamma>1,
+\]
+equivalent to lowering softmax temperature. A stronger version predicts $\gamma$ from entropy, layer, head, goal, or graph structure. Global sharpening is only a baseline because it can erase bridge edges and minority hypotheses. Graph-aware redistribution should preserve edges with persistence, bridge value, goal relevance, or measured causal utility.
+
+\subsection{Prototype consolidation}
+Structural observations can update local prototypes without backpropagation:
+\[
+p_k\leftarrow(1-\eta)p_k+\eta S_t,
+\]
+with competitive, normalized, Hebbian, Oja-like, or hierarchical variants. Prototypes may represent edge types, motifs, subgraphs, task structures, or residual-update regimes.
+
+\subsection{Structural adapters and fast weights}
+An adapter can condition on structural summaries,
+\[
+\Delta h_l=g_\phi(h_l,S_t),
+\]
+or a hypernetwork can map structural state to low-rank updates. Online variants update $\phi$ with structural objectives. This is a controlled middle ground between transient activation changes and backbone fine-tuning.
+
+\subsection{Slow backbone consolidation}
+For local deployments, validated episodes can populate a build dataset for periodic LoRA, FFN, or restricted backbone updates. This should be the slowest timescale because model drift, forgetting, and attribution become progressively harder to control.
+
+\subsection{Consolidation objective and controls}
+Let $P_t$ denote persistent structural state and $V$ a validation signal. A generic update is
+\begin{equation}
+P_{t+1}=\mathcal U(P_t,S_t;V_t),
+\end{equation}
+but the scientific comparison is not update versus no update alone. It includes token/label-only memory, hidden-state-conditioned memory, random or shuffled structural features, matched-capacity ordinary adapters, replay where applicable, and an oracle diagnostic. Outcomes include future-task loss, transfer, retention, contextual override, contamination sensitivity, update cost, and reversibility. Online updates require bounded scope, versioned state, rollback, and an audit trail linking each persistent change to its source episodes.
+
+\section{Integration with the Research Program}
+\paragraph{PRA.} PRA is the first experimental vehicle because better structural discrimination can directly reduce retrieved chunks that must be materialized. The principal Pareto curve is task quality versus materialized KV tokens, supplemented by latency and GPU memory.
+
+\paragraph{Gated residuals.} Residual work asks whether updates refine, complement, or interfere. NSC adds historical structural evidence:
+\[
+g_l=f(Z,r_l,\Delta_l,G_l,P),
+\]
+where $P$ is consolidated prototype state. This separates instantaneous intrinsic gating from experience-consolidated control.
+
+\paragraph{Modal LLMs.} A non-causal encoding mode can construct a complete prompt graph before generation. Generation consumes it causally; review re-encodes the solution; validation compares prompt, generation, review, and goal state. The modes create a natural loop: encode $\rightarrow$ act $\rightarrow$ inspect $\rightarrow$ validate $\rightarrow$ consolidate.
+
+\paragraph{Emergent quasi-symbolic inference.} Hierarchical prototypes provide a testable bridge:
+\[
+\text{neural dynamics}\rightarrow\text{graph invariants}\rightarrow\text{stable prototypes}\rightarrow\text{relations}\rightarrow\text{composable operators}.
+\]
+The scientific question is whether recurrent motifs become invariant, discrete, compositional, and causally reusable enough to function as latent relations without manually installing symbols.
+
+\section{Research Program and Paper Sequence}
+\begin{enumerate}[leftmargin=*]
+\item \textbf{Paper 0.5 -- Common n-grams as causal probes.} Establish recurrent prefix--continuation statistics and trace their SA--FFN--residual mechanisms across depth and training.
+\item \textbf{Paper 0.6 -- Hierarchical semantic abstraction.} Map nested invariance across layers with natural/synthetic hierarchies and n-gram-controlled causal tests.
+\item \textbf{Paper 1 -- Structural statistics as sparse-control signals.} Test whether attention/retrieval graph statistics improve PRA's quality--materialization Pareto frontier without training.
+\item \textbf{Paper 2 -- Local prototype consolidation.} Learn recurrent graph motifs with local rules and test transfer.
+\item \textbf{Paper 3 -- Structural adapters.} Compare graph-conditioned LoRA/adapters with ordinary task/domain adapters under matched budgets.
+\item \textbf{Paper 4 -- Online validated consolidation.} Update persistent state from successful/reviewed episodes; characterize stability, forgetting, contamination, reversibility, and provenance.
+\item \textbf{Paper 5 -- Structural residual control.} Predict refinement, complementarity, interference, and selective layer execution.
+\item \textbf{Paper 6 -- Modal consolidation.} Exploit encoding/generation/review/validation as distinct observation and learning phases.
+\item \textbf{Paper 7 -- Emergent relational operators.} Test invariance, discreteness, systematic composition, transfer, counterfactual behavior, and causal reuse.
+\end{enumerate}
+
+\section{Decision Ledger}
+Each paper freezes hypotheses, controls, primary endpoints, and stop/go criteria before the next mechanism is introduced. Paper 0.5 passes when recurrent statistics predict or causally explain component responsibility under matched controls. Paper 0.6 passes when hierarchy effects survive surface-statistical controls and causal interventions on held-out templates or synthetic mappings. Paper 1 passes when structural selection shifts the held-out quality--materialization Pareto frontier. Learned prototypes or adapters proceed only after at least one upstream gate passes. A null gate is a result and narrows the program; it is not permission for unbounded tuning.
+
+\section{Cross-Cutting Evaluation Principles}
+Use matched-compute baselines; frozen-backbone baselines before trainable mechanisms; task quality plus systems cost; causal interventions; multiple seeds; layer/head breakdowns; explicit negative results; contamination controls for online learning; and separation of structural prediction from structural utility. Ablations should distinguish semantic retrieval score, lexical score, attention magnitude, persistence, community structure, bridge score, residual geometry, goal conditioning, and outcome feedback.
+
+\section{Falsification Criteria}
+The program weakens if n-gram mechanisms do not replicate across seeds or model settings; semantic hierarchy effects vanish after lexical and continuation-statistical controls; descriptive motifs do not predict causal component utility; structural statistics fail to predict causal utility beyond ordinary activations/scores; graph-aware selection cannot improve quality per materialized token over tuned top-$k$/temperature baselines; prototypes fail to transfer and merely memorize lexical identity; structural adapters offer no advantage over matched ordinary adapters; contextual override degrades after consolidation; or apparent quasi-symbolic prototypes fail invariance and compositionality tests.
+
+\section{From Consolidated Relations to Emergent Symbols}
+A persistent neural object is not symbolic merely because it is sparse, clustered, or human-interpretable. The strongest endpoint requires a ladder of tests: invariance to nuisance substitutions; discreteness relative to continuous controls; systematic recombination; transfer across lexical and task domains; counterfactual sensitivity to relation changes; causal reuse in a new computation; and stable reference across episodes. The term \emph{quasi-symbolic} is reserved for partial success on this ladder, with failed rungs reported. This criterion prevents the program from equating a probe direction, attention motif, or prototype centroid with a symbol.
+
+\section{Strategic Value}
+NSC supplies a common experimental language for memory, sparse inference, residual control, modal processing, and local learning. It also provides a disciplined path from systems work to architecture and cognitive-theory questions: first show that transient structure predicts useful sparse decisions; then show that recurrent structure can be consolidated; only then ask whether resulting objects support stable relational computation.
+
+\begin{thebibliography}{9}
+\bibitem{titans} A. Behrouz, P. Zhong, V. Mirrokni. \emph{Titans: Learning to Memorize at Test Time}. arXiv:2501.00663.
+\bibitem{ttt} Y. Sun et al. \emph{Learning to (Learn at Test Time): RNNs with Expressive Hidden States}. arXiv:2407.04620.
+\bibitem{fast} I. Schlag, K. Irie, J. Schmidhuber. \emph{Linear Transformers Are Secretly Fast Weight Programmers}. arXiv:2102.11174.
+\bibitem{infini} T. Munkhdalai, M. Faruqui, S. Gopal. \emph{Leave No Context Behind: Efficient Infinite Context Transformers with Infini-attention}. arXiv:2404.07143.
+\end{thebibliography}
+\end{document}
