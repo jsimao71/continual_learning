@@ -32,4 +32,10 @@ Paper-specific code lives under `src/cl/`; only reusable, architecture-independe
 
 Each run records the git commit, command, resolved configuration, model/tokenizer and data identifiers, seed, device/dtype, package versions, timestamp, and atlas or hierarchy hash. Statistical aggregation uses the scientific unit (for example, n-gram or semantic branch), not correlated token occurrences.
 
-The runnable commands and exact artifact paths are maintained in each paper's result summary as implementations are added.
+Paper 0.5 controlled run:
+
+```powershell
+python -m cl.experiments.paper05_ngram --steps 160 --checkpoints 0 40 100 160 --seeds 11,23 --device cpu
+```
+
+Its exact artifacts and retained negative results are documented in `docs/papers/paper0_5/results/summary.md`. Paper 0.6 reuses the same model adapter, trace locations, interventions, metric ontology, and artifact schema.

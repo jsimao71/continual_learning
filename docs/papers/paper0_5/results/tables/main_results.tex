@@ -1,0 +1,15 @@
+\begin{table}[H]\centering\small
+\begin{tabular}{llrrrr}\toprule
+Stratum & Component & Zero & Mean & Replacement & Head 0 \\\midrule
+Context introduced & FF & 0.827 & 0.292 & 0.784 & -- \\
+Context introduced & SA & 0.305 & 0.120 & 0.565 & 0.855 \\
+Familiar, high entropy & FF & 0.942 & 0.421 & 0.642 & -- \\
+Familiar, high entropy & SA & 1.027 & 0.069 & 0.998 & 0.158 \\
+Familiar, low entropy & FF & 0.478 & 0.442 & 0.134 & -- \\
+Familiar, low entropy & SA & 0.301 & 0.025 & 0.407 & 0.319 \\
+Override/repair & FF & 0.261 & 0.450 & 0.205 & -- \\
+Override/repair & SA & 1.497 & 0.347 & 3.323 & 0.639 \\
+\bottomrule\end{tabular}
+\caption{Mean intact-minus-intervened target log probability (nats). Positive values indicate target-supporting causal contribution. Rows aggregate layers, model settings, seeds, and n-gram examples; scientific-unit uncertainty is reported in the machine-readable component table. Head 0 applies only to SA.}
+\label{tab:pilot-causal}
+\end{table}

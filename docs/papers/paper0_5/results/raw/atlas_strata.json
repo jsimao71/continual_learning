@@ -1,0 +1,434 @@
+{
+  "high_frequency_high_entropy": [
+    {
+      "association_log_ratio": 3.248671397561899,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "30": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "30": 1.0
+      },
+      "decoded_prefix": "t5 t8 t24 t28 t21 t20 t27 t31",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        5,
+        8,
+        24,
+        28,
+        21,
+        20,
+        27,
+        31
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 30,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.3299343616406647,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "39": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "39": 1.0
+      },
+      "decoded_prefix": "t12 t27 t35",
+      "distinct_continuations": 1,
+      "n": 3,
+      "prefix_token_ids": [
+        12,
+        27,
+        35
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 39,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.2733640101522705,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "3": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "3": 1.0
+      },
+      "decoded_prefix": "t29 t29 t28 t25 t38 t26 t1 t2",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        29,
+        29,
+        28,
+        25,
+        38,
+        26,
+        1,
+        2
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 3,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.3299343616406647,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "39": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "39": 1.0
+      },
+      "decoded_prefix": "t24 t25 t35 t26 t25",
+      "distinct_continuations": 1,
+      "n": 5,
+      "prefix_token_ids": [
+        24,
+        25,
+        35,
+        26,
+        25
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 39,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 2.9368917735310576,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "1": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "1": 1.0
+      },
+      "decoded_prefix": "t38 t31 t28 t21 t24",
+      "distinct_continuations": 1,
+      "n": 5,
+      "prefix_token_ids": [
+        38,
+        31,
+        28,
+        21,
+        24
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 1,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.2986818181365605,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "31": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "31": 1.0
+      },
+      "decoded_prefix": "t26 t28 t29 t29 t36 t32 t28 t35",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        26,
+        28,
+        29,
+        29,
+        36,
+        32,
+        28,
+        35
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 31,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 2.8915087676832396,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "20": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "20": 1.0
+      },
+      "decoded_prefix": "t31 t38 t21 t39 t35 t34 t33 t19",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        31,
+        38,
+        21,
+        39,
+        35,
+        34,
+        33,
+        19
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 20,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.3299343616406647,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "39": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "39": 1.0
+      },
+      "decoded_prefix": "t38 t1 t2 t3 t39 t25 t20 t20",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        38,
+        1,
+        2,
+        3,
+        39,
+        25,
+        20,
+        20
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 39,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 2.9368917735310576,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "2": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "2": 1.0
+      },
+      "decoded_prefix": "t23 t33 t24 t1",
+      "distinct_continuations": 1,
+      "n": 4,
+      "prefix_token_ids": [
+        23,
+        33,
+        24,
+        1
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 2,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 2.8915087676832396,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "20": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "20": 1.0
+      },
+      "decoded_prefix": "t22 t32 t22 t37 t25",
+      "distinct_continuations": 1,
+      "n": 5,
+      "prefix_token_ids": [
+        22,
+        32,
+        22,
+        37,
+        25
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 20,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.335239413870358,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "26": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "26": 1.0
+      },
+      "decoded_prefix": "t3 t36 t37 t26",
+      "distinct_continuations": 1,
+      "n": 4,
+      "prefix_token_ids": [
+        3,
+        36,
+        37,
+        26
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 26,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 2.9368917735310576,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "2": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "2": 1.0
+      },
+      "decoded_prefix": "t26 t31 t25 t1",
+      "distinct_continuations": 1,
+      "n": 4,
+      "prefix_token_ids": [
+        26,
+        31,
+        25,
+        1
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 2,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.3594667092056825,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "21": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "21": 1.0
+      },
+      "decoded_prefix": "t37 t1 t2 t13 t32 t29 t30 t35",
+      "distinct_continuations": 1,
+      "n": 8,
+      "prefix_token_ids": [
+        37,
+        1,
+        2,
+        13,
+        32,
+        29,
+        30,
+        35
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 21,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.248671397561899,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "30": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "30": 1.0
+      },
+      "decoded_prefix": "t5 t6 t26 t20",
+      "distinct_continuations": 1,
+      "n": 4,
+      "prefix_token_ids": [
+        5,
+        6,
+        26,
+        20
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 30,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.2859427923591307,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "32": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "32": 1.0
+      },
+      "decoded_prefix": "t20 t36 t22 t22",
+      "distinct_continuations": 1,
+      "n": 4,
+      "prefix_token_ids": [
+        20,
+        36,
+        22,
+        22
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 32,
+      "top_continuation_probability": 1.0
+    },
+    {
+      "association_log_ratio": 3.2986818181365605,
+      "atlas_hash": "f6c21f028048dc00f17bae4ac20362df1cf5f2449df736deffad63383f779e52",
+      "continuation_counts": {
+        "31": 1
+      },
+      "continuation_entropy": -0.0,
+      "continuation_probabilities": {
+        "31": 1.0
+      },
+      "decoded_prefix": "t38 t29 t36 t23 t31",
+      "distinct_continuations": 1,
+      "n": 5,
+      "prefix_token_ids": [
+        38,
+        29,
+        36,
+        23,
+        31
+      ],
+      "reference_corpus_frequency": 1,
+      "source_corpus": "controlled-ngram-v1",
+      "split": "train",
+      "top_continuation": 31,
+      "top_continuation_probability": 1.0
+    }
+  ],
+  "high_frequency_low_entropy": [],
+  "low_frequency_high_entropy": [],
+  "low_frequency_low_entropy": []
+}

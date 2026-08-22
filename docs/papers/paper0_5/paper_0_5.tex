@@ -1,0 +1,342 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,microtype,xcolor,graphicx,float}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\title{Common N-Grams as Causal Probes of Transformer Computation:\\Attention Signatures, MLP Compilation, and Residual Transformation Trajectories}
+\author{Paper 0.5 --- Continuous Self-Attention Learning Research Line}
+\date{Controlled experiment report --- August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Transformers repeatedly encounter short token sequences whose continuation distributions can be estimated directly. We use common n-grams as controlled probes of how recurrent prefix-to-next-token relations are transformed across self-attention (SA), feed-forward/MLP layers, and the residual stream. We implement a provenance-complete E1--E6 pipeline: an atlas over $n\in\{1,2,3,4,5,8\}$, exact sublayer traces, signed diagnostic progress, zero/mean/matched-replacement and selective-head interventions, matched attention-motif controls, familiar-versus-context-introduced mappings, contextual override/repair, and dense checkpoint measurements. A controlled corpus trains two inspectable causal Transformer settings with two seeds each. The atlas contains 21,630 prefix entries and the final analysis contains 1,920 component rows. Averaged across layer/model cells, familiar low-entropy relations show FFN and SA zero-ablation drops of 0.478 and 0.301 nats; context-introduced mappings show 0.827 and 0.305. Override examples instead are strongly SA-dependent (1.497 versus 0.261). Attention motifs are more similar within relation than to matched controls (mean specificity 0.228), but motif specificity is unrelated to SA causal contribution across 18 relation--layer units ($\rho=-0.009$). Thus the controlled pilot supports distributed, transformation-dependent mechanisms and directly falsifies a simple ``stable motif implies causal importance'' account. It does not establish pretrained-model compilation: corpus scale, pretrained checkpoint replication, and stronger mediation experiments remain necessary before an online learner is justified.
+\end{abstract}
+
+\section{Motivation}
+A language model trained by next-token prediction is exposed to a vast collection of recurrent local relations. For a token prefix
+\begin{equation}
+ g=(x_{t-n+1},\ldots,x_t),
+\end{equation}
+the training distribution defines a continuation distribution
+\begin{equation}
+ P_{\mathcal D}(x_{t+1}\mid g).
+\end{equation}
+Common n-grams are useful mechanistic probes because both the input relation and the statistical target are measurable. Unlike broad semantic concepts, they provide a compact unit for asking where a known conditional relation is represented and how it is transformed.
+
+The central question is not merely whether the model predicts the continuation correctly. It is how responsibility is divided among three interacting mechanisms:
+\begin{enumerate}
+    \item \textbf{Self-attention:} context-dependent selection, matching, retrieval, and relational binding;
+    \item \textbf{MLP/feed-forward layers:} nonlinear transformation and possible storage of learned associations;
+    \item \textbf{Residual stream:} accumulation, refinement, competition, repair, and transport of partial representations across depth.
+\end{enumerate}
+
+This decomposition connects two broader research lines. First, it gives the residual-stream program a controlled family of transformations for measuring refinement, complementarity, interference, and repair. Second, it provides a minimal laboratory for continuous learning from SA statistics: recurrent context computations may expose stable relations that can later be compiled into persistent neural structure.
+
+\section{Relation to Prior Work}
+Several literatures motivate the proposed study, but they do not fully characterize the joint SA--MLP--residual trajectory of corpus n-grams.
+
+\paragraph{MLPs as associative memories.}
+Geva et al. showed that transformer feed-forward layers can be interpreted as key--value memories: keys correlate with recognizable textual patterns and values induce output-vocabulary distributions. Lower layers tend to capture shallower patterns while upper layers capture more semantic patterns, and FFN outputs are subsequently refined through residual computation \cite{geva2021ffn}.
+
+\paragraph{Attention circuits and induction.}
+Mechanistic work on attention has identified copying, previous-token, prefix-matching, and induction-head circuits that dynamically recover relations from the current context \cite{olsson2022induction}. These mechanisms show that a prefix-to-continuation relation need not be stored as a fixed lexical lookup in MLP weights; it can be constructed or retrieved from context.
+
+\paragraph{Specialization of attention and MLP computation.}
+Controlled studies comparing trainable and frozen transformer components indicate that MLPs are especially effective for memorization, while input-dependent attention is important for retrieval and induction-like behavior \cite{dong2025attention}. This suggests a division of labor, but real language modeling is likely to contain mixed and distributed circuits rather than a strict dichotomy.
+
+\paragraph{Bigram subnetworks.}
+Chang and Bergen identify small subnetworks sufficient for basic bigram predictions, concentrated in the first transformer MLP layer. These subnetworks can drive an early residual transition from representing the current token toward predicting the next token \cite{chang2025bigram}. This result makes ordinary n-gram statistics especially attractive as a basis for extending analysis beyond bigrams to context-dependent and compositional sequences.
+
+\paragraph{Gap addressed here.}
+We propose a unified experimental framework in which corpus statistics, attention structure, component-wise residual updates, causal intervention, and training-time emergence are measured together. The target is not a slogan such as ``attention retrieves, MLP memorizes,'' but a quantitative map of when each mechanism dominates, cooperates, conflicts, or repairs another.
+
+\section{Core Hypotheses}
+Let $g$ be an n-gram prefix and $y$ a likely continuation. We distinguish five hypotheses.
+
+\subsection{H1: Direct MLP compilation}
+For highly frequent, low-entropy lexical relations, earlier residual computation produces a representation $z_g$ that an MLP maps strongly toward the continuation:
+\begin{equation}
+ z_g \xrightarrow{\mathrm{MLP}_\ell} v_y.
+\end{equation}
+Prediction gains should be localized in one or a few MLP updates and remain relatively stable across surrounding contexts.
+
+\subsection{H2: Attention-dominant reconstruction}
+For relations that depend on information introduced or disambiguated in the current context, attention should provide a larger causal contribution by selecting and combining relevant prefix elements or prior occurrences. Induction-style synthetic controls are the limiting case.
+
+\subsection{H3: Distributed SA--MLP circuits}
+Many relations will be distributed. An attention layer may retrieve a relevant feature, an MLP may transform it toward a continuation, and later layers may combine, sharpen, suppress, or contextualize it. The mechanistic object of interest is therefore a trajectory rather than a single neuron or head.
+
+\subsection{H4: Statistical compilation with training}
+Repeated relations may migrate during training from diffuse contextual computation toward more direct and economical mappings. If so, training partially acts as amortized compilation of recurrent inference.
+
+\subsection{H5: Contextual override and repair}
+Strong lexical priors can be contradicted by wider context. For example, a common continuation may be promoted early and subsequently suppressed. Such cases provide controlled probes of residual interference, inhibition, and repair.
+
+\section{N-Gram Atlas}
+We construct an atlas from one or more public corpora tokenized with the target model tokenizer. For each prefix $g$ record:
+\begin{align}
+ f(g) &= \text{corpus frequency},\\
+ H(g) &= -\sum_y P(y\mid g)\log P(y\mid g),\\
+ p_{\max}(g) &= \max_y P(y\mid g),\\
+ \mathrm{PMI}(g,y) &= \log \frac{P(y\mid g)}{P(y)}.
+\end{align}
+
+The main strata are:
+\begin{itemize}
+    \item high-frequency / low-entropy lexical sequences;
+    \item high-frequency / high-entropy prefixes;
+    \item rare but deterministic sequences;
+    \item same suffix with different earlier prefixes and different continuations;
+    \item same relation under lexical substitutions;
+    \item compositional/synthetic sequences absent or rare in pretraining-like corpora;
+    \item context-introduced mappings for induction controls;
+    \item override examples where wider context contradicts the dominant local n-gram continuation.
+\end{itemize}
+
+N-gram lengths $n\in\{1,2,3,4,5,8\}$ provide a progression from local token association to multi-token contextual binding. Tokenizer effects must be retained rather than hidden: the study concerns token n-grams, with optional word-level groupings as a secondary analysis.
+
+\section{Layer-wise Instrumentation}
+For a pre-norm decoder block, record the residual state before attention $r_\ell$, the attention update $\Delta^{SA}_\ell$, the post-attention residual $r'_\ell$, and the MLP update $\Delta^{FF}_\ell$:
+\begin{align}
+ r'_\ell &= r_\ell + \Delta^{SA}_\ell,\\
+ r_{\ell+1} &= r'_\ell + \Delta^{FF}_\ell.
+\end{align}
+
+Where architecture permits, also record per-head updates, MLP intermediate activations, normalized states, Q/K/V projections, and post-RoPE Q/K values.
+
+\subsection{Logit-space progress}
+Using the model's unembedding matrix $W_U$, define a diagnostic projection
+\begin{equation}
+ \ell_y(r)= [W_U\,\mathrm{Norm}(r)]_y.
+\end{equation}
+For the target continuation $y$, measure component-wise gains
+\begin{align}
+ U^{SA}_\ell(y) &= \ell_y(r'_\ell)-\ell_y(r_\ell),\\
+ U^{FF}_\ell(y) &= \ell_y(r_{\ell+1})-\ell_y(r'_\ell).
+\end{align}
+These quantities are descriptive and must be complemented by causal interventions because logit-lens projections can misrepresent intermediate computation.
+
+\subsection{Causal contribution}
+For each component, compare the intact model with interventions such as zero ablation, mean ablation, path patching, activation replacement from matched controls, and selective head/MLP ablations. Let
+\begin{equation}
+ C_{c,\ell}(g,y)=\log P(y\mid g)_{\text{intact}}-\log P(y\mid g)_{\text{intervene}(c,\ell)}.
+\end{equation}
+Matched semantic/context controls prevent attributing generic language-model utility to the n-gram relation itself.
+
+\section{Attention Signatures as Relational Invariants}
+For head $h$ at layer $\ell$, let $A^{\ell,h}$ denote the attention matrix. For occurrences of $g$, extract the submatrix spanning the n-gram tokens and relevant context. Define the conditional motif
+\begin{equation}
+ \bar A^{\ell,h}_g=\mathbb E[A^{\ell,h}\mid g]
+\end{equation}
+and a stability statistic such as
+\begin{equation}
+ S_A(g,\ell,h)=1-\mathbb E\left[d(A^{\ell,h}_{g,i},\bar A^{\ell,h}_g)\right],
+\end{equation}
+where $d$ can be Frobenius distance after normalization, cosine distance, Jensen--Shannon divergence over rows, or a graph-topological distance.
+
+The key question is whether exact activation coordinates vary while a relational pattern remains stable. We therefore compare:
+\begin{itemize}
+    \item raw attention matrices;
+    \item row-normalized motif geometry;
+    \item attention graph edges above adaptive thresholds;
+    \item connected components / communities;
+    \item QK similarity structure;
+    \item OV contribution directions;
+    \item residual-update direction and subspace similarity.
+\end{itemize}
+
+This turns ``representation'' from a single-vector question into a relational invariance question.
+
+\section{Mechanistic Trajectories}
+For each $(g,y)$ define a depth trajectory
+\begin{equation}
+ \mathbf T(g,y)=\left[U^{SA}_1,U^{FF}_1,\ldots,U^{SA}_L,U^{FF}_L, C_{SA,1},C_{FF,1},\ldots\right].
+\end{equation}
+Cluster trajectories and test whether clusters correspond to measurable corpus properties. Candidate classes include:
+\begin{description}[style=nextline]
+    \item[Early lookup:] a sharp early MLP contribution dominates;
+    \item[Progressive composition:] alternating SA and MLP contributions accumulate gradually;
+    \item[Late disambiguation:] several candidates coexist until a later context-sensitive update;
+    \item[Retrieval/copy:] attention dominates and MLP contribution is weak;
+    \item[Override/repair:] an early common continuation is promoted, then later suppressed in favor of a contextually correct one.
+\end{description}
+
+A central quantitative analysis predicts trajectory class, layer of maximal causal contribution, and SA/MLP contribution ratio from $\log f(g)$, entropy $H(g)$, PMI, n-gram length, and context sensitivity.
+
+\section{Training-Time Emergence}
+Tiny and small language models should be trained from scratch with checkpoints saved densely enough to follow mechanism formation. At training step $t$, measure
+\begin{equation}
+ \mathbf T_t(g,y),\qquad S_{A,t}(g,\ell,h),\qquad C_{c,\ell,t}(g,y).
+\end{equation}
+
+We test whether frequent deterministic relations show a sequence such as
+\begin{equation}
+ \text{diffuse contextual computation}\rightarrow
+ \text{stable relational motif}\rightarrow
+ \text{localized/compiled mapping}.
+\end{equation}
+A negative result is equally informative: mechanisms may remain distributed, or early MLP bigram mappings may appear before stable attention motifs. The study must not assume compilation direction in advance.
+
+\section{Bridge to Continuous Learning from SA Statistics}
+The later research line asks whether useful regularities visible during inference can be retained without full conventional retraining. Paper 0.5 does not claim to solve this problem. It defines the measurable precursor.
+
+Suppose a recurring context relation produces samples of attention/residual structure $s_1,\ldots,s_m$ and continuations $y_1,\ldots,y_m$. An online system can maintain sufficient statistics or prototypes
+\begin{equation}
+ \theta_g^{\mathrm{stat}}=\{N_g,\bar s_g,\Sigma_g,\hat P(y\mid g),\bar{\Delta r}_g\}.
+\end{equation}
+If the relation is stable and predictive, a later algorithm may convert it into persistent structure:
+\begin{equation}
+ \text{recurrent SA relation}\rightarrow
+ \text{stable prototype/statistic}\rightarrow
+ \text{adapter or weight memory}.
+\end{equation}
+
+Paper 0.5 therefore establishes candidate signals, stability criteria, causal targets, and baselines for a later ``neural compilation'' experiment. The online learner should be evaluated by whether it reproduces or improves the native trajectory while reducing repeated contextual work, not merely by whether loss decreases after adaptation.
+
+\section{Experiments}
+\subsection{E1: Corpus atlas and behavioral predictability}
+The committed atlas builder counts continuations by brute-force-equivalent sliding windows for $n\in\{1,2,3,4,5,8\}$. Each row records token IDs, decoded inspection text, exact frequency, continuation counts/probabilities, entropy, top probability, log association ratio, source/split, and a content hash. Deterministic strata separate frequency and entropy. In this local controlled experiment the corpus is the true training corpus; the implementation nevertheless uses the field name \texttt{reference\_corpus\_frequency} so the schema transfers safely to opaque pretrained models.
+
+\subsection{E2: SA versus MLP contribution across depth}
+An inspectable pre-normalized causal Transformer records $r_\ell$, $\Delta^{\rm SA}_\ell$, $r'_\ell$, $\Delta^{\rm FF}_\ell$, $r_{\ell+1}$, and per-head attention. Capture mode preserves bit-identical logits because attention probabilities are reconstructed separately from the output kernel. Signed diagnostic progress is reported separately from causal log-probability drops. Interventions include zero update, batch-matched mean update, matched-control activation replacement, first-head ablation, and full FFN-layer ablation. Residual identities and trace-disabled parity are unit tested.
+
+\subsection{E3: Stable attention motifs}
+For every probe and layer, the final-query attention rows are head-aligned and row normalized. Within-relation cosine is compared with a position-matched control that changes the defining prefix or contextual mapping. The decisive follow-up correlates relation--layer motif specificity with SA zero-ablation utility; visual similarity alone is not treated as evidence.
+
+\subsection{E4: Stored versus context-introduced relations}
+The controlled factorial comparison includes a high-frequency deterministic mapping $(1,2)\mapsto3$, a high-frequency high-entropy mapping $(4,5)\mapsto\{6,7,8\}$, a rare deterministic mapping, and arbitrary in-context definitions of the form $(A,B),\ldots,A\mapsto B$. The latter mappings vary their arbitrary labels while preserving the relational template.
+
+\subsection{E5: Override and repair}
+A leading marker changes the otherwise habitual continuation $(1,2)\mapsto3$ to the correct continuation 13. At every sublayer we retain signed progress for both candidates, causal drops, update--update cosine, and a geometry-only candidate label. The labels \emph{opposing}, \emph{aligned}, and \emph{orthogonal candidate} deliberately do not assert interference without negative task utility and later repair.
+
+\subsection{E6: Training-time development}
+Two model settings (width/layers/heads $=32/2/2$ and $48/3/3$) are trained for 160 optimizer steps with seeds 11 and 23. Component measurements are repeated at steps 0, 40, 100, and 160; the complete four-checkpoint state series is committed for the first setting/seed. This tests developmental direction without assuming monotone migration toward the FFN.
+
+\subsection{E7: Minimal online compilation pilot}
+E7 was not started. The near-zero motif--causal association and the absence of pretrained replication fail the pre-registered gate for choosing SA statistics as an online-learning signal. Preserving this stop decision prevents a learner from being engineered around a preferred interpretation of an inconclusive pilot.
+
+\section{Models and Data}
+The present experiment uses the two locally trained decoder-only settings above, a 40-token vocabulary, maximum sequence length 12, GELU FFNs, AdamW, and 960 controlled training sequences per seed. Probe contexts cover four primary strata with 24 examples each. The local regime makes training frequency and checkpoints exact and keeps exhaustive intervention feasible. It is intentionally not a substitute for natural-corpus or pretrained-model replication; GPT-2/Pythia-style checkpoint series and a modern small decoder remain the next external-validity stage.
+
+\section{Metrics and Statistical Tests}
+Primary metrics include:
+\begin{itemize}
+    \item target log-probability and rank across depth;
+    \item SA and MLP logit contribution curves;
+    \item causal effect under component interventions;
+    \item attention-motif stability across occurrences;
+    \item residual-update cosine/subspace similarity;
+    \item layer of maximal contribution;
+    \item contribution concentration (e.g., entropy across layers/components);
+    \item trajectory-cluster stability across seeds and models;
+    \item regression of mechanism metrics on frequency, continuation entropy, PMI, and n-gram length.
+\end{itemize}
+
+Report bootstrap confidence intervals over n-grams and contexts, not just token occurrences. Mixed-effects models can separate effects of n-gram identity, model seed, and context. Multiple-comparison control is required for head-level claims.
+
+\section{Controlled Pilot Results}
+The run produced 21,630 atlas rows, 1,920 final-checkpoint component rows, 1,920 raw motif/control rows, and four dense checkpoints for the first model/seed. Final training losses range from 2.436 to 2.565. All numbers below regenerate from the committed manifest and tables.
+
+\input{docs/papers/paper0_5/results/tables/main_results.tex}
+
+The intervention family gives a more qualified result than either direct compilation or attention-dominant retrieval. Familiar low-entropy mappings are FFN-heavier under zero ablation (0.478 versus 0.301 nats), but the effect changes under matched replacement (0.134 versus 0.407). Context-introduced mappings are also FFN-heavier under zero ablation (0.827 versus 0.305), contrary to H2's simplest prediction, while their first-head intervention is substantial (0.855). High-entropy familiar mappings use both components (SA 1.027; FFN 0.942). Override/repair is the clearest SA-dominant stratum (1.497 versus 0.261) and has the largest matched-replacement SA effect (3.323). These method-dependent differences support distributed circuits and make generic component importance an active alternative explanation.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/atlas.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/causal_contributions.png}
+\caption{Left: controlled atlas frequency--entropy support. Right: layerwise zero-ablation effects for the two model settings. Curves include all pre-registered strata; the displayed comparison emphasizes familiar low-entropy and context-introduced mappings.}
+\label{fig:atlas-causal}
+\end{figure}
+
+\subsection{Descriptive progress disagrees with intervention magnitude}
+Diagnostic logit progress is frequently much larger than intact-minus-ablated target effects and can rank components differently. Figure~\ref{fig:diagnostic-trajectory} retains this discrepancy instead of collapsing the measurements. This is direct evidence for the paper's guardrail: an update aligned with the target unembedding is not thereby the causal site of the relation.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/diagnostic_contributions.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/trajectory_map.png}
+\caption{Left: signed diagnostic progress, explicitly not a causal effect. Right: descriptive SVD of per-example causal trajectories; cluster appearance is exploratory and no discrete mechanism classes are asserted.}
+\label{fig:diagnostic-trajectory}
+\end{figure}
+
+\subsection{Stable motifs fail the causal-utility test}
+Mean within-minus-control motif cosine is 0.228, so aligned attention rows are measurably relation-specific in this corpus. However, the Spearman correlation between motif specificity and SA zero-ablation contribution is $-0.009$ over 18 relation--layer units. E3 therefore yields a useful negative result: stability survives the matched control, but does not predict causal utility at the tested scale.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/motif_stability.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/override_repair.png}
+\caption{Left: motif specificity by relation and layer. Right: signed progress for habitual and contextually correct continuations. Geometry labels in the raw artifact remain candidates until paired with task-conditioned causal and temporal evidence.}
+\label{fig:motif-repair}
+\end{figure}
+
+\subsection{Training dynamics and decision gate}
+Checkpoint measurements are non-monotonic across strata and components; the controlled run does not establish a general diffuse-to-FFN compilation trajectory. The exploratory regression of causal contribution on controlled frequency, entropy, context status, and component explains only $R^2=0.073$. Combined with the motif null, this fails the gate for E7 and motivates pretrained checkpoint replication rather than online adaptation.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.62\linewidth]{docs/papers/paper0_5/results/figures/training_dynamics.png}
+\caption{Component causal contribution over local training checkpoints. The trajectories are retained even when they do not match a monotone compilation account.}
+\label{fig:training}
+\end{figure}
+
+\section{Reproducibility and Artifact Contract}
+The exact command is \texttt{python -m cl.experiments.paper05\_ngram --steps 160 --checkpoints 0 40 100 160 --seeds 11,23 --device cpu}. The manifest records model settings and an artifact hash; per-run metadata records the source commit, dirty flag, command, resolved configuration, model/data identifiers, seed, device/dtype, package versions, timestamp, and corpus hash. JSONL contains scientific-unit rows; CSV contains paper aggregates; eight figures regenerate from those files. Tests cover counts, entropy, alignment, deterministic sampling, trace serialization, exact capture parity, residual identities, intervention locality, and metric toy cases.
+
+\section{Falsification Criteria}
+The paper should explicitly accept the following outcomes:
+\begin{enumerate}
+    \item Stable attention motifs do not generalize across contexts once lexical/position controls are matched.
+    \item Frequency does not predict greater MLP localization or reduced SA dependence.
+    \item Apparent logit-lens contributions disappear under causal intervention.
+    \item N-gram computation is predominantly distributed and cannot be usefully categorized into trajectory families.
+    \item Training checkpoints show no directional migration from contextual computation toward compiled mappings.
+    \item SA statistics fail to provide predictive information beyond ordinary hidden-state or token-frequency statistics for the online-learning bridge.
+\end{enumerate}
+These outcomes would constrain, rather than invalidate, the broader continuous-learning program.
+
+\section{Contribution and Limitations}
+The present contribution is a tested mechanistic measurement framework, controlled atlas, multi-intervention trace schema, and a falsifying pilot result. It does not show that Transformers implement literal symbolic n-gram tables, that pretrained models share these mechanisms, or that corpus frequency predicts compilation generally. Only two small local architectures and two seeds are included; the corpus vocabulary and grammar are deliberately narrow; head 0 is diagnostic rather than the result of corrected head search; zero/mean/replacement interventions can leave the activation manifold; and no path-patching mediation is performed. The strongest supported statement is consequently narrow: recurrent prediction mechanisms are transformation-dependent, and stable attention motifs alone are not a sufficient learning signal in this controlled regime.
+
+\section{Relationship to the Research Program}
+\paragraph{Residual-stream line.}
+Paper 0.5 supplies controlled cases for refinement, complementarity, interference, inhibition, and repair. The n-gram trajectory can be reused as a diagnostic benchmark in the broader residual paper without making that paper depend on all experiments here.
+
+\paragraph{Continuous SA learning line.}
+This paper is the empirical precursor. Later papers should compare local prototype learning, low-rank adapters, local prediction rules, and conventional backprop for compiling recurring SA-derived relations. The central question becomes whether persistent learning can reduce the cost or improve the reliability of repeatedly reconstructed relations while preserving context-sensitive override.
+
+\paragraph{PRA and retrieval.}
+The connection is secondary but useful: attention motifs and graph structure may eventually inform query-facet discovery or retrieval selection. This paper should avoid depending on PRA so that the mechanistic result remains architecture-general.
+
+\section{Paper Boundary}
+To keep Paper 0.5 publishable and falsifiable, the mandatory scope ends after E1--E6. A working online adapter in E7 is a bonus or appendix. Full continual-learning algorithms, catastrophic-forgetting studies, deployment policies, replay/memory management, and long-horizon adaptation belong to subsequent papers.
+
+\section{Conclusion}
+Common token n-grams provide a bridge between externally measurable statistics and internal Transformer computation. In the controlled pilot, component responsibility depends on the transformation and the intervention: familiar and context-introduced mappings are often FFN-heavy, high-entropy mappings are distributed, and contextual override is SA-heavy. Stable attention motifs do not predict SA causal utility, and checkpoint trajectories do not establish monotone compilation. The experiment therefore narrows the continuous-learning hypothesis: any persistent learner must be conditioned on validated causal utility rather than motif recurrence alone, and should wait for pretrained replication and stronger mediation evidence.
+
+\begin{thebibliography}{9}
+\bibitem{geva2021ffn}
+Mor Geva, Roei Schuster, Jonathan Berant, and Omer Levy.
+\newblock Transformer Feed-Forward Layers Are Key-Value Memories.
+\newblock \emph{EMNLP}, 2021.
+
+\bibitem{olsson2022induction}
+Catherine Olsson et al.
+\newblock In-context Learning and Induction Heads.
+\newblock Transformer Circuits, 2022.
+
+\bibitem{dong2025attention}
+Yihe Dong, Lorenzo Noci, Mikhail Khodak, and Mufan Li.
+\newblock Attention Retrieves, MLP Memorizes: Disentangling Trainable Components in the Transformer.
+\newblock arXiv:2506.01115, 2025.
+
+\bibitem{chang2025bigram}
+Tyler A. Chang and Benjamin K. Bergen.
+\newblock Bigram Subnetworks: Mapping to Next Tokens in Transformer Language Models.
+\newblock arXiv:2504.15471, 2025.
+\end{thebibliography}
+
+\end{document}

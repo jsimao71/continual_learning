@@ -1,0 +1,32 @@
+{
+  "artifact_hash": "706a553307ebf8d2f071d1bd73485655181f7d91648186b7faaa3c20b30aaf92",
+  "config": {
+    "checkpoints": [
+      0,
+      40,
+      100,
+      160
+    ],
+    "device": "cpu",
+    "models": [
+      {
+        "heads": 2,
+        "layers": 2,
+        "name": "tiny-w32-l2-h2",
+        "width": 32
+      },
+      {
+        "heads": 3,
+        "layers": 3,
+        "name": "tiny-w48-l3-h3",
+        "width": 48
+      }
+    ],
+    "seeds": [
+      11,
+      23
+    ],
+    "steps": 160
+  },
+  "schema_version": "paper05.results.v1"
+}

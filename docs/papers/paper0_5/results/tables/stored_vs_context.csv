@@ -1,0 +1,5 @@
+component,mean_causal_logprob_drop,n,stratum
+ff,0.8267124548690238,240,context_introduced
+sa,0.3051803515952391,240,context_introduced
+ff,0.4782953938527612,240,familiar_low_entropy
+sa,0.3005750604608693,240,familiar_low_entropy
