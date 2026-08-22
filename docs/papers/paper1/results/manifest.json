@@ -1,0 +1,41 @@
+{
+  "artifact_hash": "fa57896010139e0119b76a4b11f6399a36378dca5d98bac2e9dece16bc1382ca",
+  "config": {
+    "budgets": [
+      2,
+      3,
+      4,
+      6,
+      8
+    ],
+    "candidate_tokens": 32,
+    "candidates": 24,
+    "full_attention_retained": false,
+    "qwen_kv_bytes_per_token": 4096,
+    "seeds": [
+      11,
+      23,
+      37,
+      41,
+      53
+    ],
+    "selectors": [
+      "base_topk",
+      "budget_tuned_topk",
+      "power_sharpen",
+      "entropy_adaptive_sharpen",
+      "persistence",
+      "agreement",
+      "community",
+      "bridge_preserving",
+      "combined_structural",
+      "oracle_evidence"
+    ],
+    "test_examples_per_seed": 120,
+    "validation_examples_per_seed": 80
+  },
+  "paper06_manifest_hash": "de746b9c963f5ee9612828f32157a0ff04c9b883a2707f8e289dc176b0289e5e",
+  "pretrained_model": "Qwen/Qwen3-0.6B@c1899de289a04d12100db370d81485cdf75e47ca",
+  "pretrained_source_sha256": "f3d2aa1b00c556a370cb0e9bb92d97ff7e325b36284b3616492aa5e9e6dc545c",
+  "schema_version": "paper1.results.v1"
+}

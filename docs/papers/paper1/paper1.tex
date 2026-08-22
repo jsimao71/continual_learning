@@ -1,0 +1,152 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.82in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,enumitem,microtype,graphicx,float}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\title{Transient Structure as a Sparse-Control Signal:\\Matched-Budget Graph Selection Before Continual Learning}
+\author{Jorge Sim\~ao\\EInnovator R\&D --- Center for the Sciences of Computation, Cognition, and Complexity}
+\date{Paper 1 --- Controlled Experiment Report --- August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Transformer inference repeatedly constructs relational statistics that disappear after the request. Before consolidating them into persistent state, we test a narrower frozen-control hypothesis: can compact graph features select sparse memory better than tuned score-only rules at exactly matched materialization budgets? We implement B0--B3 and S1--S5, deterministic graph features, compact traces, a controlled weak-bridge suite, and a residualized audit of retained Qwen3-0.6B graph summaries. Across 600 held-out controlled examples (five seeds), four-chunk base top-$k$ obtains quality 0.297 and complete-path rate 0.068. Reserving graph-bridge capacity raises these to 0.627 and 0.480; a validation-fitted base-plus-structure selector reaches 1.000 in this deliberately diagnostic generator. Structural features raise held-out causal-utility Spearman from 0.486 to 0.528. The natural pretrained audit is null: adding graph summaries to surface controls changes identity-disjoint Spearman only from $-0.027$ to $-0.005$, with negative $R^2$ in both cases. Thus transient structure is useful under a known bridge mechanism, but current natural evidence does not pass the gate for online consolidation. Candidate-level HotpotQA/QASPER regeneration and task-quality Pareto evaluation remain required.
+\end{abstract}
+
+\section{Question and Evidence Gate}
+
+Let $C=\{c_1,\ldots,c_n\}$ be candidate chunks with base discovery scores $s_i$. The question is whether transient structure supplies incremental information about which candidates should be materialized while model weights remain frozen. This is not the claim that training ignores attention: gradients already pass through attention. The narrower hypothesis is that recurrent sample-level structure may provide a useful sparse-control statistic that is normally discarded after inference.
+
+The experiment separates observation, intervention, and learning. Observation constructs compact candidate features. Intervention changes only frozen candidate selection. Learning of prototypes, adapters, or model weights is prohibited in this paper. Online consolidation may begin only after either (i) structural features predict held-out causal candidate utility beyond score and surface controls, or (ii) a structural selector reproducibly shifts the quality--materialization Pareto frontier on natural tasks.
+
+\section{Relation to Papers 0--0.6}
+
+Paper 0 defines Neural Structural Consolidation and its stop/go criteria. Paper 0.5 supplies recurrent n-gram controls, exact trace locations, and intervention discipline. Paper 0.6 shows weak hierarchy geometry but no semantic attention-motif specificity. Paper 1 therefore asks whether transient graph statistics have \emph{operational} value before treating them as a substrate for continual learning. Geometry, attention weight, and probe performance alone are not accepted as mechanistic evidence.
+
+\section{Frozen Sparse-Control Formalization}
+
+Materializing $M\subseteq C$ incurs
+\[
+B(M)=\sum_{c_i\in M}|KV(c_i)|.
+\]
+Every primary comparison receives the same candidates and exact chunk budget. For candidate $i$, the compact feature vector is
+\[
+x_i=[s_i,L_i,S_i,E_i,P_i,A_i,C_i,G_i],
+\]
+where $L$ and $S$ are lexical and semantic discovery controls, $E$ is entropy contribution, $P$ is cross-layer/head persistence, $A$ is rank agreement, $C$ is within-community centrality, and $G$ is cross-community bridge mass. No token-level $N^2$ attention matrix is retained in traces.
+
+For a diagnostic set with known evidence, removal utility is
+\[
+U_i=Q(C)-Q(C\setminus\{c_i\}).
+\]
+We compare ridge prediction from $(s,L,S)$ against $(s,L,S,E,P,A,C,G)$ on held-out examples. Selector S5 is stricter: it may combine only $s$ with $(E,P,A,C,G)$, so it cannot silently reweight lexical or semantic discovery channels.
+
+\section{Implemented Conditions}
+
+\begin{table}[H]\centering\small
+\begin{tabular}{p{.10\linewidth}p{.80\linewidth}}\toprule
+ID & Condition\\\midrule
+B0 & Base score with exact top-$k$.\\
+B1 & Budget-tuned top-$k$ evaluated over the same full budget sweep.\\
+B2 & Fixed power sharpening $p'_i\propto p_i^\gamma$.\\
+B3 & Entropy-adaptive global sharpening.\\
+S1 & Base score plus cross-layer/head persistence.\\
+S2 & Base score plus rank agreement.\\
+S3 & Base score plus within-community centrality.\\
+S4 & Explicit reservation for high-bridge candidates.\\
+S5 & Validation-fitted base-plus-structure linear selector.\\
+O1 & Oracle evidence ordering, diagnostic upper bound only.\\
+\bottomrule\end{tabular}
+\caption{Implemented frozen selectors. B0--B3 and S1--S5 obey exact candidate and materialization budgets.}
+\label{tab:conditions}
+\end{table}
+
+A global monotone transform cannot change exact top-$k$ membership. Consequently B2 and B3 must reproduce B0 under a fixed cardinality budget; this is an algebraic control rather than a failed implementation. Sharpening can matter only with thresholds, variable budgets, sampling, or altered model-native attention, none of which is conflated with this selector test.
+
+\section{Controlled Weak-Bridge Suite}
+
+Each example contains 24 candidates partitioned into three communities, with two- or three-hop evidence paths, matched 32-token chunks, high/low lexical-overlap regimes, three bridge strengths, six synthetic layers, and four synthetic heads. Evidence candidates receive noisy semantic support, but the indispensable cross-community bridge is down-weighted in the base score and a lexical distractor is strengthened. Validation and test examples have disjoint deterministic identities. Five seeds each contribute 80 validation and 120 test examples, for 1,000 total and 600 held-out scientific units.
+
+Quality combines evidence recall and complete-path recovery:
+\[
+Q(M)=\tfrac12\frac{|M\cap E|}{|E|}+\tfrac12\mathbf{1}[E\subseteq M].
+\]
+Budgets are $k\in\{2,3,4,6,8\}$ chunks. Reported Qwen-equivalent K/V bytes use eight K/V heads, head width 128, two tensors, and two bytes per element, or 4096 bytes per materialized token. These are accounting-equivalent bytes, not a measured native materialization run.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.82\linewidth]{docs/papers/paper1/results/figures/quality_budget_frontier.png}
+\caption{Controlled quality versus exactly matched materialized tokens. The oracle is diagnostic. Structural gains occur because the generator contains a known cross-community bridge mechanism.}
+\label{fig:frontier}
+\end{figure}
+
+\section{Frozen-Qwen Residualized Audit}
+
+The available PRA artifact retains layerwise graph summaries, but intentionally omits its 7.8 GB candidate tensor cache. We therefore perform an observational audit rather than reconstructing a candidate-selection result. The source contains 672 rows from 84 identity-disjoint 2WikiMultiHopQA and MuSiQue examples, each measured at layers $0,4,8,12,16,20,24,27$ of frozen Qwen3-0.6B revision \texttt{c1899de...}. Validation identities fit the models; test identities evaluate them.
+
+The target is the fraction of layers with complete native graph recovery, aggregated to one row per example before evaluation. Surface controls are candidate/parent count, annotated hops, graph density, layer, dataset, and graph type. Added structural predictors are duplicate-neighbor rate, reciprocal-edge rate, effective branching factor, unique neighbors, shortcut rate, giant-component fraction, and mean out-degree. This analysis is predictive and identity-disjoint, but not causal: it has neither candidate removal outcomes nor task-generation quality.
+
+\section{Results}
+
+\input{docs/papers/paper1/results/tables/main_results.tex}
+
+At four chunks, explicit bridge preservation increases quality by 0.330 and complete-path rate by 0.412 over B0. Persistence also helps, but agreement is small and community centrality alone is identical to B0 at this operating point. S5 reaches the oracle ceiling from three chunks upward and also matches its quality at two chunks. This ceiling is a generator diagnostic: validation and test share the same structural mechanism, so it is not evidence of natural-task generalization.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.78\linewidth]{docs/papers/paper1/results/figures/bridge_path_completion.png}
+\caption{Complete evidence-path recovery across the budget sweep. Explicit bridge reservation prevents the weak-link failure induced by score-only selection.}
+\label{fig:bridge}
+\end{figure}
+
+Candidate removal provides exact causal utility in the controlled generator. Averaged across five held-out seeds, adding structural features raises Spearman from 0.486 to 0.528 and $R^2$ from 0.429 to 0.891. The result supports H1 only inside the controlled mechanism.
+
+In the frozen-Qwen audit, surface-control Spearman is $-0.027$ and the structural model reaches only $-0.005$. Corresponding $R^2$ values are $-0.352$ and $-0.348$. The improvement is negligible and both models underperform the test-set mean. Retaining this negative result prevents observational graph richness from being mistaken for predictive utility.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.82\linewidth]{docs/papers/paper1/results/figures/incremental_prediction.png}
+\caption{Left: controlled candidate-removal utility. Right: observational pretrained graph recovery after identity-disjoint fitting. Structural prediction is positive only in the known synthetic mechanism.}
+\label{fig:prediction}
+\end{figure}
+
+\section{Systems Discipline}
+
+All selectors enforce exact cardinality; the artifact reports zero budget violations. Traces contain candidate IDs, selected IDs, evidence IDs for diagnostics, seed, condition, and budget, while explicitly recording that full attention is not retained. Offline Python selector time is separated from hypothetical K/V materialization. It is not presented as GPU serving latency.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.72\linewidth]{docs/papers/paper1/results/figures/selector_overhead.png}
+\caption{Research-code selector overhead at four chunks. Times measure CPU Python selection only and are not end-to-end PRA latency.}
+\label{fig:overhead}
+\end{figure}
+
+The implementation is opt-in. With NSC disabled, the adapter boundary calls exact base top-$k$ and changes neither scores nor candidate membership. Deterministic component labels, bridge scores, sharpening monotonicity/normalization, budget enforcement, trace compactness, and disabled parity are covered by tests.
+
+\section{Decision Gate and Falsification}
+
+The controlled suite supports H1--H3 under its explicit generator: structural variables predict known removal utility, bridge preservation shifts the controlled frontier, and monotone sharpening cannot protect a low-score bridge. H4 is not established. The pretrained audit is null, and no natural task-quality frontier was measured. Online prototypes or adapters therefore remain blocked.
+
+The next decisive run must regenerate candidate-level frozen-Qwen features for HotpotQA and QASPER, preserve identity-disjoint validation/test splits, measure task quality or answer likelihood after actual native K/V materialization, and sweep equal token/byte budgets. Success requires a paired frontier improvement or incremental causal-utility prediction beyond score and lexical/semantic controls on both task families. A second null result should stop the consolidation program rather than motivate a more flexible learner.
+
+\section{Reproducibility and Provenance}
+
+The exact command is
+\begin{verbatim}
+python -m cl.experiments.paper1_structural_control
+\end{verbatim}
+with \texttt{PYTHONPATH=src}. The manifest records configuration, source SHA-256, the frozen model revision, Paper 0.6 manifest hash, and an aggregate artifact hash. Machine-readable outputs include 24,000 candidate-feature rows, 30,000 selector/example/budget rows, compact traces, fitted coefficients, pretrained predictions, bootstrap summaries, figures, and the generated table. The committed pretrained rows make the audit inspectable without the omitted tensor cache.
+
+\section{Limitations}
+
+The controlled generator encodes the mechanism that structural features are designed to detect; its perfect S5 ceiling is diagnostic, not an external validity claim. Its quality function is known evidence-path recovery, not generated-answer quality. Qwen-equivalent bytes are accounting estimates. The pretrained audit reuses 2WikiMultiHopQA/MuSiQue summaries rather than the requested HotpotQA/QASPER candidate cache, averages eight correlated layer measurements to the example level, and predicts graph recovery rather than causal task utility. No native K/V was materialized in this repository, no end-to-end latency was measured, and no larger architecture was evaluated.
+
+\section{Conclusion}
+
+Transient graph structure can be an effective frozen sparse-control signal when weak cross-community bridges are causally necessary. That result is not yet enough for continual learning. The retained pretrained evidence is observationally null after surface controls, and the natural candidate-level intervention required by the gate remains absent. Paper 1 therefore contributes a reusable selector/trace framework, a positive controlled mechanism test, and a clear negative boundary: do not consolidate until natural matched-budget causal utility is demonstrated.
+
+\begin{thebibliography}{9}
+\bibitem{titans} A. Behrouz, P. Zhong, and V. Mirrokni. \emph{Titans: Learning to Memorize at Test Time}. arXiv:2501.00663.
+\bibitem{ttt} Y. Sun et al. \emph{Learning to (Learn at Test Time): RNNs with Expressive Hidden States}. arXiv:2407.04620.
+\bibitem{fast} I. Schlag, K. Irie, and J. Schmidhuber. \emph{Linear Transformers Are Secretly Fast Weight Programmers}. arXiv:2102.11174.
+\bibitem{infini} T. Munkhdalai, M. Faruqui, and S. Gopal. \emph{Leave No Context Behind: Efficient Infinite Context Transformers with Infini-attention}. arXiv:2404.07143.
+\end{thebibliography}
+
+\end{document}

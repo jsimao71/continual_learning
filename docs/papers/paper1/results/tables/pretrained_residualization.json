@@ -1,0 +1,39 @@
+{
+  "base": {
+    "r2": -0.3518065276350473,
+    "rmse": 0.16681536654726045,
+    "spearman": -0.027329248098272512
+  },
+  "base_plus_structure": {
+    "r2": -0.34837055645657555,
+    "rmse": 0.16660322913678333,
+    "spearman": -0.004796169964996942
+  },
+  "causal": false,
+  "controls": [
+    "parent_count",
+    "annotated_hops",
+    "graph_density",
+    "layer",
+    "dataset",
+    "graph_type"
+  ],
+  "delta_r2": 0.0034359711784717195,
+  "delta_spearman": 0.02253307813327557,
+  "model_id": "Qwen/Qwen3-0.6B",
+  "scientific_unit": "example identity after averaging eight layer rows",
+  "source_rows": 672,
+  "source_sha256": "f3d2aa1b00c556a370cb0e9bb92d97ff7e325b36284b3616492aa5e9e6dc545c",
+  "structure": [
+    "duplicate_neighbor_rate",
+    "reciprocal_edge_rate",
+    "effective_branching_factor",
+    "unique_neighbor_count",
+    "shortcut_rate",
+    "giant_component_fraction",
+    "mean_out_degree"
+  ],
+  "target": "fraction of layers with complete native graph recovery",
+  "test_examples": 42,
+  "validation_examples": 42
+}

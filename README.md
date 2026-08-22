@@ -47,3 +47,11 @@ python -m cl.experiments.paper06_abstraction --steps 160 --checkpoints 0 40 100 
 ```
 
 The semantic results, reuse map, hierarchy controls, and artifact manifest are under `docs/papers/paper0_6/results/`.
+
+Paper 1 frozen structural-control pilot:
+
+```powershell
+python -m cl.experiments.paper1_structural_control
+```
+
+This runs the matched-budget controlled bridge suite and the residualized frozen-Qwen graph audit. Results and the explicit no-go decision for online consolidation are under `docs/papers/paper1/results/`.

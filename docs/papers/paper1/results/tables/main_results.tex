@@ -1,0 +1,15 @@
+\begin{table}[H]\centering\small
+\begin{tabular}{lrrrr}\toprule
+Condition & Quality & Evidence recall & Path complete & Bridge recall \\\midrule
+base topk & 0.297 & 0.526 & 0.068 & 0.102 \\
+power sharpen & 0.297 & 0.526 & 0.068 & 0.102 \\
+persistence & 0.438 & 0.657 & 0.220 & 0.262 \\
+agreement & 0.319 & 0.551 & 0.087 & 0.122 \\
+community & 0.297 & 0.526 & 0.068 & 0.102 \\
+bridge preserving & 0.627 & 0.774 & 0.480 & 0.785 \\
+combined structural & 1.000 & 1.000 & 1.000 & 1.000 \\
+oracle evidence & 1.000 & 1.000 & 1.000 & 1.000 \\
+\bottomrule\end{tabular}
+\caption{Controlled test performance at four 32-token chunks. The oracle is diagnostic only. All non-oracle conditions receive identical candidates and budgets.}
+\label{tab:paper1-main}
+\end{table}
