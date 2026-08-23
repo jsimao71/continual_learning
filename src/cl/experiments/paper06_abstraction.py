@@ -91,7 +91,9 @@ def collect_semantic_equivalence(model, corpus, device, identity):
                     row["delta_entropy_bits"]=float(row["entropy_bits"]-previous["entropy_bits"])
                     row["delta_target_probability"]=float(row["target_probability"]-previous["target_probability"])
                 entropy_rows.append({**identity,"example_id":p.example_id,"family":p.family,"natural":p.natural,
-                                     "abstraction_level":p.abstraction_level,"template_id":p.template_id,"layer":layer,"location":location,**row})
+                                     "item_id":p.item_id,"category_id":str(p.target),"abstraction_level":p.abstraction_level,
+                                     "template_id":p.template_id,"layer":layer,"location":location,
+                                     "probabilities":decoded.tolist(),"residual":values[location][i].numpy().tolist(),**row})
                 previous=row
             for component,name in (("sa","delta_sa"),("ff","delta_ff")):
                 updates.append({**identity,"example_id":p.example_id,"parent_id":item.parent_id,"family":p.family,
@@ -106,6 +108,71 @@ def collect_semantic_equivalence(model, corpus, device, identity):
                                        "output_js_bits":jensen_shannon_bits(probabilities[i],changed_p),
                                        "target_probability_change":float(changed_p[p.target]-probabilities[i,p.target])})
     return entropy_rows,patch_rows,updates,family_rows
+
+
+def aggregate_semantic_variance(rows):
+    """ANOVA-like decomposition across templates, members, and learned-category metadata."""
+    cells=defaultdict(list)
+    fields=("model_setting","seed","layer","location","family","natural","abstraction_level","category_id")
+    for row in rows: cells[tuple(row[f] for f in fields)].append(row)
+    output=[]
+    for key,values in sorted(cells.items()):
+        by_item=defaultdict(list)
+        for row in values: by_item[row["item_id"]].append(row)
+        item_centroids=[]; nuisance=[]
+        for item_rows in by_item.values():
+            matrix=np.asarray([r["residual"] for r in item_rows]); item_centroids.append(matrix.mean(0))
+            nuisance.append(float(np.square(matrix-matrix.mean(0)).sum(axis=1).mean()))
+        item_centroids=np.asarray(item_centroids); category_centroid=item_centroids.mean(0)
+        member_variance=float(np.square(item_centroids-category_centroid).sum(axis=1).mean())
+        probabilities=np.asarray([r["probabilities"] for r in values]); probability_centroid=probabilities.mean(0)
+        covariance=np.cov(np.asarray([r["residual"] for r in values]),rowvar=False); eig=np.clip(np.linalg.eigvalsh(np.atleast_2d(covariance)),0,None)
+        output.append({**dict(zip(fields,key)),"n_realizations":len(values),"n_entities":len(by_item),
+                       "nuisance_context_variance":float(np.mean(nuisance)),"semantic_member_variance":member_variance,
+                       "within_category_variance":float(np.mean(nuisance)+member_variance),
+                       "mean_js_to_category_centroid":float(np.mean([jensen_shannon_bits(p,probability_centroid) for p in probabilities])),
+                       "mean_within_example_entropy_bits":float(np.mean([r["entropy_bits"] for r in values])),
+                       "residual_covariance_effective_rank":float(eig.sum()**2/max(np.square(eig).sum(),1e-12)),
+                       "residual_centroid":category_centroid.tolist()})
+    matched=defaultdict(list); match_fields=("model_setting","seed","layer","location","family","natural","abstraction_level")
+    for row in output: matched[tuple(row[f] for f in match_fields)].append(row)
+    for values in matched.values():
+        for row in values:
+            centroid=np.asarray(row["residual_centroid"]); between=[float(np.square(centroid-np.asarray(other["residual_centroid"])).sum()) for other in values if other["category_id"]!=row["category_id"]]
+            row["between_category_variance"]=float(np.mean(between)) if between else 0.0
+            row["fisher_separation_ratio"]=row["between_category_variance"]/max(row["within_category_variance"],1e-12)
+    for row in output: del row["residual_centroid"]
+    return output
+
+
+def plot_semantic_variance(output,variance,competence,checkpoints):
+    figures=output/"figures"
+    def depth_plot(metrics,labels,filename,title):
+        fig,ax=plt.subplots(figsize=(7.5,4.5))
+        for metric,label in zip(metrics,labels):
+            selected=[r for r in variance if r["location"]=="post_block"] ; by=defaultdict(list)
+            for row in selected: by[row["layer"]].append(row[metric])
+            ax.plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=label)
+        ax.set_xlabel("layer (incompetent-run diagnostic)"); ax.set_title(title); ax.legend(); ax.grid(alpha=.25); fig.tight_layout(); fig.savefig(figures/filename,dpi=170); plt.close(fig)
+    depth_plot(("within_category_variance","between_category_variance"),("within category","between category"),"semantic_within_between_variance.png","Within vs between-category residual variance")
+    depth_plot(("fisher_separation_ratio",),("between / within",),"semantic_fisher_ratio.png","Fisher-style separation ratio")
+    depth_plot(("nuisance_context_variance","semantic_member_variance"),("template nuisance","member within category"),"semantic_variance_decomposition.png","Context/member variance decomposition")
+    depth_plot(("mean_within_example_entropy_bits","mean_js_to_category_centroid"),("within-example entropy","across-realization JS"),"semantic_entropy_vs_dispersion.png","Entropy and conditional dispersion are distinct")
+    fig,ax=plt.subplots(figsize=(7.5,4.5))
+    for level in ("parent","root"):
+        selected=[r for r in variance if r["location"]=="post_block" and r["abstraction_level"]==level]; by=defaultdict(list)
+        for row in selected: by[row["layer"]].append(row["fisher_separation_ratio"])
+        ax.plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=level)
+    ax.set_xlabel("layer"); ax.set_ylabel("between/within residual variance"); ax.legend(); ax.grid(alpha=.25); ax.set_title("Hierarchy-level invariance (gate failed)"); fig.tight_layout(); fig.savefig(figures/"semantic_hierarchy_variance.png",dpi=170); plt.close(fig)
+    fig,ax1=plt.subplots(figsize=(7.5,4.5)); by_step=defaultdict(list)
+    for row in competence: by_step[row["step"]].append(row["correct"])
+    steps=sorted(by_step); ax1.plot(steps,[np.mean(by_step[s]) for s in steps],marker="o",color="#2563eb",label="completion accuracy"); ax1.axhline(.8,color="black",ls="--",label="gate")
+    ax2=ax1.twinx(); geometry=defaultdict(list)
+    for row in checkpoints:
+        if row["location"]=="post_block": geometry[row["step"]].append(row["normalized_separation"])
+    ax2.plot(sorted(geometry),[np.mean(geometry[s]) for s in sorted(geometry)],marker="s",color="#dc2626",label="geometry")
+    ax1.set_xlabel("training step"); ax1.set_ylabel("held-out accuracy"); ax2.set_ylabel("normalized geometry"); ax1.set_title("Competence versus apparent variance structure")
+    lines=ax1.lines+ax2.lines; ax1.legend(lines,[line.get_label() for line in lines],fontsize=8); fig.tight_layout(); fig.savefig(figures/"competence_vs_semantic_variance.png",dpi=170); plt.close(fig)
 
 
 def train_semantic(setting, seed, corpus, steps, checkpoints, device, checkpoint_dir):
@@ -322,7 +389,7 @@ def write_latex_table(table_dir, geometry, components):
 def write_summary(output, config, geometry, components, motifs, checkpoints, losses):
     post=[r for r in geometry if r["location"]=="post_block"]
     motif_values=[r["motif_specificity"] for r in motifs if np.isfinite(r["motif_specificity"])]
-    lines=["# Paper 0.6 controlled experiment summary","","## What was run","",f"- E1--E8 over two model settings x {len(config['seeds'])} seeds.","- Balanced noun, action, and relation hierarchies; natural labels, arbitrary synthetic labels, and permuted controls.",f"- Geometry aggregate rows: {len(geometry)}; component aggregate rows: {len(components)}.","","## Main pilot observations","",f"- Mean post-block normalized hierarchy separation: {np.mean([r['mean_normalized_separation'] for r in post]):.4f}.",f"- Mean post-block hierarchy RSA: {np.mean([r['mean_hierarchy_rsa_spearman'] for r in post]):.4f}.",f"- Tree-neighbor recovery versus permuted control: {np.mean([r['mean_tree_neighbor_recovery'] for r in post]):.4f} versus {np.mean([r['mean_permuted_neighbor_recovery'] for r in post]):.4f}.",f"- Mean cross-template cosine: {np.mean([r['mean_cross_template_cosine'] for r in post]):.4f}.",f"- Mean semantic motif specificity: {np.mean(motif_values):.4f}.",f"- Final training loss range: {min(v[-1] for v in losses.values()):.4f}--{max(v[-1] for v in losses.values()):.4f}.","","## Interpretation and failures","","This is a controlled local-model abstraction pilot, not evidence that pretrained Transformers encode a literal taxonomy. Templates, token length, training frequency, and continuation statistics are balanced by construction. Geometry is compared with permuted hierarchy and causal component interventions, but generic layer utility and off-manifold interventions remain limitations. Flat or non-monotonic profiles are retained.","","## Next falsifiable question","","Do hierarchy geometry and causal component effects survive residualization against natural-corpus n-gram statistics in a pretrained checkpoint series and transfer across unseen paraphrases?",""]
+    lines=["# Paper 0.6 controlled experiment summary","","## What was run","",f"- E1--E8 over two model settings x {len(config['seeds'])} seeds.","- Balanced noun, action, and relation hierarchies; natural labels, arbitrary synthetic labels, and permuted controls.",f"- Geometry aggregate rows: {len(geometry)}; component aggregate rows: {len(components)}.","","## Main pilot observations","",f"- Mean post-block normalized hierarchy separation: {np.mean([r['mean_normalized_separation'] for r in post]):.4f}.",f"- Mean post-block hierarchy RSA: {np.mean([r['mean_hierarchy_rsa_spearman'] for r in post]):.4f}.",f"- Tree-neighbor recovery versus permuted control: {np.mean([r['mean_tree_neighbor_recovery'] for r in post]):.4f} versus {np.mean([r['mean_permuted_neighbor_recovery'] for r in post]):.4f}.",f"- Mean cross-template cosine: {np.mean([r['mean_cross_template_cosine'] for r in post]):.4f}.",f"- Mean semantic motif specificity: {np.mean(motif_values):.4f}.",f"- Final training loss range: {min(v[-1] for v in losses.values()):.4f}--{max(v[-1] for v in losses.values()):.4f}.","- Held-out accuracy is 1.4%--15.3%; all four runs fail the 80% competence gate.","- Diagnostic post-block JS-to-category-centroid dispersion falls 0.376 -> 0.328 -> 0.213 bits while entropy rises 0.797 -> 1.224 -> 1.547 bits.","- Diagnostic Fisher-style between/within residual ratio rises 1.668 -> 1.724 -> 1.957, but total within-category variance also rises.","","## Interpretation and failures","","This is a controlled negative result. Since every run fails held-out completion competence, generator categories remain evaluation metadata: geometry and variance curves cannot be interpreted as learned semantic invariants. The coexistence of attractive separation with failed behavior is the central warning.","","## Next falsifiable question","","Can a revised training regime cross the frozen competence gate before repeating the same identity-disjoint variance and causal analyses?",""]
     (output/"summary.md").write_text("\n".join(lines),encoding="utf-8")
 
 
@@ -361,12 +428,15 @@ def run(args):
     patch_summary=[{"donor_type":k[0],"component":k[1],"layer":k[2],"mean_output_js_bits":float(np.mean([r["output_js_bits"] for r in v])),"mean_target_probability_change":float(np.mean([r["target_probability_change"] for r in v])),"n":len(v)} for k,v in sorted(patch_groups.items())]
     family_summary=[{"comparison":name,"mean_js_bits":float(np.mean([r[field] for r in all_families])),"n":len(all_families)} for name,field in (("sibling","sibling_js_bits"),("cross_category","cross_category_js_bits"))]
     equiv_common=common_component_metrics(all_equiv_updates,("model_setting","seed","layer","component","family","natural","abstraction_level","parent_id"))
+    semantic_variance=aggregate_semantic_variance(all_entropy)
     write_jsonl(raw/"representations.jsonl",all_reps); write_jsonl(raw/"updates.jsonl",all_updates); write_jsonl(raw/"components.jsonl",all_components); write_jsonl(raw/"motifs.jsonl",all_motif_records); write_jsonl(raw/"metadata.jsonl",metadata); atomic_write_json(raw/"losses.json",losses)
     write_jsonl(raw/"competence.jsonl",all_competence); write_jsonl(raw/"entropy_trajectories.jsonl",all_entropy); write_jsonl(raw/"semantic_patches.jsonl",all_patches); write_jsonl(raw/"semantic_equivalence.jsonl",all_families)
     write_csv(tables/"geometry.csv",geometry); write_csv(tables/"geometry_by_run.csv",geometry_raw); write_csv(tables/"component_summary.csv",components); write_csv(tables/"motif_summary.csv",motifs); write_csv(tables/"update_commonality.csv",update_metrics); write_csv(tables/"checkpoint_dynamics.csv",all_checkpoints); atomic_write_json(tables/"onset_persistence.json",onset)
     write_csv(tables/"competence_gate.csv",competence_summary); write_csv(tables/"semantic_equivalence.csv",family_summary); write_csv(tables/"semantic_patching.csv",patch_summary); write_csv(tables/"equivalence_common_updates.csv",equiv_common)
+    write_csv(tables/"semantic_variance_decomposition.csv",semantic_variance)
     plots(output,geometry,components,motifs,update_metrics,all_checkpoints,onset); write_latex_table(tables,geometry,components); write_summary(output,config,geometry,components,motifs,all_checkpoints,losses)
-    atomic_write_json(output/"manifest.json",{"schema_version":"paper06.results.v2","config":config,"competence_threshold":0.80,"hierarchy_hash":atlas_corpus.hierarchy.version_hash,"paper05_manifest_hash":stable_hash(json.loads((repo/"docs/papers/paper0_5/results/manifest.json").read_text())),"artifact_hash":stable_hash({"geometry":geometry,"components":components,"motifs":motifs,"competence":competence_summary,"patches":patch_summary})})
+    plot_semantic_variance(output,semantic_variance,all_competence,all_checkpoints)
+    atomic_write_json(output/"manifest.json",{"schema_version":"paper06.results.v3","config":config,"competence_threshold":0.80,"variance_unit":"context/entity realization conditional on generator category metadata at fixed depth; interpretation gated by competence","hierarchy_hash":atlas_corpus.hierarchy.version_hash,"paper05_manifest_hash":stable_hash(json.loads((repo/"docs/papers/paper0_5/results/manifest.json").read_text())),"artifact_hash":stable_hash({"geometry":geometry,"components":components,"motifs":motifs,"competence":competence_summary,"patches":patch_summary,"variance":semantic_variance})})
     print(json.dumps({"output":str(output),"geometry_rows":len(geometry),"component_rows":len(all_components),"representation_rows":len(all_reps)},indent=2))
 
 

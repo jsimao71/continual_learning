@@ -34,6 +34,9 @@ Pairwise cosine-distance matrices are compared with exact tree distances by Spea
 
 Following the shared metric ontology, we also retain $\|\Delta_l\|$, $\|\Delta_l\|/\|h_l\|$, $\cos(h_l,\Delta_l)$, update--update cosine, and category-conditioned update rank. Positive, orthogonal, or negative geometry remains a refinement, complementarity, or interference \emph{candidate}; geometry alone is never called causal interference. For layer masks above the permuted-control criterion, onset, consecutive persistence, disappearance, and re-entry are computed explicitly rather than assuming monotonicity.
 
+\subsection{Conditional semantic-variance decomposition}
+At each fixed depth and tensor location, realizations are crossed over template context, entity within generator category, category, family, requested parent/root level, model, and seed. We separate template nuisance variance within an entity, entity/member variance within a category, total within-category variance, and between-category centroid variation. Their Fisher-style ratio is between-category variation divided by within-category variation. We separately retain residual covariance rank, mean JS divergence to the category-conditioned output centroid, and within-example entropy. Depth is a refinement axis, not a source of independent samples. Because the competence gate fails, generator memberships are metadata for a negative-control decomposition and are not called learned categories.
+
 \section{SA versus FFN}
 Capture pre/post-attention and pre/post-FFN states using Paper 0.5's exact convention,
 \begin{align}
@@ -85,6 +88,32 @@ Natural-label geometry is stronger than arbitrary-label geometry, and both excee
 Same-parent sibling output distributions have mean JS divergence 0.660 bits, compared with 0.746 bits across semantic families. This difference is directionally consistent with the designed nesting but is small relative to the distance itself and cannot pass the competence prerequisite. Complete-update replacement shows similarly weak specificity: at layer-0 FFN, sibling versus cross-category output change is 0.241 versus 0.284 JS bits; at layer-0 SA it is 0.205 versus 0.243. Target-probability changes are near zero for sibling donors and somewhat more negative for cross-category donors, but the unlearned target makes this contrast non-semantic.
 
 Decoded uncertainty is non-monotone in the sense required by the shared ontology and, on average, increases through a block. Parent-query entropy is 0.629/0.792/1.107 bits at pre-SA/post-SA/post-block; root-query entropy is 0.596/0.791/1.139. These trajectories reject a universal entropy-reduction story, but they do not reveal abstraction while the behavioral gate is closed. Common residual-component metrics are committed for audit and future competent replication; no common direction is promoted to a semantic invariant here.
+
+\subsection{Variance curves are informative controls, not semantic evidence}
+Across post-block cells, mean JS-to-generator-category centroid decreases from 0.376 to 0.328 to 0.213 bits over layers 0--2, while mean within-example entropy rises from 0.797 to 1.224 to 1.547 bits. The same dissociation seen in Paper 0.5 is therefore measurable here: output distributions can become more consistent across realizations while remaining broad individually. However, the failed completion gate prevents a semantic interpretation.
+
+Total within-category residual variance rises from 28.71 to 43.60 to 57.54, and between-category variation rises from 35.35 to 52.66 to 68.74. Total variance reduction is therefore false. The diagnostic Fisher ratio nevertheless rises from 1.668 to 1.724 to 1.957 because between-category structure grows somewhat faster than within-category dispersion. Template nuisance variance is non-monotone (2.50, 7.62, 5.41), whereas member variance grows (26.20, 35.97, 52.13). These metadata-conditioned curves show why the correct prediction concerns relative task signal, not shrinking total hidden-state variance---and why behavior must arbitrate whether that signal is semantic.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_within_between_variance.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_fisher_ratio.png}
+\caption{Generator-metadata variance diagnostics at fixed depth. Both within- and between-category residual variation grow; their ratio rises modestly. The competence gate failed, so these are controls rather than semantic evidence.}
+\label{fig:paper06-variance}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_variance_decomposition.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_entropy_vs_dispersion.png}
+\caption{Left: nuisance-template and entity/member components. Right: within-example entropy versus across-realization JS dispersion, retained as distinct quantities.}
+\label{fig:paper06-decomposition}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/semantic_hierarchy_variance.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_6/results/figures/competence_vs_semantic_variance.png}
+\caption{Left: parent/root metadata-conditioned ratios without a monotone abstraction assumption. Right: apparent geometry alongside held-out competence and its frozen 80\% gate.}
+\label{fig:paper06-competence-variance}
+\end{figure}
 
 \subsection{Dispersion, invariance, and residual commonality}
 Between-parent distance exceeds within-parent distance on average, while high cross-template cosine shows that the same item/requested level remains stable across the three controlled forms. The invariant criterion is already above the permuted control at layer 0 and persists for all measured layers in both natural and synthetic conditions. This is evidence against a simple late-onset abstraction ladder: part of the geometry is present in the learned embedding/context state before deeper transformation. Shared-update explained variance is reported as residual commonality, not as a literal group generator.

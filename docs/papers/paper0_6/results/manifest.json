@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "0c291aa635ed41529af3025eb87e1d874e8e33fa2adde9051e27a15e7a91e17c",
+  "artifact_hash": "adc26076be300eb8025a6a6ee0052c4d5700fb2202f34d209d52d2c981672a9f",
   "competence_threshold": 0.8,
   "config": {
     "checkpoints": [
@@ -30,6 +30,7 @@
     "steps": 160
   },
   "hierarchy_hash": "a392fd6f15e20747c61034634ad8fc82abc93a2258bad908b60b7507a9b71b89",
-  "paper05_manifest_hash": "34ed2c174de52d52272e8570e0e2c39f0e206a246cf54d62bcb5ce737657a730",
-  "schema_version": "paper06.results.v2"
+  "paper05_manifest_hash": "9e42e1e978ff06ac46b1bd77caeb09055f0159addff30dcd9a22d685144aeca2",
+  "schema_version": "paper06.results.v3",
+  "variance_unit": "context/entity realization conditional on generator category metadata at fixed depth; interpretation gated by competence"
 }

@@ -14,15 +14,14 @@
 - Mean cross-template cosine: 0.9597.
 - Mean semantic motif specificity: -0.0121.
 - Final training loss range: 0.4574--0.5295.
-- Held-out completion accuracy is 1.4%--15.3% across runs; all four fail the preregistered 80% competence gate.
-- Same-parent sibling versus cross-category output JS divergence is 0.660 versus 0.746 bits.
-- Layer-0 FFN sibling versus cross-category replacement changes output distributions by 0.241 versus 0.284 JS bits; the contrast is diagnostic only.
-- Parent-query entropy rises from 0.629 bits pre-SA to 1.107 post-block; root-query entropy rises from 0.596 to 1.139.
+- Held-out accuracy is 1.4%--15.3%; all four runs fail the 80% competence gate.
+- Diagnostic post-block JS-to-category-centroid dispersion falls 0.376 -> 0.328 -> 0.213 bits while entropy rises 0.797 -> 1.224 -> 1.547 bits.
+- Diagnostic Fisher-style between/within residual ratio rises 1.668 -> 1.724 -> 1.957, but total within-category variance also rises.
 
 ## Interpretation and failures
 
-This is a controlled negative result. Because every run fails the held-out completion gate, geometry, entropy, and replacement measurements cannot be interpreted as semantic invariants. Above-permutation geometry in an incompetent model is itself a warning against representation-first claims. No Paper 1 learning feature is enabled by this run.
+This is a controlled negative result. Since every run fails held-out completion competence, generator categories remain evaluation metadata: geometry and variance curves cannot be interpreted as learned semantic invariants. The coexistence of attractive separation with failed behavior is the central warning.
 
 ## Next falsifiable question
 
-Do hierarchy geometry and causal component effects survive residualization against natural-corpus n-gram statistics in a pretrained checkpoint series and transfer across unseen paraphrases?
+Can a revised training regime cross the frozen competence gate before repeating the same identity-disjoint variance and causal analyses?
