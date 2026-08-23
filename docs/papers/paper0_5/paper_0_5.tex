@@ -15,7 +15,7 @@
 \maketitle
 
 \begin{abstract}
-Transformers repeatedly encounter short token sequences whose continuation distributions can be estimated directly. We use common n-grams as controlled probes of how recurrent prefix-to-next-token relations are transformed across self-attention (SA), feed-forward/MLP layers, and the residual stream. We implement a provenance-complete E1--E6 pipeline: an atlas over $n\in\{1,2,3,4,5,8\}$, exact sublayer traces, signed diagnostic progress, zero/mean/matched-replacement and selective-head interventions, matched attention-motif controls, familiar-versus-context-introduced mappings, contextual override/repair, and dense checkpoint measurements. A controlled corpus trains two inspectable causal Transformer settings with two seeds each. The atlas contains 21,630 prefix entries and the final analysis contains 1,920 component rows. Averaged across layer/model cells, familiar low-entropy relations show FFN and SA zero-ablation drops of 0.478 and 0.301 nats; context-introduced mappings show 0.827 and 0.305. Override examples instead are strongly SA-dependent (1.497 versus 0.261). Attention motifs are more similar within relation than to matched controls (mean specificity 0.228), but motif specificity is unrelated to SA causal contribution across 18 relation--layer units ($\rho=-0.009$). Thus the controlled pilot supports distributed, transformation-dependent mechanisms and directly falsifies a simple ``stable motif implies causal importance'' account. Subsequent papers reinforce the distinction: semantic hierarchy geometry can survive controls while semantic motif specificity is negative; controlled bridge structure aids selection; and a natural native-K/V intervention yields favorable bridge means without resolved uncertainty or learned-selector transfer. Recurrent appearance is therefore a candidate observation, not an online-learning target; reproducible pretrained causal utility remains necessary.
+Transformers repeatedly encounter short token sequences whose continuation distributions can be estimated directly. We use recurrent prefix relations to test component responsibility, predictive equivalence, and nuisance-conditioned variance across self-attention (SA), feed-forward/MLP layers, and the residual stream. Two locally trained causal Transformers (two seeds each) yield 1,920 component rows and a controlled depth--prefix--noise factorial. Under pattern evidence with four distractors, post-block JS dispersion falls by 0.0474 bits from first to last available depth (family/run bootstrap 95\% CI $[-0.0778,-0.0217]$), even while within-example entropy rises. Stable attention motifs remain unrelated to SA causal contribution ($\rho=-0.009$). We then replicate on Pythia-70M-deduped checkpoints 0, 1,000, and 143,000 and pinned Qwen3-0.6B using crossed syntax--semantic families. Directions fitted on clean weak-evidence identities transfer to noisy stronger-evidence identities. Equivalent replacement is substantially less harmful than fully nonequivalent replacement for trained Pythia at step 1,000 (difference 1.047 nats, family bootstrap CI $[0.545,1.455]$), step 143,000 (1.206, $[0.224,2.187]$), and Qwen (0.599, $[0.299,0.899]$), but not at random initialization. Removing the fitted common direction is harmful in the trained models. Prediction-dispersion reduction is not universal across pretrained depth: final Pythia shows a small negative contrast, whereas Qwen increases. The supported claim is therefore causal functional equivalence with conditional nuisance refinement, not monotone denoising or online learnability. E7 remains stopped.
 \end{abstract}
 
 \section{Motivation}
@@ -265,7 +265,7 @@ Replacement interventions sharpen the result. Across layers and components, equi
 The entropy trajectories are explicitly non-monotone and task-conditioned. Mean decoded entropy at pre-SA/post-SA/post-block is 0.069/0.046/0.083 bits for familiar deterministic relations, but 0.637/0.809/1.198 for high-entropy relations and 0.848/1.158/1.959 for context-introduced mappings. Thus SA and FFN can increase uncertainty when the learned continuation family requires alternatives; entropy reduction is not treated as a universal signature of useful computation. Family-conditioned update centroids are highly aligned in many cells, but their effective ranks and within-family dispersion remain in the artifact, so commonality is not collapsed into a one-dimensional mechanism claim.
 
 \subsection{Depth reduces nuisance-conditioned prediction dispersion}
-The variance grid contains 25,920 fixed-depth realization rows and 1,620 conditional aggregates. Under pattern-length evidence with four distractors, mean post-block target-probability variance falls from 0.0347 at layer 0 to 0.0106 at layer 1 and 0.0109 at layer 2. Mean JS-to-pattern-centroid dispersion similarly falls from 0.0650 to 0.0307 and 0.0106 bits. The median between-pattern/within-pattern JS ratio rises from 56.9 to 142.0 to 285.2 across the available depth cells. This is evidence for nuisance invariance as repeated state-conditioned refinement, not evidence that layers are independent samples.
+The completed variance grid contains 124,416 fixed-depth realization rows and 7,776 conditional aggregates across trained/random stages, context controls, and observed/shuffled targets. Under pattern-length evidence with four distractors, mean post-block target-probability variance falls from 0.0347 at layer 0 to 0.0106 at layer 1 and 0.0109 at layer 2. Mean JS-to-pattern-centroid dispersion similarly falls from 0.0650 to 0.0307 and 0.0106 bits. The median between-pattern/within-pattern JS ratio rises from 56.9 to 142.0 to 285.2 across the available depth cells. This is evidence for nuisance invariance as repeated state-conditioned refinement, not evidence that layers are independent samples.
 
 The distinction from entropy matters empirically. Over the same cells, mean within-example entropy rises from 1.326 to 2.094 to 2.277 bits while across-realization JS dispersion falls. Depth therefore makes outputs more consistent across irrelevant realizations without forcing a narrower distribution within each realization. Added nuisance increases post-block JS dispersion for pattern evidence (0.0119/0.0263/0.0404 bits at zero/two/four distractors, averaged across depth and runs), and later computation partly compensates. Weak-prefix cells include exact-output ties and near-zero within-family denominators, so SNR means are unstable; we report medians and retain the raw numerator and denominator.
 
@@ -287,6 +287,37 @@ The distinction from entropy matters empirically. Over the same cells, mean with
 \includegraphics[width=.70\linewidth]{docs/papers/paper0_5/results/figures/depth_prefix_noise_and_components.png}
 \caption{Depth-by-noise dispersion and pre-SA/post-SA/post-MLP comparison. Sublayer changes are interpreted as contributions to invariance, not independent estimators.}
 \label{fig:paper05-noise-components}
+\end{figure}
+
+The completed factorial retains all prefix strengths and distinguishes irrelevant nuisance, answer-changing contexts, shuffled target labels, and a true step-0 checkpoint. For pattern evidence with four distractors, trained irrelevant-nuisance JS falls by $-0.0474$ bits from first to last depth (24 relation--run units; family/run bootstrap CI $[-0.0778,-0.0217]$). Answer-changing contexts also contract ($-0.0328$, $[-0.0543,-0.0141]$), but less strongly, so invariance is not equated with ignoring legitimate context. The random checkpoint has extremely low dispersion only because target signal is absent (mean target probability below $5\times10^{-7}$); low variance without signal is not success. Shuffling the target changes target-specific variance/margin summaries but correctly leaves full-distribution JS unchanged.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/depth_prefix_noise_surface.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/variance_negative_controls.png}
+\caption{Left: complete depth--prefix--noise JS surface. Right: irrelevant, answer-changing, shuffled-target, and random-checkpoint controls. Low random-model dispersion is interpreted jointly with its absent target signal.}
+\label{fig:paper05-full-factorial}
+\end{figure}
+
+\subsection{Pretrained checkpoint and modern-model replication}
+The external-validity matrix uses Pythia-70M-deduped at official revisions \texttt{step0}, \texttt{step1000}, and \texttt{step143000} \cite{biderman2023pythia}, plus Qwen3-0.6B at pinned revision \texttt{c1899de...} \cite{qwen3report}. Four externally defined families cross alternation/mapping syntax with number/color semantic domains. Each family crosses one, two, or four demonstrations; zero, two, or four distractor units; and four realizations. Selected first/middle/final depths yield 1,728 observation rows. Exact full-distribution JS is computed before dense arrays are discarded; the compact raw artifact retains scalar metrics and distribution/state hashes.
+
+For causal transfer, common update directions and equivalent donors are fitted only on realizations 0--1 with one clean demonstration. They are evaluated on identity-disjoint realizations 2--3 with two demonstrations and four nuisance units. Across three depths and both components, interventions include zeroing, equivalent replacement, same-semantics/different-syntax replacement, same-syntax/different-semantics replacement, fully nonequivalent replacement, common-direction projection removal, and common-direction addition (1,344 rows). This is sublayer-to-output causal mediation; it does not isolate individual attention paths.
+
+Functional transfer appears only after training. Equivalent-minus-fully-nonequivalent target-log-probability contrasts are 0.089 nats at Pythia step 0 (family bootstrap interval crosses zero), 1.047 at step 1,000 (95\% CI $[0.545,1.455]$), 1.206 at step 143,000 ($[0.224,2.187]$), and 0.599 for Qwen ($[0.299,0.899]$). Qwen also separates equivalent from syntax mismatch by 0.574 ($[0.325,0.866]$); its semantic-only mismatch contrast is 0.327 with an interval slightly crossing zero. Common-direction removal is more damaging than equivalent transfer in trained step-1,000 Pythia, final Pythia, and Qwen, supporting a task-relevant common component without claiming it is the complete mechanism. Addition is not reliably beneficial.
+
+The variance hypothesis transfers only conditionally. Last-minus-first JS dispersion is positive at random Pythia and step 1,000, small and negative at final Pythia ($-0.00135$ bits, CI $[-0.00268,-0.00002]$), and positive for Qwen (0.00238, $[0.00056,0.00420]$). Thus causal equivalence generalizes better than monotone nuisance denoising. The crossed fixed-factor regression is descriptive because four families are insufficient for a stable mixed-effects interaction estimate; family-clustered bootstrap is primary.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/pretrained/figures/pretrained_js_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/pretrained/figures/pretrained_snr_depth.png}
+\caption{Pretrained fixed-depth replication under two demonstrations and four nuisance units. JS refinement is non-monotone and model/checkpoint dependent; SNR ratios are shown descriptively because near-zero denominators can dominate.}
+\label{fig:paper05-pretrained-variance}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=.72\linewidth]{docs/papers/paper0_5/results/pretrained/figures/pretrained_causal_mediation.png}
+\caption{Held-out sublayer intervention effects across pretrained cells. Equivalent donors are fitted in a different prefix/noise regime; mismatch, zero, projection-removal, and addition controls distinguish transferable family computation from generic component utility.}
+\label{fig:paper05-pretrained-causal}
 \end{figure}
 
 \subsection{Descriptive progress disagrees with intervention magnitude}
@@ -321,10 +352,16 @@ Checkpoint measurements are non-monotonic across strata and components; the cont
 \section{Series-Level Interpretation}
 Paper 0.5 establishes the first recurring pattern in the research sequence: descriptive regularity is easier to find than reusable causal structure. Relation-specific attention rows exist, yet their specificity is unrelated to SA intervention magnitude; signed logit progress can also disagree with intact-minus-ablated effects. Paper 0.6 repeats this separation in a semantic setting: hierarchy-neighbor recovery is 0.477 versus 0.254 under permutation, while semantic motif specificity is $-0.012$. Paper 1 then shows what a stronger bridge must look like. Explicit cross-community bridge scores improve a controlled matched-budget selection frontier, but retained frozen-Qwen summaries add essentially no identity-disjoint predictive value after surface controls.
 
-Together these results revise the learning hypothesis. The candidate persistent object should not be an attention motif simply because it recurs. It should be a compact task-conditioned summary whose held-out outcome utility is established under matched budgets and whose update preserves contextual override. For n-gram mechanisms specifically, the next natural experiment must test whether SA/FFN intervention fractions and repair trajectories replicate in pretrained checkpoints after frequency, entropy, tokenization, and generic-layer controls. Until then, E7 remains correctly stopped.
+Together these results revise the learning hypothesis. The candidate persistent object should not be an attention motif simply because it recurs. Pretrained causal transfer now supports family-conditioned computation, but addition does not improve outcomes and Paper 1's natural utility gate remains negative. A persistent target must still establish matched-budget future utility and preserve contextual override. E7 therefore remains correctly stopped despite the stronger mechanistic evidence.
 
 \section{Reproducibility and Artifact Contract}
-The exact command is \texttt{python -m cl.experiments.paper05\_ngram --steps 160 --checkpoints 0 40 100 160 --seeds 11,23 --device cpu}. The manifest records model settings and an artifact hash; per-run metadata records the source commit, dirty flag, command, resolved configuration, model/data identifiers, seed, device/dtype, package versions, timestamp, and corpus hash. JSONL contains scientific-unit rows; CSV contains paper aggregates; eight figures regenerate from those files. Tests cover counts, entropy, alignment, deterministic sampling, trace serialization, exact capture parity, residual identities, intervention locality, and metric toy cases.
+The commands are
+\begin{verbatim}
+PYTHONPATH=src python -m cl.experiments.paper05_ngram
+PYTHONPATH=src python -m cl.experiments.paper05_pretrained
+PYTHONPATH=src python -m cl.analysis.paper05_inference
+\end{verbatim}
+Manifests record model/checkpoint identities, hashes, direction-fit separation, and resolved configuration. Per-realization variance artifacts are split by stage/context/target control to keep files reviewable; dense distributions and states are represented by hashes after exact aggregation. Eighteen figures (15 controlled and three pretrained) and all tables regenerate from committed artifacts. Tests cover entropy/equivalence metrics, trace parity, residual identities, intervention locality, and artifact invariants.
 
 \section{Falsification Criteria}
 The paper should explicitly accept the following outcomes:
@@ -339,7 +376,7 @@ The paper should explicitly accept the following outcomes:
 These outcomes would constrain, rather than invalidate, the broader continuous-learning program.
 
 \section{Contribution and Limitations}
-The present contribution is a tested mechanistic measurement framework, controlled atlas, multi-intervention trace schema, and a falsifying pilot result. It does not show that Transformers implement literal symbolic n-gram tables, that pretrained models share these mechanisms, or that corpus frequency predicts compilation generally. Only two small local architectures and two seeds are included; the corpus vocabulary and grammar are deliberately narrow; head 0 is diagnostic rather than the result of corrected head search; zero/mean/replacement interventions can leave the activation manifold; and no path-patching mediation is performed. The strongest supported statement is consequently narrow: recurrent prediction mechanisms are transformation-dependent, and stable attention motifs alone are not a sufficient learning signal in this controlled regime.
+The present contribution is a tested mechanistic measurement framework, controlled atlas, conditional-variance factorial, checkpoint replication, and sublayer causal-transfer result. It does not show that Transformers implement literal symbolic n-gram tables, that corpus frequency predicts compilation generally, or that functional equivalence should be consolidated online. The controlled study has two architectures/two seeds; the pretrained crossed study has four families and one run per checkpoint. Family bootstrap is therefore primary and the fixed-factor regression descriptive. Prompts and single-token targets are narrow; selected-depth hooks do not isolate individual attention paths; replacement/addition can be off-manifold; and Qwen contradicts universal depthwise variance reduction. The strongest supported statement is narrow: trained models contain transferable family-conditioned updates, while nuisance refinement is task/model dependent and stable motifs alone remain insufficient.
 
 \section{Relationship to the Research Program}
 \paragraph{Residual-stream line.}
@@ -355,7 +392,7 @@ The connection is secondary but useful: attention motifs and graph structure may
 To keep Paper 0.5 publishable and falsifiable, the mandatory scope ends after E1--E6. A working online adapter in E7 is a bonus or appendix. Full continual-learning algorithms, catastrophic-forgetting studies, deployment policies, replay/memory management, and long-horizon adaptation belong to subsequent papers.
 
 \section{Conclusion}
-Common token n-grams provide a bridge between externally measurable statistics and internal Transformer computation. In the controlled pilot, component responsibility depends on the transformation and intervention: familiar and context-introduced mappings are often FFN-heavy, high-entropy mappings are distributed, and contextual override is SA-heavy. Stable motifs do not predict SA causal utility, and checkpoint trajectories do not establish monotone compilation. Downstream hierarchy and sparse-control studies preserve the same lesson: natural bridge means can be favorable while uncertainty, combined-selector transfer, and causal prediction still fail. Any persistent learner must therefore be conditioned on reproducible held-out utility rather than recurrence or a favorable mean alone.
+Common token relations provide a bridge between externally measurable prediction families and internal Transformer computation. Controlled depth reduces nuisance-conditioned dispersion without requiring lower within-example entropy. In trained Pythia and Qwen, clean weak-context directions transfer causally to noisy stronger contexts: equivalent donors are much less harmful than syntax/semantic mismatches, and removing the common direction damages target likelihood. Random initialization lacks this separation. Yet pretrained dispersion trajectories are not universally denoising, addition is not beneficial, motifs do not predict causal utility, and the downstream natural learning gate remains closed. Functional equivalence is therefore a validated mechanistic object, not yet a persistent-learning target.
 
 \begin{thebibliography}{9}
 \bibitem{geva2021ffn}
@@ -377,6 +414,16 @@ Yihe Dong, Lorenzo Noci, Mikhail Khodak, and Mufan Li.
 Tyler A. Chang and Benjamin K. Bergen.
 \newblock Bigram Subnetworks: Mapping to Next Tokens in Transformer Language Models.
 \newblock arXiv:2504.15471, 2025.
+
+\bibitem{biderman2023pythia}
+Stella Biderman et al.
+\newblock Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling.
+\newblock \emph{ICML}, 2023.
+
+\bibitem{qwen3report}
+Qwen Team.
+\newblock Qwen3 Technical Report.
+\newblock arXiv:2505.09388, 2025.
 \end{thebibliography}
 
 \end{document}

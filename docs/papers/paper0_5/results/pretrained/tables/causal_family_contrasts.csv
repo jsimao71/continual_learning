@@ -1,0 +1,17 @@
+ci_high,ci_low,contrast,estimate,model_id,n_families,revision
+0.23411238193511963,-0.20345648129781085,equivalent_minus_replace_syntax_mismatch,0.01532795031865438,EleutherAI/pythia-70m-deduped,4,step0
+0.13461162646611533,-0.009849309921264659,equivalent_minus_replace_semantic_mismatch,0.07803664604822795,EleutherAI/pythia-70m-deduped,4,step0
+0.2931107680002848,-0.11460721492767334,equivalent_minus_replace_nonequivalent,0.08925177653630574,EleutherAI/pythia-70m-deduped,4,step0
+0.2789296507835388,-0.15706429878870645,equivalent_minus_project_remove,0.0507281223932902,EleutherAI/pythia-70m-deduped,4,step0
+1.2504468585054078,-0.024707312385241167,equivalent_minus_replace_syntax_mismatch,0.631650430460771,EleutherAI/pythia-70m-deduped,4,step1000
+1.2569745182991028,0.42136673132578534,equivalent_minus_replace_semantic_mismatch,0.8391706248124441,EleutherAI/pythia-70m-deduped,4,step1000
+1.4553445130586624,0.5448333919048309,equivalent_minus_replace_nonequivalent,1.0468034818768501,EleutherAI/pythia-70m-deduped,4,step1000
+1.356283557911714,0.930116022626559,equivalent_minus_project_remove,1.135327972471714,EleutherAI/pythia-70m-deduped,4,step1000
+2.080774260063966,-0.3909276376167934,equivalent_minus_replace_syntax_mismatch,0.8449233112235863,EleutherAI/pythia-70m-deduped,4,step143000
+0.45153842245539033,0.28535897781451536,equivalent_minus_replace_semantic_mismatch,0.3560535131643216,EleutherAI/pythia-70m-deduped,4,step143000
+2.1873335279524326,0.22448907544215518,equivalent_minus_replace_nonequivalent,1.2059113016972938,EleutherAI/pythia-70m-deduped,4,step143000
+0.5678295913773278,0.017283509174982697,equivalent_minus_project_remove,0.29255655027615524,EleutherAI/pythia-70m-deduped,4,step143000
+0.8663615419839819,0.324873102363199,equivalent_minus_replace_syntax_mismatch,0.574043049942702,Qwen/Qwen3-0.6B,4,c1899de289a04d12100db370d81485cdf75e47ca
+0.6590411405389508,-0.004051191732287414,equivalent_minus_replace_semantic_mismatch,0.3274949744033317,Qwen/Qwen3-0.6B,4,c1899de289a04d12100db370d81485cdf75e47ca
+0.8991978683819373,0.2988729296873013,equivalent_minus_replace_nonequivalent,0.5990353990346193,Qwen/Qwen3-0.6B,4,c1899de289a04d12100db370d81485cdf75e47ca
+1.3332699400683246,0.5035119218130907,equivalent_minus_project_remove,0.9495313533892235,Qwen/Qwen3-0.6B,4,c1899de289a04d12100db370d81485cdf75e47ca

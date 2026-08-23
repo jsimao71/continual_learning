@@ -1,0 +1,23 @@
+{
+  "artifact_hash": "29d6065fe20406bd1b92795be87a35abf64b0a6e1638a0fe978b1dde623205e4",
+  "identity_disjoint_direction_fit": true,
+  "models": [
+    [
+      "EleutherAI/pythia-70m-deduped",
+      "step0"
+    ],
+    [
+      "EleutherAI/pythia-70m-deduped",
+      "step1000"
+    ],
+    [
+      "EleutherAI/pythia-70m-deduped",
+      "step143000"
+    ],
+    [
+      "Qwen/Qwen3-0.6B",
+      "c1899de289a04d12100db370d81485cdf75e47ca"
+    ]
+  ],
+  "schema_version": "paper05.pretrained.v1"
+}

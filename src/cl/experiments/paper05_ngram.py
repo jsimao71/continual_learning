@@ -210,27 +210,29 @@ def collect_variance_grid(model, probes, device, identity):
             core=probe.tokens[-prefix_length:]
             for noise_level in (0,2,4):
                 distractors=tuple(20+((index*7+j*3)%20) for j in range(noise_level))
-                tokens=(distractors+core)[-model.max_length:]
-                inputs=torch.tensor([tokens],dtype=torch.long,device=device)
-                _,trace=model(inputs,capture=True); assert trace is not None
-                for layer,values in enumerate(final_position_trace(trace)):
-                    for location in ("pre_sa","post_sa","post_block"):
-                        logits=model.diagnostic_logits(values[location].to(device))[0]
-                        probabilities=torch.softmax(logits,-1).cpu().numpy()
-                        ordered=np.argsort(-probabilities)
-                        competitor=next(int(v) for v in ordered if int(v)!=probe.target)
-                        rows.append({**identity,"example_id":probe.example_id,"relation_id":probe.relation_id,"stratum":probe.stratum,
-                                     "prefix_evidence":prefix_label,"prefix_length":prefix_length,"noise_level":noise_level,
-                                     "layer":layer,"location":location,"target_probability":float(probabilities[probe.target]),
-                                     "target_logit":float(logits[probe.target]),"target_margin":float(logits[probe.target]-logits[competitor]),
-                                     "entropy_bits":distribution_metrics(probabilities,probe.target)["entropy_bits"],
-                                     "probabilities":probabilities.tolist(),"residual":values[location][0].numpy().tolist()})
+                answer_changing=(distractors+probe.control_tokens[-prefix_length:])[-model.max_length:]
+                for control_type,tokens in (("irrelevant_nuisance",(distractors+core)[-model.max_length:]),("answer_changing",answer_changing)):
+                    inputs=torch.tensor([tokens],dtype=torch.long,device=device)
+                    _,trace=model(inputs,capture=True); assert trace is not None
+                    for layer,values in enumerate(final_position_trace(trace)):
+                        for location in ("pre_sa","post_sa","post_block"):
+                            logits=model.diagnostic_logits(values[location].to(device))[0]
+                            probabilities=torch.softmax(logits,-1).cpu().numpy()
+                            for target_control,target in (("observed",probe.target),("shuffled_continuation",(probe.target+7)%model.vocab_size)):
+                                ordered=np.argsort(-probabilities); competitor=next(int(v) for v in ordered if int(v)!=target)
+                                rows.append({**identity,"example_id":probe.example_id,"relation_id":probe.relation_id,"stratum":probe.stratum,
+                                             "control_type":control_type,"target_control":target_control,
+                                             "prefix_evidence":prefix_label,"prefix_length":prefix_length,"noise_level":noise_level,
+                                             "layer":layer,"location":location,"target_probability":float(probabilities[target]),
+                                             "target_logit":float(logits[target]),"target_margin":float(logits[target]-logits[competitor]),
+                                             "entropy_bits":distribution_metrics(probabilities,target)["entropy_bits"],
+                                             "probabilities":probabilities.tolist(),"residual":values[location][0].numpy().tolist()})
     return rows
 
 
 def aggregate_variance_grid(rows):
     groups=defaultdict(list)
-    fields=("model_setting","seed","relation_id","stratum","prefix_evidence","prefix_length","noise_level","layer","location")
+    fields=("model_setting","seed","training_stage","relation_id","stratum","control_type","target_control","prefix_evidence","prefix_length","noise_level","layer","location")
     for row in rows: groups[tuple(row[f] for f in fields)].append(row)
     preliminary=[]
     for key,values in sorted(groups.items()):
@@ -249,7 +251,7 @@ def aggregate_variance_grid(rows):
             "residual_covariance_effective_rank":float(eig.sum()**2/max(np.square(eig).sum(),1e-12)),
             "distribution_centroid":centroid.tolist()})
     matched=defaultdict(list)
-    match_fields=("model_setting","seed","prefix_evidence","noise_level","layer","location")
+    match_fields=("model_setting","seed","training_stage","control_type","target_control","prefix_evidence","noise_level","layer","location")
     for row in preliminary: matched[tuple(row[f] for f in match_fields)].append(row)
     for values in matched.values():
         for row in values:
@@ -265,7 +267,7 @@ def plot_variance_results(output, summary):
     def curve(metric,filename,ylabel):
         fig,ax=plt.subplots(figsize=(7.5,4.6))
         for location in locations:
-            selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]==location]
+            selected=[r for r in summary if r["training_stage"]=="trained" and r["control_type"]=="irrelevant_nuisance" and r["target_control"]=="observed" and r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]==location]
             by=defaultdict(list)
             for row in selected: by[row["layer"]].append(row[metric])
             ax.plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=location)
@@ -275,11 +277,11 @@ def plot_variance_results(output, summary):
     curve("pattern_snr_js_ratio","pattern_snr.png","between-pattern / within-pattern JS")
     fig,axes=plt.subplots(1,2,figsize=(10,4.2))
     for noise in (0,2,4):
-        selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==noise and r["location"]=="post_block"]
+        selected=[r for r in summary if r["training_stage"]=="trained" and r["control_type"]=="irrelevant_nuisance" and r["target_control"]=="observed" and r["prefix_evidence"]=="pattern" and r["noise_level"]==noise and r["location"]=="post_block"]
         by=defaultdict(list)
         for row in selected: by[row["layer"]].append(row["mean_js_to_pattern_centroid"])
         axes[0].plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=f"noise {noise}")
-    selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4]
+    selected=[r for r in summary if r["training_stage"]=="trained" and r["control_type"]=="irrelevant_nuisance" and r["target_control"]=="observed" and r["prefix_evidence"]=="pattern" and r["noise_level"]==4]
     by=defaultdict(list)
     for row in selected: by[(row["location"],row["layer"])].append(row["mean_js_to_pattern_centroid"])
     axes[1].plot(sorted({k[1] for k in by}),[np.mean(by[("pre_sa",l)]) for l in sorted({k[1] for k in by})],marker="o",label="pre-SA")
@@ -288,11 +290,27 @@ def plot_variance_results(output, summary):
     for ax in axes: ax.set_xlabel("layer"); ax.set_ylabel("JS dispersion"); ax.legend(); ax.grid(alpha=.25)
     axes[0].set_title("Depth x nuisance noise"); axes[1].set_title("SA vs MLP invariance contribution"); fig.tight_layout(); fig.savefig(figure_dir/"depth_prefix_noise_and_components.png",dpi=170); plt.close(fig)
     fig,ax=plt.subplots(figsize=(7.5,4.6))
-    selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]=="post_block"]
+    selected=[r for r in summary if r["training_stage"]=="trained" and r["control_type"]=="irrelevant_nuisance" and r["target_control"]=="observed" and r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]=="post_block"]
     by=defaultdict(list)
     for row in selected: by[row["layer"]].append((row["mean_entropy_bits"],row["mean_js_to_pattern_centroid"]))
     layers=sorted(by); ax.plot(layers,[np.mean([v[0] for v in by[l]]) for l in layers],marker="o",label="within-example entropy"); ax.plot(layers,[np.mean([v[1] for v in by[l]]) for l in layers],marker="s",label="across-realization JS")
     ax.set_xlabel("layer"); ax.set_ylabel("bits (different quantities)"); ax.legend(); ax.grid(alpha=.25); fig.tight_layout(); fig.savefig(figure_dir/"entropy_vs_sample_dispersion.png",dpi=170); plt.close(fig)
+    # Full depth x prefix x noise surface and preregistered negative controls.
+    fig,axes=plt.subplots(1,3,figsize=(12,3.8),sharey=True); prefixes=("weak","pattern","full"); layers=sorted({r["layer"] for r in summary if r["training_stage"]=="trained"})
+    for ax,prefix in zip(axes,prefixes):
+        matrix=np.full((3,len(layers)),np.nan)
+        for i,noise in enumerate((0,2,4)):
+            for j,layer in enumerate(layers):
+                values=[r["mean_js_to_pattern_centroid"] for r in summary if r["training_stage"]=="trained" and r["control_type"]=="irrelevant_nuisance" and r["target_control"]=="observed" and r["prefix_evidence"]==prefix and r["noise_level"]==noise and r["layer"]==layer and r["location"]=="post_block"]
+                matrix[i,j]=np.mean(values) if values else np.nan
+        image=ax.imshow(matrix,aspect="auto",origin="lower",cmap="magma"); ax.set_title(prefix); ax.set_xticks(range(len(layers)),layers); ax.set_yticks(range(3),(0,2,4)); ax.set_xlabel("layer")
+    axes[0].set_ylabel("distractor tokens"); fig.colorbar(image,ax=axes.ravel().tolist(),label="JS dispersion"); fig.subplots_adjust(wspace=.25,right=.88); fig.savefig(figure_dir/"depth_prefix_noise_surface.png",dpi=170,bbox_inches="tight"); plt.close(fig)
+    fig,ax=plt.subplots(figsize=(8,4.5)); controls=(("trained","irrelevant_nuisance","observed"),("trained","answer_changing","observed"),("trained","irrelevant_nuisance","shuffled_continuation"),("random","irrelevant_nuisance","observed"))
+    for stage,context,target in controls:
+        selected=[r for r in summary if r["training_stage"]==stage and r["control_type"]==context and r["target_control"]==target and r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]=="post_block"]; by=defaultdict(list)
+        for row in selected: by[row["layer"]].append(row["mean_js_to_pattern_centroid"])
+        ax.plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=f"{stage}/{context}/{target}")
+    ax.set_xlabel("layer"); ax.set_ylabel("JS dispersion"); ax.legend(fontsize=7); ax.grid(alpha=.25); fig.tight_layout(); fig.savefig(figure_dir/"variance_negative_controls.png",dpi=170); plt.close(fig)
 
 
 def train_model(setting, seed, corpus, steps, checkpoints, device, checkpoint_dir):
@@ -562,8 +580,8 @@ def write_summary(output, config, atlas, component_summary, motif_summary, motif
         "## Next falsifiable question", "",
         "Do the SA/FFN causal fractions and override trajectories replicate in a small pretrained checkpoint series after matching reference-corpus frequency, entropy, tokenization, and generic layer importance?", "",
     ]
-    (output / "summary.md").write_text("\n".join(lines), encoding="utf-8")
-    (output / "decisions.md").write_text(
+    (output / "controlled_summary.md").write_text("\n".join(lines), encoding="utf-8")
+    (output / "controlled_decisions.md").write_text(
         "# Decisions\n\n- E7 online learning was not started: E1--E6 require pretrained and stronger intervention replication first.\n- Controlled local training is used so training frequency is known exactly.\n- Zero ablation supports causal pilot measurements; all logit-lens values remain explicitly diagnostic.\n",
         encoding="utf-8",
     )
@@ -603,7 +621,12 @@ def run(args):
             all_dynamics.extend(add_identity(dynamics, **identity))
             entropy_rows, update_rows, family_rows, patch_rows = collect_equivalence(model, corpus.probes, device, identity)
             all_entropy.extend(entropy_rows); all_updates.extend(update_rows); all_families.extend(family_rows); all_patches.extend(patch_rows)
-            all_variance.extend(collect_variance_grid(model,corpus.probes,device,identity))
+            all_variance.extend(collect_variance_grid(model,corpus.probes,device,{**identity,"training_stage":"trained"}))
+    random_setting=MODEL_SETTINGS[0]; random_corpus=build_corpus(seed=11,train_size=args.train_size)
+    random_model=TinyTransformerLM(random_corpus.vocab_size,random_corpus.sequence_length,width=random_setting["width"],layers=random_setting["layers"],heads=random_setting["heads"]).to(device)
+    random_state=torch.load(output/"checkpoints"/"step-0000.pt",map_location=device,weights_only=False)
+    random_model.load_state_dict(random_state["state_dict"]); random_model.eval()
+    all_variance.extend(collect_variance_grid(random_model,random_corpus.probes,device,{"run_id":"paper05-random-control","model_setting":random_setting["name"],"seed":11,"training_stage":"random"}))
     motif_summary = []
     motif_runs = defaultdict(list)
     for row in all_motif_records:
@@ -629,7 +652,12 @@ def run(args):
     write_jsonl(raw_dir / "entropy_trajectories.jsonl", all_entropy)
     write_jsonl(raw_dir / "equivalence_families.jsonl", all_families)
     write_jsonl(raw_dir / "equivalence_patches.jsonl", all_patches)
-    write_jsonl(raw_dir / "variance_realizations.jsonl", all_variance)
+    compact_variance=[{k:v for k,v in row.items() if k not in {"probabilities","residual"}} | {
+        "distribution_hash":stable_hash(row["probabilities"]),"residual_hash":stable_hash(row["residual"])} for row in all_variance]
+    variance_files=defaultdict(list)
+    for row in compact_variance: variance_files[(row["training_stage"],row["control_type"],row["target_control"])].append(row)
+    for key,values in variance_files.items():
+        write_jsonl(raw_dir/f"variance_{key[0]}_{key[1]}_{key[2]}.jsonl",values)
     atomic_write_json(raw_dir / "losses.json", losses_by_run)
     write_csv(table_dir / "component_summary.csv", component_summary)
     write_csv(table_dir / "motif_summary.csv", motif_aggregate)
