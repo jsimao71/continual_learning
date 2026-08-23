@@ -1,6 +1,7 @@
 {
   "decision": "blocked: do not run semantic type-dispatch, composition, or rule-learning experiments",
   "eligible": false,
+  "paper05_conditional_variance_available": true,
   "paper05_predictive_equivalence_available": true,
   "paper06_accuracy_range": [
     0.013888888888888888,
@@ -9,6 +10,7 @@
   "paper06_competent_runs": 0,
   "paper06_threshold": 0.8,
   "paper06_total_runs": 4,
-  "schema_version": "paper07.eligibility.v1",
-  "source_hash": "f557e38b5189d69dfca50052e8530171a553ac382031bbd8e138da65a9457e9a"
+  "schema_version": "paper07.eligibility.v2",
+  "source_hash": "db2c1120c57c027d10f87eb7ffec29619123bf9bc36978ce56d5698249a7209e",
+  "variance_experiment_status": "blocked with E1--E6: F x C variance requires behaviorally learned C"
 }

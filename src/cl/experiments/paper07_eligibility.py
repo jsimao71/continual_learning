@@ -14,14 +14,17 @@ def run(args):
     paper05=json.loads(Path(args.paper05_manifest).read_text(encoding="utf-8"))
     with Path(args.competence).open(newline="",encoding="utf-8") as handle: competence=list(csv.DictReader(handle))
     passed=[row for row in competence if row["competent"].lower()=="true"]
+    paper05_ready=paper05.get("schema_version") in {"paper05.results.v2","paper05.results.v3"}
     decision={
-        "schema_version":"paper07.eligibility.v1",
-        "paper05_predictive_equivalence_available":paper05.get("schema_version")=="paper05.results.v2",
+        "schema_version":"paper07.eligibility.v2",
+        "paper05_predictive_equivalence_available":paper05_ready,
+        "paper05_conditional_variance_available":paper05.get("schema_version")=="paper05.results.v3",
         "paper06_competent_runs":len(passed),
         "paper06_total_runs":len(competence),
         "paper06_threshold":float(competence[0]["threshold"]) if competence else None,
         "paper06_accuracy_range":[min(float(r["heldout_accuracy"]) for r in competence),max(float(r["heldout_accuracy"]) for r in competence)] if competence else [],
-        "eligible":bool(passed) and paper05.get("schema_version")=="paper05.results.v2",
+        "eligible":bool(passed) and paper05_ready,
+        "variance_experiment_status":"blocked with E1--E6: F x C variance requires behaviorally learned C" if not passed else "eligible under frozen crossed design",
         "decision":"blocked: do not run semantic type-dispatch, composition, or rule-learning experiments" if not passed else "eligible for preregistered E1--E6",
     }
     decision["source_hash"]=stable_hash({"paper05":paper05,"paper06":competence})

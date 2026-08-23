@@ -77,6 +77,17 @@ Capture pre-block, post-attention, and post-MLP states. Do not impose monotonic 
 
 Measure completion performance, target rank/probability, systematic and compositional generalization, substitution invariance, exception handling, residual-update alignment, within/between-category transformation similarity, aligned/orthogonal energy, covariance/effective dimension, head/layer complementarity, and paraphrase invariance.
 
+\section{Conditional Transformation-Variance Experiment}
+Variance reduction is estimated across nuisance-varying realizations conditional on a fixed functor and learned category, never across layers. For realization $X_j$ at fixed depth $l$, retain candidate-update dispersion $\operatorname{Var}[\Delta r_l(X)\mid F,C]$, residual covariance/effective rank, target-logit/probability/margin variance, mean prediction JS divergence to the $(F,C)$ centroid, rule-consistent continuation mass, surprisal, and within-example entropy. Depth remains the refinement axis.
+
+The primary crossed design has factors functor/syntax $F$, learned semantic category $C$, entity $x$ nested within $C$, and nuisance context $N$. ANOVA-like decomposition estimates $F$, $C$, $F\times C$, entity-within-$C$, and nuisance effects at every trace location. The $F\times C$ interaction is central evidence for soft type-sensitive dispatch. A reusable transformation should reduce within-$(F,C)$ nuisance dispersion relative to between-functor and between-category structure while remaining sensitive to legitimate category, functor, and exception differences. Total hidden-state variance need not decrease.
+
+Generalization cells cross seen functor/seen entity, seen functor/unseen category member, paraphrased functor with seen and unseen members, composed $G(F(x))$, and exception/override cases. A growing-context condition presents $F(a)\mapsto u,F(b)\mapsto u,\ldots$ before querying $F(c)$. Supporting demonstrations, distractor noise, and distance are varied factorially to produce depth-by-examples-by-noise surfaces for rule accuracy, conditional JS dispersion, and between-rule/within-rule SNR. More demonstrations and more depth may partially substitute, interact, or saturate; they are not treated as independent samples.
+
+Entropy remains complementary. A fuzzy rule may retain several valid outputs and thus high within-example entropy while exhibiting low across-realization dispersion and high probability mass on the rule-consistent output class. Causal patching and ablation must report effects on both mean rule signal and conditional variance. Required figures are within-$(F,C)$ update variance, between/within ratio, $F\times C$ interaction, depth-by-examples-by-noise surfaces, held-out substitution invariance, entropy versus conditional dispersion, and causal mean/variance effects.
+
+\paragraph{Current status.} This variance experiment inherits the same competence prerequisite as E1--E6. Since Paper 0.6 supplies no behaviorally learned category $C$, computing an $F\times C$ interaction would merely condition on privileged generator metadata. The design is frozen, but no Paper 0.7 variance rows or figures are generated in the current run.
+
 \section{Causal Tests}
 Use layer/head skipping, activation patching between equivalent functor instances, category-state patching, counterfactual category substitutions, norm-matched random-vector controls, and targeted perturbations. A putative functor is stronger evidence if causal transfer works across compatible substitutions and changes appropriately across incompatible categories.
 
@@ -107,7 +118,7 @@ The dependency audit is regenerated with
 \begin{verbatim}
 PYTHONPATH=src python -m cl.experiments.paper07_eligibility
 \end{verbatim}
-and writes \texttt{results/eligibility\_decision.json}, including source hashes, threshold, accuracy range, and the blocked decision. No model weights, selectors, or persistent state are changed.
+and writes \texttt{results/eligibility\_decision.json}, including source hashes, Paper 0.5 variance availability, threshold, accuracy range, variance-experiment status, and the blocked decision. No model weights, selectors, or persistent state are changed.
 
 \section{Conclusion}
 Paper 0.7 is a ready but inactive causal protocol. Its semantic prerequisite fails, so claims about typed functors, compositional rules, or emergent symbolic-like computation would be unsupported. Preserving the stop condition is the result: behavioral competence must precede representation, causal transfer, and rule-level interpretation.
