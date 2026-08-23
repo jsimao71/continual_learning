@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "a57a5f5bc14cfe0ca905744edaefdc846df62a8ae8064177c44f9aa1fc995e2c",
+  "artifact_hash": "c18e2c2a5c429e6b171190f81304f0d9029ceaec3585d1173562ba0bf96026a4",
   "config": {
     "checkpoints": [
       0,
@@ -29,5 +29,6 @@
     "steps": 160
   },
   "equivalence_definition": "externally grouped continuation relation",
-  "schema_version": "paper05.results.v2"
+  "schema_version": "paper05.results.v3",
+  "variance_unit": "token-sequence realization conditional on relation/prefix/noise at fixed depth"
 }

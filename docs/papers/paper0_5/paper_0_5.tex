@@ -240,6 +240,9 @@ Primary metrics include:
 
 Report bootstrap confidence intervals over n-grams and contexts, not just token occurrences. Mixed-effects models can separate effects of n-gram identity, model seed, and context. Multiple-comparison control is required for head-level claims.
 
+\subsection{Conditional realization-variance experiment}
+Variance reduction is defined across independently constructed token-sequence realizations conditional on the same relation, never across layers. Depth is the refinement axis. For every probe relation we cross weak (one-token), pattern-length (two-token), and full-context evidence with zero, two, or four deterministic nuisance distractors. At every pre-SA, post-SA, and post-MLP location we estimate target-probability, target-logit, and target-margin variance; mean JS divergence to the relation-conditioned output centroid; residual covariance trace/effective rank; within-example entropy; and between-relation/within-relation JS separation. Contradictory override contexts remain a separate condition. Success does not require monotonicity: the primary prediction is rising or stable signal with lower nuisance-conditioned dispersion over useful depth.
+
 \section{Controlled Pilot Results}
 The run produced 21,630 atlas rows, 1,920 final-checkpoint component rows, 1,920 raw motif/control rows, 2,880 entropy-trajectory rows, 3,840 causal equivalence-patch rows, and four dense checkpoints for the first model/seed. Final training losses range from 2.436 to 2.565. All numbers below regenerate from the committed manifest and tables.
 
@@ -260,6 +263,31 @@ We define equivalence from the controlled continuation relation, before inspecti
 Replacement interventions sharpen the result. Across layers and components, equivalent-donor replacements produce far smaller output changes than nonequivalent donors. The contrast is largest at layer-0 SA (0.028 versus 0.436 JS bits); its mean target-probability change is $+0.003$ for equivalent donors and $-0.352$ for nonequivalent donors. Layer-0 FFN shows the same ordering (0.017 versus 0.156 JS bits). Later-layer contrasts are smaller but retain the ordering. Because complete update tensors are replaced, this supports transferable family-conditioned computation in this controlled regime, while not identifying a unique direction or proving natural-language generality.
 
 The entropy trajectories are explicitly non-monotone and task-conditioned. Mean decoded entropy at pre-SA/post-SA/post-block is 0.069/0.046/0.083 bits for familiar deterministic relations, but 0.637/0.809/1.198 for high-entropy relations and 0.848/1.158/1.959 for context-introduced mappings. Thus SA and FFN can increase uncertainty when the learned continuation family requires alternatives; entropy reduction is not treated as a universal signature of useful computation. Family-conditioned update centroids are highly aligned in many cells, but their effective ranks and within-family dispersion remain in the artifact, so commonality is not collapsed into a one-dimensional mechanism claim.
+
+\subsection{Depth reduces nuisance-conditioned prediction dispersion}
+The variance grid contains 25,920 fixed-depth realization rows and 1,620 conditional aggregates. Under pattern-length evidence with four distractors, mean post-block target-probability variance falls from 0.0347 at layer 0 to 0.0106 at layer 1 and 0.0109 at layer 2. Mean JS-to-pattern-centroid dispersion similarly falls from 0.0650 to 0.0307 and 0.0106 bits. The median between-pattern/within-pattern JS ratio rises from 56.9 to 142.0 to 285.2 across the available depth cells. This is evidence for nuisance invariance as repeated state-conditioned refinement, not evidence that layers are independent samples.
+
+The distinction from entropy matters empirically. Over the same cells, mean within-example entropy rises from 1.326 to 2.094 to 2.277 bits while across-realization JS dispersion falls. Depth therefore makes outputs more consistent across irrelevant realizations without forcing a narrower distribution within each realization. Added nuisance increases post-block JS dispersion for pattern evidence (0.0119/0.0263/0.0404 bits at zero/two/four distractors, averaged across depth and runs), and later computation partly compensates. Weak-prefix cells include exact-output ties and near-zero within-family denominators, so SNR means are unstable; we report medians and retain the raw numerator and denominator.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/sample_probability_variance.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/sample_js_dispersion.png}
+\caption{Across-realization dispersion at fixed depth under pattern-length evidence and four distractors. Left: target-probability variance. Right: full-distribution JS dispersion. These are conditional sample statistics, not variance across layers.}
+\label{fig:paper05-variance}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/pattern_snr.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/figures/entropy_vs_sample_dispersion.png}
+\caption{Left: between-pattern/within-pattern separation (curves plot cell means; robust medians are used in prose). Right: within-example entropy and across-realization JS are distinct and can move oppositely.}
+\label{fig:paper05-snr-entropy}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=.70\linewidth]{docs/papers/paper0_5/results/figures/depth_prefix_noise_and_components.png}
+\caption{Depth-by-noise dispersion and pre-SA/post-SA/post-MLP comparison. Sublayer changes are interpreted as contributions to invariance, not independent estimators.}
+\label{fig:paper05-noise-components}
+\end{figure}
 
 \subsection{Descriptive progress disagrees with intervention magnitude}
 Diagnostic logit progress is frequently much larger than intact-minus-ablated target effects and can rank components differently. Figure~\ref{fig:diagnostic-trajectory} retains this discrepancy instead of collapsing the measurements. This is direct evidence for the paper's guardrail: an update aligned with the target unembedding is not thereby the causal site of the relation.

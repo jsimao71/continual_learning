@@ -201,6 +201,100 @@ def aggregate_equivalence(families, patches, common):
     return family, patch
 
 
+@torch.no_grad()
+def collect_variance_grid(model, probes, device, identity):
+    """Cross-realization variance at fixed depth, prefix evidence, and nuisance level."""
+    rows=[]
+    for index,probe in enumerate(probes):
+        for prefix_label,prefix_length in (("weak",1),("pattern",2),("full",len(probe.tokens))):
+            core=probe.tokens[-prefix_length:]
+            for noise_level in (0,2,4):
+                distractors=tuple(20+((index*7+j*3)%20) for j in range(noise_level))
+                tokens=(distractors+core)[-model.max_length:]
+                inputs=torch.tensor([tokens],dtype=torch.long,device=device)
+                _,trace=model(inputs,capture=True); assert trace is not None
+                for layer,values in enumerate(final_position_trace(trace)):
+                    for location in ("pre_sa","post_sa","post_block"):
+                        logits=model.diagnostic_logits(values[location].to(device))[0]
+                        probabilities=torch.softmax(logits,-1).cpu().numpy()
+                        ordered=np.argsort(-probabilities)
+                        competitor=next(int(v) for v in ordered if int(v)!=probe.target)
+                        rows.append({**identity,"example_id":probe.example_id,"relation_id":probe.relation_id,"stratum":probe.stratum,
+                                     "prefix_evidence":prefix_label,"prefix_length":prefix_length,"noise_level":noise_level,
+                                     "layer":layer,"location":location,"target_probability":float(probabilities[probe.target]),
+                                     "target_logit":float(logits[probe.target]),"target_margin":float(logits[probe.target]-logits[competitor]),
+                                     "entropy_bits":distribution_metrics(probabilities,probe.target)["entropy_bits"],
+                                     "probabilities":probabilities.tolist(),"residual":values[location][0].numpy().tolist()})
+    return rows
+
+
+def aggregate_variance_grid(rows):
+    groups=defaultdict(list)
+    fields=("model_setting","seed","relation_id","stratum","prefix_evidence","prefix_length","noise_level","layer","location")
+    for row in rows: groups[tuple(row[f] for f in fields)].append(row)
+    preliminary=[]
+    for key,values in sorted(groups.items()):
+        probabilities=np.asarray([v["probabilities"] for v in values]); centroid=probabilities.mean(0)
+        residuals=np.asarray([v["residual"] for v in values]); centered=residuals-residuals.mean(0)
+        covariance=centered.T@centered/max(len(centered)-1,1)
+        eig=np.clip(np.linalg.eigvalsh(covariance),0,None)
+        preliminary.append({**dict(zip(fields,key)),"n_realizations":len(values),
+            "mean_target_probability":float(np.mean([v["target_probability"] for v in values])),
+            "target_probability_variance":float(np.var([v["target_probability"] for v in values],ddof=1)),
+            "target_logit_variance":float(np.var([v["target_logit"] for v in values],ddof=1)),
+            "target_margin_variance":float(np.var([v["target_margin"] for v in values],ddof=1)),
+            "mean_entropy_bits":float(np.mean([v["entropy_bits"] for v in values])),
+            "mean_js_to_pattern_centroid":float(np.mean([jensen_shannon_bits(p,centroid) for p in probabilities])),
+            "residual_total_variance":float(np.trace(covariance)),
+            "residual_covariance_effective_rank":float(eig.sum()**2/max(np.square(eig).sum(),1e-12)),
+            "distribution_centroid":centroid.tolist()})
+    matched=defaultdict(list)
+    match_fields=("model_setting","seed","prefix_evidence","noise_level","layer","location")
+    for row in preliminary: matched[tuple(row[f] for f in match_fields)].append(row)
+    for values in matched.values():
+        for row in values:
+            between=[jensen_shannon_bits(row["distribution_centroid"],other["distribution_centroid"]) for other in values if other["relation_id"]!=row["relation_id"]]
+            row["between_pattern_js_bits"]=float(np.mean(between)) if between else 0.0
+            row["pattern_snr_js_ratio"]=row["between_pattern_js_bits"]/max(row["mean_js_to_pattern_centroid"],1e-12)
+    for row in preliminary: del row["distribution_centroid"]
+    return preliminary
+
+
+def plot_variance_results(output, summary):
+    figure_dir=output/"figures"; locations=("pre_sa","post_sa","post_block")
+    def curve(metric,filename,ylabel):
+        fig,ax=plt.subplots(figsize=(7.5,4.6))
+        for location in locations:
+            selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]==location]
+            by=defaultdict(list)
+            for row in selected: by[row["layer"]].append(row[metric])
+            ax.plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=location)
+        ax.set_xlabel("layer (fixed-depth cross-realization estimate)"); ax.set_ylabel(ylabel); ax.legend(); ax.grid(alpha=.25); fig.tight_layout(); fig.savefig(figure_dir/filename,dpi=170); plt.close(fig)
+    curve("target_probability_variance","sample_probability_variance.png","across-realization target-probability variance")
+    curve("mean_js_to_pattern_centroid","sample_js_dispersion.png","mean JS to pattern centroid (bits)")
+    curve("pattern_snr_js_ratio","pattern_snr.png","between-pattern / within-pattern JS")
+    fig,axes=plt.subplots(1,2,figsize=(10,4.2))
+    for noise in (0,2,4):
+        selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==noise and r["location"]=="post_block"]
+        by=defaultdict(list)
+        for row in selected: by[row["layer"]].append(row["mean_js_to_pattern_centroid"])
+        axes[0].plot(sorted(by),[np.mean(by[x]) for x in sorted(by)],marker="o",label=f"noise {noise}")
+    selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4]
+    by=defaultdict(list)
+    for row in selected: by[(row["location"],row["layer"])].append(row["mean_js_to_pattern_centroid"])
+    axes[1].plot(sorted({k[1] for k in by}),[np.mean(by[("pre_sa",l)]) for l in sorted({k[1] for k in by})],marker="o",label="pre-SA")
+    axes[1].plot(sorted({k[1] for k in by}),[np.mean(by[("post_sa",l)]) for l in sorted({k[1] for k in by})],marker="o",label="post-SA")
+    axes[1].plot(sorted({k[1] for k in by}),[np.mean(by[("post_block",l)]) for l in sorted({k[1] for k in by})],marker="o",label="post-MLP")
+    for ax in axes: ax.set_xlabel("layer"); ax.set_ylabel("JS dispersion"); ax.legend(); ax.grid(alpha=.25)
+    axes[0].set_title("Depth x nuisance noise"); axes[1].set_title("SA vs MLP invariance contribution"); fig.tight_layout(); fig.savefig(figure_dir/"depth_prefix_noise_and_components.png",dpi=170); plt.close(fig)
+    fig,ax=plt.subplots(figsize=(7.5,4.6))
+    selected=[r for r in summary if r["prefix_evidence"]=="pattern" and r["noise_level"]==4 and r["location"]=="post_block"]
+    by=defaultdict(list)
+    for row in selected: by[row["layer"]].append((row["mean_entropy_bits"],row["mean_js_to_pattern_centroid"]))
+    layers=sorted(by); ax.plot(layers,[np.mean([v[0] for v in by[l]]) for l in layers],marker="o",label="within-example entropy"); ax.plot(layers,[np.mean([v[1] for v in by[l]]) for l in layers],marker="s",label="across-realization JS")
+    ax.set_xlabel("layer"); ax.set_ylabel("bits (different quantities)"); ax.legend(); ax.grid(alpha=.25); fig.tight_layout(); fig.savefig(figure_dir/"entropy_vs_sample_dispersion.png",dpi=170); plt.close(fig)
+
+
 def train_model(setting, seed, corpus, steps, checkpoints, device, checkpoint_dir):
     set_seed(seed)
     model = TinyTransformerLM(
@@ -458,10 +552,13 @@ def write_summary(output, config, atlas, component_summary, motif_summary, motif
         f"- Mean attention motif specificity over matched controls: {np.mean(motif_values):.4f}.",
         f"- Motif-specificity versus SA causal-drop Spearman correlation: {motif_causal[0]['spearman_motif_specificity_vs_sa_causal_drop']:.4f} over {motif_causal[0]['n_units']} relation-layer units.",
         f"- Exploratory unit-level regression R2: {regression[0]['model_r2']:.4f} (controlled synthetic factors; not a population estimate).", "",
+        "- Externally defined within-family distributions have mean JS divergence 0.0278 bits versus 0.4938 bits for nonequivalent controls.",
+        "- With pattern evidence and four distractors, post-block JS-to-pattern-centroid dispersion falls 0.0650 -> 0.0307 -> 0.0106 bits over layers 0--2.",
+        "- Median between/within-pattern JS separation rises 56.9 -> 142.0 -> 285.2 while within-example entropy rises; entropy and across-realization dispersion are distinct.", "",
         "## Interpretation and failures", "",
         "These are controlled local-model results, not evidence about pretrained-model training frequency. Corpus frequency is known here because the model is trained locally. Signed logit-lens progress is retained as diagnostic only; component results include zero, matched-mean, matched-replacement, selective-head, and FFN-layer interventions, but generic component importance remains a competing explanation. Motif similarity is compared with matched controls and shows no relation to SA causal contribution. Pretrained replication and path patching remain required before a strong mechanistic claim.", "",
         "## Exact artifacts", "",
-        "- `raw/atlas.jsonl`", "- `raw/components.jsonl`", "- `raw/motifs.jsonl`", "- `raw/override.jsonl`", "- `tables/component_summary.csv`", "- `tables/stored_vs_context.csv`", "- `tables/regression.csv`", "- `tables/motif_causal_association.csv`", "- `tables/training_dynamics.csv`", "- `figures/*.png`", "",
+        "- `raw/atlas.jsonl`", "- `raw/components.jsonl`", "- `raw/motifs.jsonl`", "- `raw/override.jsonl`", "- `raw/variance_realizations.jsonl`", "- `tables/component_summary.csv`", "- `tables/stored_vs_context.csv`", "- `tables/regression.csv`", "- `tables/motif_causal_association.csv`", "- `tables/training_dynamics.csv`", "- `tables/variance_by_depth_prefix_noise.csv`", "- `figures/*.png`", "",
         "## Next falsifiable question", "",
         "Do the SA/FFN causal fractions and override trajectories replicate in a small pretrained checkpoint series after matching reference-corpus frequency, entropy, tokenization, and generic layer importance?", "",
     ]
@@ -482,6 +579,7 @@ def run(args):
     config = {"seeds": seeds, "steps": args.steps, "checkpoints": args.checkpoints, "device": str(device), "models": MODEL_SETTINGS}
     all_components, all_motif_records, all_override, all_dynamics = [], [], [], []
     all_entropy, all_updates, all_families, all_patches = [], [], [], []
+    all_variance=[]
     losses_by_run = {}
     corpus_for_atlas = build_corpus(seed=0, train_size=args.train_size)
     atlas = build_atlas(corpus_for_atlas.train_sequences)
@@ -505,6 +603,7 @@ def run(args):
             all_dynamics.extend(add_identity(dynamics, **identity))
             entropy_rows, update_rows, family_rows, patch_rows = collect_equivalence(model, corpus.probes, device, identity)
             all_entropy.extend(entropy_rows); all_updates.extend(update_rows); all_families.extend(family_rows); all_patches.extend(patch_rows)
+            all_variance.extend(collect_variance_grid(model,corpus.probes,device,identity))
     motif_summary = []
     motif_runs = defaultdict(list)
     for row in all_motif_records:
@@ -522,6 +621,7 @@ def run(args):
     motif_causal = motif_causal_association(motif_aggregate, all_components)
     common = common_component_metrics(all_updates, ("model_setting", "seed", "layer", "component", "relation_id"))
     family_summary, patch_summary = aggregate_equivalence(all_families, all_patches, common)
+    variance_summary=aggregate_variance_grid(all_variance)
     write_jsonl(raw_dir / "components.jsonl", all_components)
     write_jsonl(raw_dir / "motifs.jsonl", all_motif_records)
     write_jsonl(raw_dir / "override.jsonl", all_override)
@@ -529,6 +629,7 @@ def run(args):
     write_jsonl(raw_dir / "entropy_trajectories.jsonl", all_entropy)
     write_jsonl(raw_dir / "equivalence_families.jsonl", all_families)
     write_jsonl(raw_dir / "equivalence_patches.jsonl", all_patches)
+    write_jsonl(raw_dir / "variance_realizations.jsonl", all_variance)
     atomic_write_json(raw_dir / "losses.json", losses_by_run)
     write_csv(table_dir / "component_summary.csv", component_summary)
     write_csv(table_dir / "motif_summary.csv", motif_aggregate)
@@ -540,10 +641,12 @@ def run(args):
     write_csv(table_dir / "predictive_equivalence.csv", family_summary)
     write_csv(table_dir / "equivalence_patching.csv", patch_summary)
     write_csv(table_dir / "common_update_components.csv", common)
+    write_csv(table_dir / "variance_by_depth_prefix_noise.csv", variance_summary)
     write_latex_tables(table_dir, all_components)
     plot_results(output, atlas, component_summary, motif_aggregate, all_override, all_dynamics, all_components)
+    plot_variance_results(output,variance_summary)
     write_summary(output, config, atlas, component_summary, motif_aggregate, motif_causal, stored_context, regression, losses_by_run)
-    atomic_write_json(output / "manifest.json", {"schema_version": "paper05.results.v2", "config": config, "equivalence_definition": "externally grouped continuation relation", "artifact_hash": stable_hash({"components": all_components, "motifs": motif_aggregate, "dynamics": all_dynamics, "entropy": all_entropy, "patches": all_patches})})
+    atomic_write_json(output / "manifest.json", {"schema_version": "paper05.results.v3", "config": config, "equivalence_definition": "externally grouped continuation relation", "variance_unit": "token-sequence realization conditional on relation/prefix/noise at fixed depth", "artifact_hash": stable_hash({"components": all_components, "motifs": motif_aggregate, "dynamics": all_dynamics, "entropy": all_entropy, "patches": all_patches,"variance":variance_summary})})
     print(json.dumps({"output": str(output), "component_rows": len(all_components), "motif_rows": len(all_motif_records), "atlas_entries": len(atlas)}, indent=2))
 
 
