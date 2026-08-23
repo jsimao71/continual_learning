@@ -1,0 +1,7 @@
+{
+  "artifact_hash": "7c0f66256dfa2a784a9f605c40af75c1344cd2483ed2902efde47bcd951aa012",
+  "gate_passed": false,
+  "paper05_feature_level": "dynamical proxy only; candidate output distributions unavailable",
+  "paper06_feature_level": "unavailable: competence gate failed",
+  "reason": "No feature family has positive held-out R2 on both task families; Paper 0.6 semantic features disabled after competence failure."
+}

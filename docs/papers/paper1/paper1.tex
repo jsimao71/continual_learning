@@ -22,7 +22,7 @@ The experiment separates observation, intervention, and learning. Observation co
 
 \section{Relation to Papers 0--0.6}
 
-Paper 0 defines Neural Structural Consolidation and its stop/go criteria. Paper 0.5 supplies recurrent n-gram controls, exact trace locations, and intervention discipline. Paper 0.6 shows weak hierarchy geometry but no semantic attention-motif specificity. Paper 1 therefore asks whether transient graph statistics have \emph{operational} value before treating them as a substrate for continual learning. Geometry, attention weight, and probe performance alone are not accepted as mechanistic evidence.
+Paper 0 defines Neural Structural Consolidation and its stop/go criteria. Paper 0.5 supplies recurrent n-gram controls, exact trace locations, and causal predictive-equivalence replacements. Paper 0.6 produces weak hierarchy geometry but fails its held-out completion gate, so none of its semantic/type features can be promoted to Paper 1. Paper 1 therefore asks whether transient graph statistics have \emph{operational} value before treating them as a substrate for continual learning. Geometry, attention weight, and probe performance alone are not accepted as mechanistic evidence.
 
 \section{Frozen Sparse-Control Formalization}
 
@@ -118,6 +118,11 @@ Bridge preservation improves the mean at all six natural operating points. On Ho
 \label{fig:natural-frontier}
 \end{figure}
 
+\subsection{Frozen functional-equivalence feature audit}
+We revisit the 48 native-removal rows without rerunning or tuning the frozen model. Paper 0.5 functional membership cannot be reconstructed because candidate-conditioned output distributions were not retained; we therefore label its agreement--persistence--entropy combination a \emph{dynamical proxy}, not predictive equivalence. Paper 0.6 semantic/type features are deliberately unavailable because every Paper 0.6 run failed its held-out competence gate. This prevents a geometric failure artifact from silently becoming a Paper 1 input.
+
+On HotpotQA, the surface-only model has held-out Spearman $-0.385$ and $R^2=-0.135$. Adding recurrence, structure, the predictive proxy, or the combined functional-role feature leaves $R^2$ negative ($-1.018$, $-5.391$, $-0.890$, and $-0.714$). On QASPER, the predictive proxy improves rank correlation from 0.161 to 0.517, but $R^2$ worsens from $-0.265$ to $-1.370$; the functional-role model reaches Spearman 0.343 with $R^2=-3.325$. Thus no feature family predicts marginal utility beyond the test-set mean on both tasks. This is the preregistered second natural causal null: consolidation remains stopped, and greater learner flexibility is not an acceptable response.
+
 \begin{figure}[H]\centering
 \includegraphics[width=.82\linewidth]{docs/papers/paper1/results/figures/incremental_prediction.png}
 \caption{Left: controlled candidate-removal utility. Right: observational pretrained graph recovery after identity-disjoint fitting. Structural prediction is positive only in the known synthetic mechanism.}
@@ -126,7 +131,7 @@ Bridge preservation improves the mean at all six natural operating points. On Ho
 
 \section{Series-Level Interpretation}
 
-The four-paper sequence supports a coherent but deliberately narrowing account. Paper 0 defines an evidence ladder in which recurrence and geometry are observations, interventions establish causal relevance, and persistence requires held-out utility. Paper 0.5 then shows why that separation matters: n-gram component responsibility changes with transformation and intervention, while motif specificity is unrelated to SA causal contribution ($\rho=-0.009$). Paper 0.6 generalizes the discrepancy to semantics: hierarchy-neighbor recovery exceeds permutation (0.477 versus 0.254), yet semantic motif specificity is negative ($-0.012$), and parent/root resolution recruits different component mixtures.
+The four-paper sequence supports a coherent but deliberately narrowing account. Paper 0 defines an evidence ladder in which recurrence and geometry are observations, interventions establish causal relevance, and persistence requires held-out utility. Paper 0.5 then shows why that separation matters: externally defined same-family replacements preserve predictions whereas nonequivalent replacements disrupt them, while motif specificity remains unrelated to SA causal contribution ($\rho=-0.009$). Paper 0.6 supplies the complementary warning: hierarchy-neighbor recovery exceeds permutation (0.477 versus 0.254) even though every run fails held-out completion competence. Its semantic geometry is therefore a negative control, not an abstraction feature.
 
 Paper 1 supplies the first direct sparse-control test. It shows that task-conditioned aggregate structure can matter: reserving a weak cross-community bridge changes the controlled frontier, whereas monotone score sharpening cannot alter exact top-$k$ membership. The natural intervention adds a weaker result: bridge means move in the same favorable direction on both tasks, but uncertainty, S5 failure, and removal-prediction failure prevent a gate pass. The combined interpretation is therefore not that attention motifs become latent symbols or that abstraction rises monotonically through depth. Recurrent computation exposes candidate summaries whose utility is conditional on task, budget, and outcome; favorable averages are not yet a persistent-learning signal.
 
@@ -154,8 +159,9 @@ The exact command is
 \begin{verbatim}
 python -m cl.experiments.paper1_structural_control
 PYTHONPATH=src python -m cl.experiments.paper1_natural_gate
+PYTHONPATH=src python -m cl.experiments.paper1_equivalence_gate
 \end{verbatim}
-The manifests record resolved configuration, exact model/tokenizer revision, identities, cache hashes, package versions, device/dtype, and artifact hashes. The natural artifact adds 372 candidate rows, 480 selector rows, 48 removal rows, paired intervals, compact traces, measured systems fields, a generated table, and a figure.
+The manifests record resolved configuration, exact model/tokenizer revision, identities, cache hashes, package versions, device/dtype, and artifact hashes. The natural artifact adds 372 candidate rows, 480 selector rows, 48 removal rows, paired intervals, compact traces, measured systems fields, a generated table, and a figure. The equivalence audit adds identity-disjoint feature-family predictions and an explicit stop decision without changing model state.
 
 \section{Limitations}
 
