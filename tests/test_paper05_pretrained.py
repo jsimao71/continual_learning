@@ -1,6 +1,8 @@
 from cl.experiments.paper05_pretrained import probes
 from cl.experiments.paper05_next_iter import DOMAINS, SYNTAXES, donor_families, expanded_family_probes
 from cl.analysis.paper05_inference import controlled_contrasts
+from cl.experiments.paper05_subspace import fit_raw_subspace, project
+import torch
 
 
 def test_pretrained_probe_factorial_is_balanced():
@@ -42,3 +44,13 @@ def test_factorial_donors_change_only_requested_axes():
     assert donors["replace_semantic_mismatch"].startswith(probe["syntax"] + ":")
     assert not donors["replace_nonequivalent"].endswith(":" + probe["semantic"])
     assert not donors["replace_nonequivalent"].startswith(probe["syntax"] + ":")
+
+
+def test_common_subspace_rank_and_projection_are_well_defined():
+    vectors = [torch.tensor([2.0, 0.0, 0.0]), torch.tensor([1.0, 1.0, 0.0])]
+    rank1, explained1 = fit_raw_subspace(vectors, 1)
+    rank2, explained2 = fit_raw_subspace(vectors, 2)
+    assert rank1.shape == (1, 3) and rank2.shape == (2, 3)
+    assert 0 < explained1 < explained2 <= 1
+    residual = vectors[0] - project(vectors[0], rank2)
+    assert torch.linalg.vector_norm(residual) < 1e-5

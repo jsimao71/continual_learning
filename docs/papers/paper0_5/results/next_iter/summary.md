@@ -17,3 +17,13 @@ Interpretation: family breadth exposes a material architecture/capability bounda
 - Changing semantics while retaining syntax has a smaller but positive effect: 0.184 nats for Pythia (CI [0.075, 0.293]) and 0.118 for Qwen (CI [0.040, 0.230]); sign consistency is 68.8% for both models.
 
 Interpretation: both axes contribute, but template/syntax compatibility explains substantially more transfer than semantic-domain compatibility in this matrix. The full equivalence advantage is broad and sign-consistent for Qwen, while Pythia's strong causal contrast must remain qualified by its weak task competence.
+
+## Milestone 3 — common subspaces and on-manifold controls
+
+- Rank 1 explains median 99.6% of two-fit-identity update energy in Pythia and 96.7% in Qwen; rank 2 is saturated by construction. These are small-sample common-subspace candidates, not dimensionality estimates of the full family computation.
+- Held-out rank-1 removal is harmful in both models: -1.019 nats for Pythia (family CI [-1.250, -0.793]) and -0.837 for Qwen ([-1.069, -0.623]); rank-2 removal is slightly more harmful.
+- Rank-1/rank-2 addition is also harmful in both models. This repeats the necessary/contributory-but-not-sufficient pattern and argues against a freely reusable rule vector.
+- Equivalent interpolation is approximately neutral for Qwen at 25%, 50%, and 75%, but increasingly harmful for low-competence Pythia.
+- The nearest-nonequivalent control is -0.022 nats for Qwen (CI [-0.082, 0.023]), essentially matching full equivalent replacement (-0.022). It also outperforms equivalent replacement descriptively in Pythia. Norm matching alone is less protective.
+
+Interpretation: common family subspaces are causally contributory and state-dependent, but the strong unmatched equivalent-versus-nonequivalent contrast is substantially reduced by residual-nearest donor matching. The broad result therefore does not yet rule out manifold proximity as the main explanation of donor compatibility. Subsequent claims must foreground this falsification rather than treating functional labels as uniquely causal.

@@ -1,0 +1,18 @@
+{
+  "artifact_hash": "7a27c4083df6b1d572dc0f2a856a86f7fdb93d93fec04a375cb82a93dfff8730",
+  "family_clustered_bootstrap_samples": 5000,
+  "identity_disjoint": true,
+  "models": [
+    [
+      "EleutherAI/pythia-70m-deduped",
+      "step143000"
+    ],
+    [
+      "Qwen/Qwen3-0.6B",
+      "c1899de289a04d12100db370d81485cdf75e47ca"
+    ]
+  ],
+  "rank_rows": 768,
+  "rows": 6912,
+  "schema_version": "paper05.next.subspace.v1"
+}
