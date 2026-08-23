@@ -1,15 +1,16 @@
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,booktabs}
+\usepackage{amsmath,amssymb,booktabs,microtype}
 \usepackage{hyperref}
 \usepackage{enumitem}
+\setlength{\emergencystretch}{2em}
 \title{Emergent Fuzzy Rule-Like Computation in Transformers:\\Functors, Learned Categories, and State-Conditioned Residual Rewriting}
 \author{Working Paper 0.7}
-\date{\today}
+\date{Preregistered protocol and dependency audit --- August 2026}
 \begin{document}
 \maketitle
 \begin{abstract}
-We propose a controlled study of whether text-completion transformers develop computation usefully described as fuzzy, quasi-symbolic rule application. Building on lexical n-grams (Paper 0.5) and learned semantic category hierarchies (Paper 0.6), we study syntactic and relational templates behaving like functors applied to semantically typed arguments. The hypothesis is functional rather than literal: sufficiently trained transformers may learn continuous representations of objects, categories, relations, and reusable transformations that approximate typed rule application. We test substitution invariance, category-sensitive generalization, composition, exceptions, causal residual interventions, and layerwise predictive entropy. Category structure must be learned through text completion, and internal semantic analysis is performed only after held-out completion competence is demonstrated.
+We preregister a controlled study of whether text-completion transformers develop computation usefully described as fuzzy, quasi-symbolic rule application. The study depends on both causally validated predictive equivalence (Paper 0.5) and behaviorally competent learned semantic classes (Paper 0.6). A machine-readable dependency audit finds that Paper 0.5 satisfies its prerequisite, but zero of four Paper 0.6 runs passes the fixed 80\% held-out completion gate; observed accuracies range from 1.4\% to 15.3\%. Paper 0.7 is therefore blocked before semantic type-dispatch, composition, or rule-learning experiments. We retain the complete factorial design, entropy ontology, interventions, controls, and falsification criteria so that a future competent semantic replication can activate the protocol without changing its hypotheses after seeing results. The present result is a disciplined stop decision, not evidence for or against fuzzy rule-like computation.
 \end{abstract}
 
 \section{Motivation}
@@ -43,6 +44,9 @@ Layers are therefore complementary causal stages, not independent estimators.
 
 \section{Training and Competence Gate}
 Use a small fully instrumentable causal transformer, with a pretrained small LM as an external-validity replication where practical. The custom model must first demonstrate held-out text-completion competence. Synthetic category labels are evaluation metadata only and must not be injected as privileged supervision in the main condition. Evaluate undertrained, threshold, and converged checkpoints. Residual category claims made before behavioral competence are invalid for the main hypothesis.
+
+\subsection{Current dependency-audit result}
+The audit consumes the committed Paper 0.5 v2 manifest and Paper 0.6 competence table. Predictive equivalence is available from Paper 0.5: equivalent-donor residual replacements preserve output distributions far better than nonequivalent replacements. Paper 0.6, however, has no competent run. Its four held-out accuracies are 1.4\%, 4.9\%, 4.9\%, and 15.3\%, all below the 80\% threshold. Consequently no Paper 0.6 representation, centroid, hierarchy label, or common residual direction is admissible as a learned semantic type. E1--E6 are not run, and no result-dependent redesign is permitted before a competent replication.
 
 \section{Dataset}
 Construct a controlled textual world containing entities whose overlapping observable properties make category and hierarchy structure statistically learnable through ordinary completion. Include instance--subcategory--category--supercategory relations, multiple lexical realizations, and paraphrases.
@@ -93,8 +97,18 @@ Evidence for fuzzy rule-like computation should require convergence of held-out 
 If supported, the intended conclusion is that continuous transformer computation can develop emergent symbolic-like behavior: approximate objects, semantic types, relations, and reusable transformations arise as functional regularities of state-conditioned residual computation.
 
 \section{Relationship to Papers 0.5 and 0.6}
-Paper 0.5 establishes lexical continuation and depth/prefix uncertainty trajectories. Paper 0.6 establishes whether semantic categories and hierarchies are actually learned through text completion; internal category analysis follows, rather than precedes, demonstrated completion competence. Paper 0.7 combines these results and asks whether learned semantic equivalence classes function as soft argument types for reusable syntactic/relational transformations.
+Paper 0.5 establishes lexical continuation equivalence, non-monotone uncertainty trajectories, common residual components, and causal equivalent-versus-nonequivalent replacement. Paper 0.6 asks whether semantic categories and hierarchies are learned through text completion, but its current run fails behavioral competence; its attractive geometry is retained as a negative control. Paper 0.7 cannot combine a validated predictive relation with an invalid semantic type system. The next admissible action is to repair and independently validate Paper 0.6 competence under the frozen gate, not to weaken Paper 0.7's entry criterion.
 
 \section{Falsification}
 The hypothesis is weakened if apparent rules disappear on held-out combinations, reduce to lexical frequency, fail category substitution, lack causal transfer, or appear equally in incompetent/undertrained models. A mixed result---local, approximate, context-dependent rule-like behavior---is a valid and informative outcome.
+
+\section{Reproducibility and Current Decision}
+The dependency audit is regenerated with
+\begin{verbatim}
+PYTHONPATH=src python -m cl.experiments.paper07_eligibility
+\end{verbatim}
+and writes \texttt{results/eligibility\_decision.json}, including source hashes, threshold, accuracy range, and the blocked decision. No model weights, selectors, or persistent state are changed.
+
+\section{Conclusion}
+Paper 0.7 is a ready but inactive causal protocol. Its semantic prerequisite fails, so claims about typed functors, compositional rules, or emergent symbolic-like computation would be unsupported. Preserving the stop condition is the result: behavioral competence must precede representation, causal transfer, and rule-level interpretation.
 \end{document}
