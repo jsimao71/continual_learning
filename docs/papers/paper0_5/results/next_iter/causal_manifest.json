@@ -1,0 +1,25 @@
+{
+  "artifact_hash": "0afefc97345a7498532ecc063da4064bc1cf39eb2e6d20c3dfb89c3a977f0441",
+  "evaluation_identities": [
+    2,
+    3
+  ],
+  "family_clustered_bootstrap_samples": 5000,
+  "fit_identities": [
+    0,
+    1
+  ],
+  "models": [
+    [
+      "EleutherAI/pythia-70m-deduped",
+      "step143000"
+    ],
+    [
+      "Qwen/Qwen3-0.6B",
+      "c1899de289a04d12100db370d81485cdf75e47ca"
+    ]
+  ],
+  "n_families": 32,
+  "rows": 3072,
+  "schema_version": "paper05.next.causal.v1"
+}

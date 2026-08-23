@@ -1,0 +1,7 @@
+ci_high,ci_low,contrast,estimate,model_id,n_families,positive_family_fraction,revision
+2.6807233294006436,1.6561850256637023,equivalent_minus_replace_syntax_mismatch,2.186115824598043,EleutherAI/pythia-70m-deduped,32,0.84375,step143000
+0.29276941201775714,0.07528115217040375,equivalent_minus_replace_semantic_mismatch,0.18363172822864726,EleutherAI/pythia-70m-deduped,32,0.6875,step143000
+3.0695672603906137,1.991404212907219,equivalent_minus_replace_nonequivalent,2.5523330786284832,EleutherAI/pythia-70m-deduped,32,0.90625,step143000
+0.7641562300052708,0.49097881119873066,equivalent_minus_replace_syntax_mismatch,0.6243755317582327,Qwen/Qwen3-0.6B,32,0.96875,c1899de289a04d12100db370d81485cdf75e47ca
+0.2303478051403847,0.03950877259858317,equivalent_minus_replace_semantic_mismatch,0.11792030324007403,Qwen/Qwen3-0.6B,32,0.6875,c1899de289a04d12100db370d81485cdf75e47ca
+0.899297284574762,0.622658616321193,equivalent_minus_replace_nonequivalent,0.7630238043084319,Qwen/Qwen3-0.6B,32,1.0,c1899de289a04d12100db370d81485cdf75e47ca
