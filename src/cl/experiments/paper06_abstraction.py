@@ -16,10 +16,11 @@ import torch
 
 from cl.analysis.attention_motifs import motif_stability
 from cl.analysis.hierarchy_geometry import hierarchy_metrics, shared_update_metrics
+from cl.analysis.equivalence import common_component_metrics, distribution_metrics, jensen_shannon_bits
 from cl.common.artifacts import RunMetadata, atomic_write_json, stable_hash, write_csv, write_jsonl
 from cl.common.hooks import final_position_trace
 from cl.common.metrics import bootstrap_ci, onset_persistence
-from cl.common.model_adapter import TinyTransformerLM, train_step
+from cl.common.model_adapter import Intervention, TinyTransformerLM, train_step
 from cl.experiments.paper05_ngram import MODEL_SETTINGS, collect_motifs, component_rows, set_seed
 from cl.ngram.atlas import build_atlas
 from cl.semantic.synthetic import SemanticProbe, build_semantic_corpus
@@ -53,6 +54,60 @@ def collect_representations(model, probes: tuple[SemanticProbe, ...], device, id
     return representations, updates
 
 
+@torch.no_grad()
+def competence_rows(model, probes, device, identity, step):
+    inputs=torch.tensor([p.tokens for p in probes],dtype=torch.long,device=device)
+    targets=torch.tensor([p.target for p in probes],dtype=torch.long,device=device)
+    logits,_=model(inputs); logp=torch.log_softmax(logits[:,-1],-1)
+    rows=[]
+    for i,p in enumerate(probes):
+        rows.append({**identity,"step":step,"example_id":p.example_id,"family":p.family,"natural":p.natural,
+                     "abstraction_level":p.abstraction_level,"template_id":p.template_id,
+                     "correct":int(logp[i].argmax()==targets[i]),"target_logprob":float(logp[i,targets[i]])})
+    return rows
+
+
+@torch.no_grad()
+def collect_semantic_equivalence(model, corpus, device, identity):
+    probes=corpus.probes; inputs=torch.tensor([p.tokens for p in probes],dtype=torch.long,device=device)
+    logits,trace=model(inputs,capture=True); assert trace is not None
+    probabilities=torch.softmax(logits[:,-1],-1).cpu().numpy(); compact=final_position_trace(trace)
+    entropy_rows=[]; patch_rows=[]; updates=[]; family_rows=[]
+    for i,p in enumerate(probes):
+        item=corpus.hierarchy.items[p.item_id]
+        sibling=next(j for j,q in enumerate(probes) if q.abstraction_level==p.abstraction_level and q.template_id==p.template_id
+                     and q.item_id!=p.item_id and corpus.hierarchy.items[q.item_id].parent_id==item.parent_id)
+        cross=next(j for j,q in enumerate(probes) if q.abstraction_level==p.abstraction_level and q.template_id==p.template_id
+                   and q.family!=p.family)
+        family_rows.append({**identity,"example_id":p.example_id,"family":p.family,"natural":p.natural,
+                            "abstraction_level":p.abstraction_level,"sibling_js_bits":jensen_shannon_bits(probabilities[i],probabilities[sibling]),
+                            "cross_category_js_bits":jensen_shannon_bits(probabilities[i],probabilities[cross])})
+        previous=None
+        for layer,values in enumerate(compact):
+            for location in ("pre_sa","post_sa","post_block"):
+                decoded=torch.softmax(model.diagnostic_logits(values[location][i:i+1].to(device)),-1)[0].cpu().numpy()
+                row=distribution_metrics(decoded,p.target)
+                if previous is not None:
+                    row["delta_entropy_bits"]=float(row["entropy_bits"]-previous["entropy_bits"])
+                    row["delta_target_probability"]=float(row["target_probability"]-previous["target_probability"])
+                entropy_rows.append({**identity,"example_id":p.example_id,"family":p.family,"natural":p.natural,
+                                     "abstraction_level":p.abstraction_level,"template_id":p.template_id,"layer":layer,"location":location,**row})
+                previous=row
+            for component,name in (("sa","delta_sa"),("ff","delta_ff")):
+                updates.append({**identity,"example_id":p.example_id,"parent_id":item.parent_id,"family":p.family,
+                                "natural":p.natural,"abstraction_level":p.abstraction_level,"layer":layer,"component":component,
+                                "vector":values[name][i].numpy().tolist()})
+                full=getattr(trace.layers[layer],name)
+                for donor_type,donor in (("sibling",sibling),("cross_category",cross)):
+                    changed,_=model(inputs[i:i+1],intervention=Intervention(layer,component,"replace",full[donor:donor+1]))
+                    changed_p=torch.softmax(changed[0,-1],-1).cpu().numpy()
+                    patch_rows.append({**identity,"example_id":p.example_id,"family":p.family,"natural":p.natural,
+                                       "abstraction_level":p.abstraction_level,"layer":layer,"component":component,"donor_type":donor_type,
+                                       "output_js_bits":jensen_shannon_bits(probabilities[i],changed_p),
+                                       "target_probability_change":float(changed_p[p.target]-probabilities[i,p.target])})
+    return entropy_rows,patch_rows,updates,family_rows
+
+
 def train_semantic(setting, seed, corpus, steps, checkpoints, device, checkpoint_dir):
     set_seed(seed)
     model = TinyTransformerLM(
@@ -65,14 +120,15 @@ def train_semantic(setting, seed, corpus, steps, checkpoints, device, checkpoint
     optimizer = torch.optim.AdamW(model.parameters(), lr=3e-3, weight_decay=0.01)
     data = torch.tensor(corpus.train_sequences, dtype=torch.long)
     generator = torch.Generator().manual_seed(seed)
-    checkpoint_rows, losses = [], []
+    checkpoint_rows, competence, losses = [], [], []
     for step in range(steps + 1):
         if step in checkpoints:
-            identity = {"model_setting": setting["name"], "seed": seed}
+            identity = {"run_id": f"paper06-{setting['name']}-seed{seed}", "model_setting": setting["name"], "seed": seed}
             reps, _ = collect_representations(model, corpus.probes, device, identity)
             geometry = hierarchy_metrics(corpus.hierarchy, reps, seed=seed)
             for row in geometry:
                 checkpoint_rows.append({"step": step, **row})
+            competence.extend(competence_rows(model, corpus.probes, device, identity, step))
             if setting["name"] == MODEL_SETTINGS[0]["name"] and seed == 11:
                 checkpoint_dir.mkdir(parents=True, exist_ok=True)
                 torch.save({"step": step, "setting": setting, "seed": seed, "state_dict": model.state_dict()}, checkpoint_dir / f"step-{step:04d}.pt")
@@ -80,7 +136,7 @@ def train_semantic(setting, seed, corpus, steps, checkpoints, device, checkpoint
             break
         indices = torch.randint(len(data), (48,), generator=generator)
         losses.append(train_step(model, data[indices].to(device), optimizer))
-    return model, checkpoint_rows, losses
+    return model, checkpoint_rows, competence, losses
 
 
 def attach_semantic_labels(rows, probes):
@@ -274,15 +330,18 @@ def run(args):
     repo=Path(args.repo).resolve(); output=Path(args.output).resolve(); raw=output/"raw"; tables=output/"tables"; raw.mkdir(parents=True,exist_ok=True); tables.mkdir(parents=True,exist_ok=True)
     device=torch.device(args.device); seeds=[int(v) for v in args.seeds.split(",")]; config={"seeds":seeds,"steps":args.steps,"checkpoints":args.checkpoints,"device":str(device),"models":MODEL_SETTINGS}
     all_reps=[]; all_updates=[]; all_components=[]; all_motif_records=[]; all_checkpoints=[]; metadata=[]; losses={}
+    all_competence=[]; all_entropy=[]; all_patches=[]; all_equiv_updates=[]; all_families=[]
     atlas_corpus=build_semantic_corpus(seed=0,repeats=args.repeats); atlas=semantic_atlas(atlas_corpus); write_jsonl(raw/"semantic_atlas.jsonl",atlas)
     for setting in MODEL_SETTINGS:
         for seed in seeds:
             corpus=build_semantic_corpus(seed=seed,repeats=args.repeats); run_id=f"paper06-{setting['name']}-seed{seed}"; identity={"run_id":run_id,"model_setting":setting["name"],"seed":seed}
             metadata.append(RunMetadata.capture(repo=repo,run_id=run_id,config=config,model_id=setting["name"],dataset_id="controlled-semantic-v1",seed=seed,device=str(device),dtype="float32",data_hash=corpus.corpus_hash).as_dict())
-            model,checkpoint_rows,run_losses=train_semantic(setting,seed,corpus,args.steps,set(args.checkpoints),device,output/"checkpoints"); losses[run_id]=run_losses; all_checkpoints.extend(checkpoint_rows)
+            model,checkpoint_rows,competence,run_losses=train_semantic(setting,seed,corpus,args.steps,set(args.checkpoints),device,output/"checkpoints"); losses[run_id]=run_losses; all_checkpoints.extend(checkpoint_rows); all_competence.extend(competence)
             reps,updates=collect_representations(model,corpus.probes,device,identity); all_reps.extend(reps); all_updates.extend(updates)
             measured=component_rows(model,corpus.probes,device); all_components.extend([{**identity,**row} for row in attach_semantic_labels(measured,corpus.probes)])
             all_motif_records.extend([{**identity,**row} for row in collect_motifs(model,corpus.probes,device)])
+            entropy,patches,equiv_updates,families=collect_semantic_equivalence(model,corpus,device,identity)
+            all_entropy.extend(entropy); all_patches.extend(patches); all_equiv_updates.extend(equiv_updates); all_families.extend(families)
     geometry_raw=hierarchy_metrics(atlas_corpus.hierarchy,all_reps,seed=0); geometry=aggregate_geometry(geometry_raw); update_metrics=shared_update_metrics(atlas_corpus.hierarchy,all_updates); components=aggregate_components(all_components)
     motif_runs=defaultdict(list)
     for row in all_motif_records: motif_runs[row["run_id"]].append(row)
@@ -292,10 +351,22 @@ def run(args):
     for row in motif_rows: motif_groups[(row["relation_id"],row["layer"])].append(row)
     motifs=[{"relation_id":key[0],"layer":key[1],"motif_specificity":float(np.mean([r["motif_specificity"] for r in values])),"within_motif_cosine":float(np.mean([r["within_motif_cosine"] for r in values])),"matched_control_cosine":float(np.mean([r["matched_control_cosine"] for r in values])),"n_runs":len(values)} for key,values in sorted(motif_groups.items())]
     onset=onset_rows(geometry)
+    final_comp=[r for r in all_competence if r["step"]==args.steps]
+    competence_summary=[]
+    for run_id in sorted({r["run_id"] for r in final_comp}):
+        values=[r for r in final_comp if r["run_id"]==run_id]; accuracy=float(np.mean([r["correct"] for r in values]))
+        competence_summary.append({"run_id":run_id,"heldout_accuracy":accuracy,"mean_target_logprob":float(np.mean([r["target_logprob"] for r in values])),"threshold":0.80,"competent":accuracy>=0.80,"n":len(values)})
+    patch_groups=defaultdict(list)
+    for row in all_patches: patch_groups[(row["donor_type"],row["component"],row["layer"])].append(row)
+    patch_summary=[{"donor_type":k[0],"component":k[1],"layer":k[2],"mean_output_js_bits":float(np.mean([r["output_js_bits"] for r in v])),"mean_target_probability_change":float(np.mean([r["target_probability_change"] for r in v])),"n":len(v)} for k,v in sorted(patch_groups.items())]
+    family_summary=[{"comparison":name,"mean_js_bits":float(np.mean([r[field] for r in all_families])),"n":len(all_families)} for name,field in (("sibling","sibling_js_bits"),("cross_category","cross_category_js_bits"))]
+    equiv_common=common_component_metrics(all_equiv_updates,("model_setting","seed","layer","component","family","natural","abstraction_level","parent_id"))
     write_jsonl(raw/"representations.jsonl",all_reps); write_jsonl(raw/"updates.jsonl",all_updates); write_jsonl(raw/"components.jsonl",all_components); write_jsonl(raw/"motifs.jsonl",all_motif_records); write_jsonl(raw/"metadata.jsonl",metadata); atomic_write_json(raw/"losses.json",losses)
+    write_jsonl(raw/"competence.jsonl",all_competence); write_jsonl(raw/"entropy_trajectories.jsonl",all_entropy); write_jsonl(raw/"semantic_patches.jsonl",all_patches); write_jsonl(raw/"semantic_equivalence.jsonl",all_families)
     write_csv(tables/"geometry.csv",geometry); write_csv(tables/"geometry_by_run.csv",geometry_raw); write_csv(tables/"component_summary.csv",components); write_csv(tables/"motif_summary.csv",motifs); write_csv(tables/"update_commonality.csv",update_metrics); write_csv(tables/"checkpoint_dynamics.csv",all_checkpoints); atomic_write_json(tables/"onset_persistence.json",onset)
+    write_csv(tables/"competence_gate.csv",competence_summary); write_csv(tables/"semantic_equivalence.csv",family_summary); write_csv(tables/"semantic_patching.csv",patch_summary); write_csv(tables/"equivalence_common_updates.csv",equiv_common)
     plots(output,geometry,components,motifs,update_metrics,all_checkpoints,onset); write_latex_table(tables,geometry,components); write_summary(output,config,geometry,components,motifs,all_checkpoints,losses)
-    atomic_write_json(output/"manifest.json",{"schema_version":"paper06.results.v1","config":config,"hierarchy_hash":atlas_corpus.hierarchy.version_hash,"paper05_manifest_hash":stable_hash(json.loads((repo/"docs/papers/paper0_5/results/manifest.json").read_text())),"artifact_hash":stable_hash({"geometry":geometry,"components":components,"motifs":motifs})})
+    atomic_write_json(output/"manifest.json",{"schema_version":"paper06.results.v2","config":config,"competence_threshold":0.80,"hierarchy_hash":atlas_corpus.hierarchy.version_hash,"paper05_manifest_hash":stable_hash(json.loads((repo/"docs/papers/paper0_5/results/manifest.json").read_text())),"artifact_hash":stable_hash({"geometry":geometry,"components":components,"motifs":motifs,"competence":competence_summary,"patches":patch_summary})})
     print(json.dumps({"output":str(output),"geometry_rows":len(geometry),"component_rows":len(all_components),"representation_rows":len(all_reps)},indent=2))
 
 

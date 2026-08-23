@@ -1,5 +1,6 @@
 {
-  "artifact_hash": "e3b980acd29379e40725df8e9f2aeb050822c02a56638543dc918e3f635e5f53",
+  "artifact_hash": "0c291aa635ed41529af3025eb87e1d874e8e33fa2adde9051e27a15e7a91e17c",
+  "competence_threshold": 0.8,
   "config": {
     "checkpoints": [
       0,
@@ -29,6 +30,6 @@
     "steps": 160
   },
   "hierarchy_hash": "a392fd6f15e20747c61034634ad8fc82abc93a2258bad908b60b7507a9b71b89",
-  "paper05_manifest_hash": "6a7635441a5a5533d0e69783c6c3daf2e6141ec142f93f9f3cbf2fb682c4438d",
-  "schema_version": "paper06.results.v1"
+  "paper05_manifest_hash": "34ed2c174de52d52272e8570e0e2c39f0e206a246cf54d62bcb5ce737657a730",
+  "schema_version": "paper06.results.v2"
 }
