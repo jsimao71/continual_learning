@@ -1,0 +1,100 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,booktabs}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\title{Emergent Fuzzy Rule-Like Computation in Transformers:\\Functors, Learned Categories, and State-Conditioned Residual Rewriting}
+\author{Working Paper 0.7}
+\date{\today}
+\begin{document}
+\maketitle
+\begin{abstract}
+We propose a controlled study of whether text-completion transformers develop computation usefully described as fuzzy, quasi-symbolic rule application. Building on lexical n-grams (Paper 0.5) and learned semantic category hierarchies (Paper 0.6), we study syntactic and relational templates behaving like functors applied to semantically typed arguments. The hypothesis is functional rather than literal: sufficiently trained transformers may learn continuous representations of objects, categories, relations, and reusable transformations that approximate typed rule application. We test substitution invariance, category-sensitive generalization, composition, exceptions, causal residual interventions, and layerwise predictive entropy. Category structure must be learned through text completion, and internal semantic analysis is performed only after held-out completion competence is demonstrated.
+\end{abstract}
+
+\section{Motivation}
+N-grams provide a primitive lexical mapping from prefix to continuation. Semantic learning adds equivalence classes and hierarchical relations. Their combination suggests transformations
+\[
+F(x)\rightarrow y,
+\]
+where a syntactic/relational frame $F$ operates on an argument $x$, while the continuation depends on both frame and learned semantic type. This resembles a fuzzy object-oriented/frame-logic organization: soft entities, soft types, approximate matching, and reusable transformations. We do not claim a literal symbolic interpreter.
+
+\section{Research Questions}
+\begin{enumerate}[label=RQ\arabic*.]
+\item Are syntactic/relational functors represented with substitution-tolerant invariants?
+\item Does learned category membership constrain the transformation induced by a functor?
+\item Does behavior generalize to unseen members and unseen member--functor combinations?
+\item Are transformations compositional across nested/chained functors?
+\item How do attention and MLP sublayers divide binding, category activation, and transformation?
+\item How does predictive entropy change while rule-consistent candidates are selected?
+\item Do causal interventions support the rule-like interpretation?
+\end{enumerate}
+
+\section{Hypotheses}
+\paragraph{H1: Soft functor invariance.} Equivalent frames share a recoverable transformation component across argument substitutions.
+\paragraph{H2: Learned type-sensitive dispatch.} The same frame can induce different continuation/transformation families for different learned semantic categories.
+\paragraph{H3: Category generalization.} Learned behavior transfers to held-out category members.
+\paragraph{H4: State-conditioned rewriting.}
+\[
+r_{l+1}=r_l+\Delta_l,\qquad \Delta_l=F_l(r_l).
+\]
+Layers are therefore complementary causal stages, not independent estimators.
+\paragraph{H5: Uncertainty restructuring.} Successful inference tends to concentrate probability on rule-consistent equivalence classes over depth, although individual layers may expand or redirect the candidate set.
+
+\section{Training and Competence Gate}
+Use a small fully instrumentable causal transformer, with a pretrained small LM as an external-validity replication where practical. The custom model must first demonstrate held-out text-completion competence. Synthetic category labels are evaluation metadata only and must not be injected as privileged supervision in the main condition. Evaluate undertrained, threshold, and converged checkpoints. Residual category claims made before behavioral competence are invalid for the main hypothesis.
+
+\section{Dataset}
+Construct a controlled textual world containing entities whose overlapping observable properties make category and hierarchy structure statistically learnable through ordinary completion. Include instance--subcategory--category--supercategory relations, multiple lexical realizations, and paraphrases.
+
+Introduce unary frames $F(x)$, binary relations $R(x,y)$, compositions such as $G(F(x))$, category-conditioned continuations, exceptions, competing defaults, and novel lexical realizations. Formal notation is for analysis; main training text should not trivially expose the latent symbolic structure.
+
+Generalization splits withhold entity--functor combinations, category members, paraphrases, compositions, longer chains, and category-boundary/exception cases.
+
+\section{Measurements}
+At intermediate residuals decode
+\[
+z_l=W_U\,\mathrm{LN}_f(r_l),\qquad p_l=\mathrm{softmax}(z_l).
+\]
+Measure
+\[
+H_l=-\sum_y p_l(y)\log_2p_l(y),\qquad
+\eta_l=\frac{H_l}{\log_2|V|},
+\]
+and target surprisal
+\[
+S_l(y^*)=-\log_2p_l(y^*).
+\]
+For a controlled rule-consistent continuation set $C$, measure
+\[
+P_l(C)=\sum_{y\in C}p_l(y).
+\]
+Capture pre-block, post-attention, and post-MLP states. Do not impose monotonic entropy reduction.
+
+Measure completion performance, target rank/probability, systematic and compositional generalization, substitution invariance, exception handling, residual-update alignment, within/between-category transformation similarity, aligned/orthogonal energy, covariance/effective dimension, head/layer complementarity, and paraphrase invariance.
+
+\section{Causal Tests}
+Use layer/head skipping, activation patching between equivalent functor instances, category-state patching, counterfactual category substitutions, norm-matched random-vector controls, and targeted perturbations. A putative functor is stronger evidence if causal transfer works across compatible substitutions and changes appropriately across incompatible categories.
+
+\section{Core Experiments}
+\paragraph{E1: N-gram to functor.} Replace a fixed element of a learned lexical template with members of an equivalence class and test emergence of substitution-invariant transformation.
+\paragraph{E2: Learned categories as soft types.} After the competence gate, test whether held-out category members elicit similar functor-conditioned trajectories.
+\paragraph{E3: Type-sensitive dispatch.} Hold syntax fixed while changing learned category.
+\paragraph{E4: Novel arguments.} Train on $F(a),F(b),F(c)$ and withhold $F(d)$; repeat broadly.
+\paragraph{E5: Composition.} Test $G(F(x))$, $R(F(x),y)$, and longer chains for sequentially conditioned transformations.
+\paragraph{E6: Exceptions.} Contradict frequent/default transformations and distinguish early priming from later correction.
+
+\section{Controls}
+Use random and undertrained checkpoints, shuffled category assignments, shuffled functor--continuation mappings, unigram/frequency-matched baselines, lexical identity controls, paraphrases, category-label leakage checks, context-length controls, and multiple seeds. The core factorial comparison is same syntax/different category versus different syntax/same category.
+
+\section{Interpretation}
+Evidence for fuzzy rule-like computation should require convergence of held-out systematic generalization, substitution/paraphrase invariance, learned semantic category dependence, residual/entropy trajectories, and causal transfer/disruption. No attention map, probe, cluster, or decoder alone establishes a symbolic rule.
+
+If supported, the intended conclusion is that continuous transformer computation can develop emergent symbolic-like behavior: approximate objects, semantic types, relations, and reusable transformations arise as functional regularities of state-conditioned residual computation.
+
+\section{Relationship to Papers 0.5 and 0.6}
+Paper 0.5 establishes lexical continuation and depth/prefix uncertainty trajectories. Paper 0.6 establishes whether semantic categories and hierarchies are actually learned through text completion; internal category analysis follows, rather than precedes, demonstrated completion competence. Paper 0.7 combines these results and asks whether learned semantic equivalence classes function as soft argument types for reusable syntactic/relational transformations.
+
+\section{Falsification}
+The hypothesis is weakened if apparent rules disappear on held-out combinations, reduce to lexical frequency, fail category substitution, lack causal transfer, or appear equally in incompetent/undertrained models. A mixed result---local, approximate, context-dependent rule-like behavior---is a valid and informative outcome.
+\end{document}
