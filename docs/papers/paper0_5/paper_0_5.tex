@@ -241,7 +241,7 @@ Primary metrics include:
 Report bootstrap confidence intervals over n-grams and contexts, not just token occurrences. Mixed-effects models can separate effects of n-gram identity, model seed, and context. Multiple-comparison control is required for head-level claims.
 
 \section{Controlled Pilot Results}
-The run produced 21,630 atlas rows, 1,920 final-checkpoint component rows, 1,920 raw motif/control rows, and four dense checkpoints for the first model/seed. Final training losses range from 2.436 to 2.565. All numbers below regenerate from the committed manifest and tables.
+The run produced 21,630 atlas rows, 1,920 final-checkpoint component rows, 1,920 raw motif/control rows, 2,880 entropy-trajectory rows, 3,840 causal equivalence-patch rows, and four dense checkpoints for the first model/seed. Final training losses range from 2.436 to 2.565. All numbers below regenerate from the committed manifest and tables.
 
 \input{docs/papers/paper0_5/results/tables/main_results.tex}
 
@@ -253,6 +253,13 @@ The intervention family gives a more qualified result than either direct compila
 \caption{Left: controlled atlas frequency--entropy support. Right: layerwise zero-ablation effects for the two model settings. Curves include all pre-registered strata; the displayed comparison emphasizes familiar low-entropy and context-introduced mappings.}
 \label{fig:atlas-causal}
 \end{figure}
+
+\subsection{Externally defined predictive equivalence survives causal replacement}
+We define equivalence from the controlled continuation relation, before inspecting hidden states. Model output distributions for two contexts in the same relation family have mean Jensen--Shannon (JS) divergence 0.028 bits and top-5 overlap 0.878, compared with 0.494 bits and 0.645 for each context's prefix-matched nonequivalent control. This separation is therefore functional rather than a cluster chosen from the representation under test.
+
+Replacement interventions sharpen the result. Across layers and components, equivalent-donor replacements produce far smaller output changes than nonequivalent donors. The contrast is largest at layer-0 SA (0.028 versus 0.436 JS bits); its mean target-probability change is $+0.003$ for equivalent donors and $-0.352$ for nonequivalent donors. Layer-0 FFN shows the same ordering (0.017 versus 0.156 JS bits). Later-layer contrasts are smaller but retain the ordering. Because complete update tensors are replaced, this supports transferable family-conditioned computation in this controlled regime, while not identifying a unique direction or proving natural-language generality.
+
+The entropy trajectories are explicitly non-monotone and task-conditioned. Mean decoded entropy at pre-SA/post-SA/post-block is 0.069/0.046/0.083 bits for familiar deterministic relations, but 0.637/0.809/1.198 for high-entropy relations and 0.848/1.158/1.959 for context-introduced mappings. Thus SA and FFN can increase uncertainty when the learned continuation family requires alternatives; entropy reduction is not treated as a universal signature of useful computation. Family-conditioned update centroids are highly aligned in many cells, but their effective ranks and within-family dispersion remain in the artifact, so commonality is not collapsed into a one-dimensional mechanism claim.
 
 \subsection{Descriptive progress disagrees with intervention magnitude}
 Diagnostic logit progress is frequently much larger than intact-minus-ablated target effects and can rank components differently. Figure~\ref{fig:diagnostic-trajectory} retains this discrepancy instead of collapsing the measurements. This is direct evidence for the paper's guardrail: an update aligned with the target unembedding is not thereby the causal site of the relation.

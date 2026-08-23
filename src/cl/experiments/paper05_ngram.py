@@ -27,10 +27,11 @@ import torch.nn.functional as F
 from cl.analysis.attention_motifs import motif_stability
 from cl.analysis.checkpoint_dynamics import summarize_checkpoint
 from cl.analysis.component_contrib import measure_components
+from cl.analysis.equivalence import common_component_metrics, distribution_metrics, jensen_shannon_bits, topk_overlap
 from cl.common.artifacts import RunMetadata, atomic_write_json, stable_hash, write_csv, write_jsonl
 from cl.common.hooks import final_position_trace
 from cl.common.metrics import bootstrap_ci, classify_update_relation, cosine, spearman
-from cl.common.model_adapter import TinyTransformerLM, train_step
+from cl.common.model_adapter import Intervention, TinyTransformerLM, train_step
 from cl.ngram.atlas import build_atlas, sample_strata
 from cl.ngram.synthetic import ProbeExample, build_corpus
 
@@ -133,6 +134,71 @@ def collect_override(model, probes, device) -> list[dict]:
                 )
                 previous_update = update
     return rows
+
+
+@torch.no_grad()
+def collect_equivalence(model, probes, device, identity):
+    """Collect the preregistered predictive-family, entropy, and patching tests."""
+    entropy_rows, update_rows, family_rows, patch_rows = [], [], [], []
+    locations = ("pre_sa", "post_sa", "post_block")
+    for group in grouped_probes(list(probes)):
+        inputs = torch.tensor([probe.tokens for probe in group], dtype=torch.long, device=device)
+        controls = torch.tensor([probe.control_tokens for probe in group], dtype=torch.long, device=device)
+        targets = torch.tensor([probe.target for probe in group], dtype=torch.long, device=device)
+        logits, trace = model(inputs, capture=True)
+        control_logits, control_trace = model(controls, capture=True)
+        assert trace is not None and control_trace is not None
+        intact = torch.softmax(logits[:, -1], -1).cpu().numpy()
+        control_p = torch.softmax(control_logits[:, -1], -1).cpu().numpy()
+        compact, compact_control = final_position_trace(trace), final_position_trace(control_trace)
+        by_relation = defaultdict(list)
+        for i, probe in enumerate(group): by_relation[probe.relation_id].append(i)
+        for i, probe in enumerate(group):
+            relation_members = by_relation[probe.relation_id]
+            donor = relation_members[(relation_members.index(i) + 1) % len(relation_members)]
+            family_rows.append({**identity, "example_id": probe.example_id, "relation_id": probe.relation_id,
+                "stratum": probe.stratum, "within_family_js_bits": jensen_shannon_bits(intact[i], intact[donor]),
+                "nonequivalent_js_bits": jensen_shannon_bits(intact[i], control_p[i]),
+                "within_family_top5_overlap": topk_overlap(intact[i], intact[donor]),
+                "nonequivalent_top5_overlap": topk_overlap(intact[i], control_p[i])})
+            previous = None
+            for layer, values in enumerate(compact):
+                for location in locations:
+                    p = torch.softmax(model.diagnostic_logits(values[location][i:i+1].to(device)), -1)[0].cpu().numpy()
+                    row = distribution_metrics(p, probe.target)
+                    if previous is not None:
+                        for metric in ("entropy_bits", "target_surprisal_bits", "target_probability"):
+                            row[f"delta_{metric}"] = float(row[metric] - previous[metric])
+                    entropy_rows.append({**identity, "example_id": probe.example_id, "relation_id": probe.relation_id,
+                        "stratum": probe.stratum, "layer": layer, "location": location, **row})
+                    previous = row
+                for component, name in (("sa", "delta_sa"), ("ff", "delta_ff")):
+                    update_rows.append({**identity, "example_id": probe.example_id, "relation_id": probe.relation_id,
+                        "stratum": probe.stratum, "layer": layer, "component": component,
+                        "vector": values[name][i].numpy().tolist()})
+                    full_update = getattr(trace.layers[layer], name)
+                    full_control_update = getattr(control_trace.layers[layer], name)
+                    for donor_type, replacement in (("equivalent", full_update[donor:donor+1]),
+                                                     ("nonequivalent", full_control_update[i:i+1])):
+                        changed, _ = model(inputs[i:i+1], intervention=Intervention(layer, component, "replace", replacement.to(device)))
+                        changed_p = torch.softmax(changed[0, -1], -1).cpu().numpy()
+                        patch_rows.append({**identity, "example_id": probe.example_id, "relation_id": probe.relation_id,
+                            "stratum": probe.stratum, "layer": layer, "component": component, "donor_type": donor_type,
+                            "output_js_bits": jensen_shannon_bits(intact[i], changed_p),
+                            "target_probability_change": float(changed_p[probe.target] - intact[i, probe.target])})
+    return entropy_rows, update_rows, family_rows, patch_rows
+
+
+def aggregate_equivalence(families, patches, common):
+    family = [{"comparison": name, "mean_js_bits": float(np.mean([r[js] for r in families])),
+               "mean_top5_overlap": float(np.mean([r[top] for r in families])), "n": len(families)}
+              for name, js, top in (("equivalent", "within_family_js_bits", "within_family_top5_overlap"),
+                                    ("nonequivalent", "nonequivalent_js_bits", "nonequivalent_top5_overlap"))]
+    groups=defaultdict(list)
+    for row in patches: groups[(row["donor_type"],row["component"],row["layer"])].append(row)
+    patch=[{"donor_type":k[0],"component":k[1],"layer":k[2],"mean_output_js_bits":float(np.mean([r["output_js_bits"] for r in v])),
+            "mean_target_probability_change":float(np.mean([r["target_probability_change"] for r in v])),"n":len(v)} for k,v in sorted(groups.items())]
+    return family, patch
 
 
 def train_model(setting, seed, corpus, steps, checkpoints, device, checkpoint_dir):
@@ -415,6 +481,7 @@ def run(args):
     seeds = [int(value) for value in args.seeds.split(",")]
     config = {"seeds": seeds, "steps": args.steps, "checkpoints": args.checkpoints, "device": str(device), "models": MODEL_SETTINGS}
     all_components, all_motif_records, all_override, all_dynamics = [], [], [], []
+    all_entropy, all_updates, all_families, all_patches = [], [], [], []
     losses_by_run = {}
     corpus_for_atlas = build_corpus(seed=0, train_size=args.train_size)
     atlas = build_atlas(corpus_for_atlas.train_sequences)
@@ -436,6 +503,8 @@ def run(args):
             overrides = add_identity(collect_override(model, corpus.probes, device), **identity)
             all_components.extend(components); all_motif_records.extend(motifs); all_override.extend(overrides)
             all_dynamics.extend(add_identity(dynamics, **identity))
+            entropy_rows, update_rows, family_rows, patch_rows = collect_equivalence(model, corpus.probes, device, identity)
+            all_entropy.extend(entropy_rows); all_updates.extend(update_rows); all_families.extend(family_rows); all_patches.extend(patch_rows)
     motif_summary = []
     motif_runs = defaultdict(list)
     for row in all_motif_records:
@@ -451,10 +520,15 @@ def run(args):
     stored_context = stored_context_summary(all_components)
     regression = regression_summary(all_components)
     motif_causal = motif_causal_association(motif_aggregate, all_components)
+    common = common_component_metrics(all_updates, ("model_setting", "seed", "layer", "component", "relation_id"))
+    family_summary, patch_summary = aggregate_equivalence(all_families, all_patches, common)
     write_jsonl(raw_dir / "components.jsonl", all_components)
     write_jsonl(raw_dir / "motifs.jsonl", all_motif_records)
     write_jsonl(raw_dir / "override.jsonl", all_override)
     write_jsonl(raw_dir / "metadata.jsonl", metadata_rows)
+    write_jsonl(raw_dir / "entropy_trajectories.jsonl", all_entropy)
+    write_jsonl(raw_dir / "equivalence_families.jsonl", all_families)
+    write_jsonl(raw_dir / "equivalence_patches.jsonl", all_patches)
     atomic_write_json(raw_dir / "losses.json", losses_by_run)
     write_csv(table_dir / "component_summary.csv", component_summary)
     write_csv(table_dir / "motif_summary.csv", motif_aggregate)
@@ -463,10 +537,13 @@ def run(args):
     write_csv(table_dir / "motif_causal_association.csv", motif_causal)
     write_csv(table_dir / "training_dynamics.csv", all_dynamics)
     write_csv(table_dir / "override_summary.csv", all_override)
+    write_csv(table_dir / "predictive_equivalence.csv", family_summary)
+    write_csv(table_dir / "equivalence_patching.csv", patch_summary)
+    write_csv(table_dir / "common_update_components.csv", common)
     write_latex_tables(table_dir, all_components)
     plot_results(output, atlas, component_summary, motif_aggregate, all_override, all_dynamics, all_components)
     write_summary(output, config, atlas, component_summary, motif_aggregate, motif_causal, stored_context, regression, losses_by_run)
-    atomic_write_json(output / "manifest.json", {"schema_version": "paper05.results.v1", "config": config, "artifact_hash": stable_hash({"components": all_components, "motifs": motif_aggregate, "dynamics": all_dynamics})})
+    atomic_write_json(output / "manifest.json", {"schema_version": "paper05.results.v2", "config": config, "equivalence_definition": "externally grouped continuation relation", "artifact_hash": stable_hash({"components": all_components, "motifs": motif_aggregate, "dynamics": all_dynamics, "entropy": all_entropy, "patches": all_patches})})
     print(json.dumps({"output": str(output), "component_rows": len(all_components), "motif_rows": len(all_motif_records), "atlas_entries": len(atlas)}, indent=2))
 
 

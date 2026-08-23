@@ -13,6 +13,9 @@
 - Mean attention motif specificity over matched controls: 0.2282.
 - Motif-specificity versus SA causal-drop Spearman correlation: -0.0093 over 18 relation-layer units.
 - Exploratory unit-level regression R2: 0.0730 (controlled synthetic factors; not a population estimate).
+- Externally defined within-family distributions have mean JS divergence 0.0278 bits versus 0.4938 bits for nonequivalent controls (top-5 overlap 0.878 versus 0.645).
+- Layer-0 SA equivalent replacement changes the output by 0.0277 JS bits, versus 0.4358 for nonequivalent replacement; the associated target-probability changes are +0.0031 and -0.3520.
+- Entropy is not monotone: mean pre-SA/post-SA/post-block entropy is 0.069/0.046/0.083 bits for deterministic familiar probes and 0.848/1.158/1.959 for context-introduced probes.
 
 ## Interpretation and failures
 
@@ -24,11 +27,17 @@ These are controlled local-model results, not evidence about pretrained-model tr
 - `raw/components.jsonl`
 - `raw/motifs.jsonl`
 - `raw/override.jsonl`
+- `raw/entropy_trajectories.jsonl`
+- `raw/equivalence_families.jsonl`
+- `raw/equivalence_patches.jsonl`
 - `tables/component_summary.csv`
 - `tables/stored_vs_context.csv`
 - `tables/regression.csv`
 - `tables/motif_causal_association.csv`
 - `tables/training_dynamics.csv`
+- `tables/predictive_equivalence.csv`
+- `tables/equivalence_patching.csv`
+- `tables/common_update_components.csv`
 - `figures/*.png`
 
 ## Next falsifiable question
