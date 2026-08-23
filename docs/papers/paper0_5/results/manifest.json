@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "706a553307ebf8d2f071d1bd73485655181f7d91648186b7faaa3c20b30aaf92",
+  "artifact_hash": "a57a5f5bc14cfe0ca905744edaefdc846df62a8ae8064177c44f9aa1fc995e2c",
   "config": {
     "checkpoints": [
       0,
@@ -28,5 +28,6 @@
     ],
     "steps": 160
   },
-  "schema_version": "paper05.results.v1"
+  "equivalence_definition": "externally grouped continuation relation",
+  "schema_version": "paper05.results.v2"
 }
