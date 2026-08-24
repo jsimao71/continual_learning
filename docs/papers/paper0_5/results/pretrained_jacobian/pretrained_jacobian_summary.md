@@ -1,0 +1,3 @@
+# Pretrained cumulative-Jacobian pilot
+
+Behavioral filtering retained 10 of 12 candidate pairs across pinned Pythia-70M and Qwen3-0.6B checkpoints. Mean directional cosine declines modestly from 0.768 at one block to 0.733 at two and 0.702 at four. This supports a weak directional cumulative-Jacobian correspondence across both architectures. It does not support an accurate linear surrogate in norm: mean relative errors exceed one in several model/direction cells, and Qwen nuisance piecewise error is not better than its frozen-path error. Nuisance status here means unchanged final top-1 under the paired prompts; it makes no claim about unknown pretraining frequencies or semantic equivalence.

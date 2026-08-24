@@ -1,0 +1,16 @@
+{
+  "accepted_pairs": 10,
+  "artifact_hash": "30bf54021b7f0c1977b70423b506b2153535b2b94de77d5cfc003f5550563883",
+  "candidate_pairs": 12,
+  "mean_cosine_by_horizon": {
+    "1": 0.7682618856430053,
+    "2": 0.7330977693200111,
+    "4": 0.7016348600387573
+  },
+  "models": [
+    "EleutherAI/pythia-70m-deduped@step143000",
+    "Qwen/Qwen3-0.6B@c1899de289a04d12100db370d81485cdf75e47ca"
+  ],
+  "rows": 60,
+  "schema_version": "paper05.pretrained_jacobian.v1"
+}
