@@ -1,0 +1,11 @@
+position_mode,relation_type,top1_correct
+aligned,irrelevant_extension,0.7245370370370371
+randomized,irrelevant_extension,0.7175925925925926
+aligned,multi_level_hierarchy,0.3587962962962963
+randomized,multi_level_hierarchy,0.3402777777777778
+aligned,override_extension,0.3125
+randomized,override_extension,0.27314814814814814
+aligned,refining_extension,0.3125
+randomized,refining_extension,0.3055555555555556
+aligned,supportive_extension,1.0
+randomized,supportive_extension,0.9976851851851852

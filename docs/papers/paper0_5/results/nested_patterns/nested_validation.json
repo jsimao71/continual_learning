@@ -1,0 +1,33 @@
+{
+  "checks": [
+    {
+      "base_length": 2,
+      "full_pattern_MI_bits": 2.0,
+      "max_proper_subset_MI_bits": 0.0,
+      "max_singleton_MI_bits": 0.0,
+      "n": 16,
+      "target_entropy_bits": 2.0
+    },
+    {
+      "base_length": 3,
+      "full_pattern_MI_bits": 2.0,
+      "max_proper_subset_MI_bits": 0.0,
+      "max_singleton_MI_bits": 0.0,
+      "n": 64,
+      "target_entropy_bits": 2.0
+    },
+    {
+      "base_length": 4,
+      "full_pattern_MI_bits": 2.0,
+      "max_proper_subset_MI_bits": 0.0,
+      "max_singleton_MI_bits": 0.0,
+      "n": 256,
+      "target_entropy_bits": 2.0
+    }
+  ],
+  "failures": [],
+  "passed": true,
+  "schema_version": "paper05.nested.validation.v1",
+  "single_token_hierarchy_exception": "C->Y0 is an explicitly controlled short-rule condition",
+  "supportive_extension_exception": "extension token intentionally has I(X;Y)>0 while the core remains sufficient"
+}

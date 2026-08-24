@@ -1,0 +1,17 @@
+{
+  "dataset_seed": 5061,
+  "model_seeds": [11, 23, 37],
+  "relation_types": ["irrelevant_extension", "supportive_extension", "refining_extension", "override_extension", "multi_level_hierarchy"],
+  "base_lengths": [2, 3, 4],
+  "extension_lengths": [1, 2, 4],
+  "positions": ["aligned", "randomized"],
+  "evaluation_families_per_cell": 16,
+  "sequence_length": 32,
+  "vocab_size": 64,
+  "width": 48,
+  "layers": 6,
+  "heads": 4,
+  "train_steps": 2400,
+  "batch_size": 128,
+  "learning_rate": 0.003
+}

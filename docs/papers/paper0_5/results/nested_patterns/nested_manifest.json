@@ -1,0 +1,68 @@
+{
+  "artifact_hash": "d35c5f8751357eb11d1d3a15b1c74aa1899826326bcb20a0b192714ac700183c",
+  "config": {
+    "base_lengths": [
+      2,
+      3,
+      4
+    ],
+    "batch_size": 128,
+    "dataset_seed": 5061,
+    "evaluation_families_per_cell": 16,
+    "extension_lengths": [
+      1,
+      2,
+      4
+    ],
+    "heads": 4,
+    "layers": 6,
+    "learning_rate": 0.003,
+    "model_seeds": [
+      11,
+      23,
+      37
+    ],
+    "positions": [
+      "aligned",
+      "randomized"
+    ],
+    "relation_types": [
+      "irrelevant_extension",
+      "supportive_extension",
+      "refining_extension",
+      "override_extension",
+      "multi_level_hierarchy"
+    ],
+    "sequence_length": 32,
+    "train_steps": 2400,
+    "vocab_size": 64,
+    "width": 48
+  },
+  "head_rows": 103680,
+  "overlap_rows": 25920,
+  "pair_metric_rows": 60480,
+  "pairs": 1440,
+  "replacement_rows": 155520,
+  "schema_version": "paper05.nested.v1",
+  "training": [
+    {
+      "checkpoint_hash": "54e939b565ba4636e8cf0479fa5d360733642591dbe661d8378fe7d318a8bcc0",
+      "final_loss": 0.25017043948173523,
+      "initial_loss": 26.99934959411621,
+      "seed": 11
+    },
+    {
+      "checkpoint_hash": "9d46781832e4c550440b497c58b83c6da6d7a19b803b787fa31d53b76635a3f4",
+      "final_loss": 0.2459723800420761,
+      "initial_loss": 40.42301940917969,
+      "seed": 23
+    },
+    {
+      "checkpoint_hash": "a3543eabc5f6f0b9909d892f3b086f986db6aa2e6f0993acbc49445f6357fd45",
+      "final_loss": 0.21609482169151306,
+      "initial_loss": 41.53829574584961,
+      "seed": 37
+    }
+  ],
+  "update_rows": 51840
+}

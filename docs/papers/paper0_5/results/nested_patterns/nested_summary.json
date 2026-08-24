@@ -1,0 +1,45 @@
+{
+  "aligned_randomized_accuracy_gap": {
+    "irrelevant_extension": 0.006944444444444531,
+    "multi_level_hierarchy": 0.01851851851851849,
+    "override_extension": 0.03935185185185186,
+    "refining_extension": 0.00694444444444442,
+    "supportive_extension": 0.0023148148148147696
+  },
+  "artifact_hash": "8b53b94baf06c72ec9df5e2a39ef584c661a01d448b0aac1d832b81eb22736ed",
+  "bridge_decision": "partial support for same-target causal reuse; refinement/override/hierarchy blocked by behavioral incompetence",
+  "competence": {
+    "irrelevant_extension": 0.7210648148148149,
+    "multi_level_hierarchy": 0.34953703703703703,
+    "override_extension": 0.29282407407407407,
+    "refining_extension": 0.3090277777777778,
+    "supportive_extension": 0.9988425925925926
+  },
+  "random_update_advantage": 0.0015266156743889983,
+  "replacement": {
+    "nonequivalent": {
+      "JS_to_intact": 0.16066015828457664,
+      "final_top1_change": 0.23567708333333334,
+      "target_logprob_delta": -1.3879177541262975
+    },
+    "same_target": {
+      "JS_to_intact": 0.07871177651775547,
+      "final_top1_change": 0.14954668209876543,
+      "target_logprob_delta": -0.3532655773504049
+    },
+    "short": {
+      "JS_to_intact": 0.06256850168981791,
+      "final_top1_change": 0.1306905864197531,
+      "target_logprob_delta": -0.23637096661894294
+    }
+  },
+  "same_target_block_update_cosine": 0.6281294372469639,
+  "same_target_ff_update_cosine": 0.7006215227384804,
+  "same_target_head_utility_spearman": 0.2639955722688764,
+  "same_target_nested_minus_nonequivalent_residual": 0.19351909728043235,
+  "same_target_raw_residual_cosine": 0.8386892323156143,
+  "same_target_sa_update_cosine": 0.5041602409011583,
+  "same_target_top2_overlap": 0.6120756172839507,
+  "schema_version": "paper05.nested.summary.v1",
+  "trained_update_advantage": 0.12217693741573879
+}

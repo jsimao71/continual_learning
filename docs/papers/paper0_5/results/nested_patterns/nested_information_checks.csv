@@ -1,0 +1,4 @@
+base_length,full_pattern_MI_bits,max_proper_subset_MI_bits,max_singleton_MI_bits,n,target_entropy_bits
+2,2.0,0.0,0.0,16,2.0
+3,2.0,0.0,0.0,64,2.0
+4,2.0,0.0,0.0,256,2.0
