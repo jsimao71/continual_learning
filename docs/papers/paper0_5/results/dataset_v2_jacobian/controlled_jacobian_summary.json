@@ -1,0 +1,20 @@
+{
+  "accepted_pairs": 85,
+  "artifact_hash": "16282a4852510ef9fab98db4aaa6ec23822b8be5804ff983ee53d98db0d322d0",
+  "directions": {
+    "nuisance": 37,
+    "signal": 48
+  },
+  "mean_cosine_by_horizon": {
+    "1": 0.7824993403518901,
+    "2": 0.5517280897673439,
+    "4": 0.33548615460886677
+  },
+  "mean_error_by_horizon": {
+    "1": 0.6236891124178382,
+    "2": 0.8802711767308852,
+    "4": 1.0472959855023551
+  },
+  "rows": 255,
+  "schema_version": "paper05.controlled_jacobian.v1"
+}
