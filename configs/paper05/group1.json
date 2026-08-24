@@ -1,0 +1,13 @@
+{
+  "seed": 314,
+  "model_seeds": [11, 23, 37],
+  "generators": ["contiguous_ngram", "skip_gram", "binary_functor"],
+  "relations_per_generator": 3,
+  "train_examples_per_relation": 80,
+  "probe_realizations": 12,
+  "nuisance_counts": [0, 4, 8],
+  "model": {"width": 48, "layers": 4, "heads": 4, "max_length": 20},
+  "train_steps": 240,
+  "batch_size": 64,
+  "learning_rate": 0.001
+}
