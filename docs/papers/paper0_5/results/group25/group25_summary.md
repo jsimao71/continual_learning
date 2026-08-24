@@ -9,7 +9,7 @@
 7. **Attention shifts.** Nuisance attention mass is measured and enters the attribution models, but attention mass alone does not establish causal variance import.
 8. **Competition.** Competitor switches explain part of failure under truncation; they do not explain the successful selective-mask contrast.
 9. **Repair.** Median valid repair fraction from cross-layer update covariance is 0.812; negative covariance provides partial later-layer cancellation where positive.
-10. **Selective masking.** Removing nuisance preserves accuracy and increases mean margin by 0.261, while reducing nuisance-conditioned variance by 43.9%. Removing signal reduces accuracy to 0.252.
+10. **Selective masking.** Removing nuisance preserves accuracy and increases mean margin by 0.229, while reducing nuisance-conditioned variance by 40.5%. Removing signal reduces accuracy to 0.249.
 11. **Broader exposure.** Full exposure is best for full-trained models; generic ``less is more'' is falsified. Selective exclusion, not indiscriminate restriction, is beneficial.
 12. **Depth tolerance.** Depth interacts with truncated-window competence, but three depth points do not support a scaling law.
 13. **Largest mechanism.** The nonlinear forest achieves held-out $R^2=0.959$. Mechanism importance is reported descriptively in `group25_variance_models.csv`; the causal masking contrast is stronger evidence than attribution ranking.

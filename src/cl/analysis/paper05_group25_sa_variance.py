@@ -36,7 +36,7 @@ def repair(config,root):
 
 def plot_line(data,x,y,name,figdir,hue="predictive_span"):
     for value,g in data.groupby(hue):
-        q=g.groupby(x)[y].mean();plt.plot(q.index.astype(str),q.values,marker="o",label=f"{hue}={value}")
+        q=g.groupby(x)[y].mean();order=sorted(q.index,key=lambda v:float("inf") if str(v)=="full" else float(v));q=q.reindex(order);plt.plot(q.index.astype(str),q.values,marker="o",label=f"{hue}={value}")
     plt.xlabel(x.replace("_"," "));plt.ylabel(y.replace("_"," "));plt.legend(fontsize=7);plt.tight_layout();plt.savefig(figdir/name,dpi=180);plt.close()
 
 def plots(surface,sub,attention,decisions,masks,figdir):

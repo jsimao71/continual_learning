@@ -13,7 +13,7 @@ estimate,interpretation,metric,model,n_test,n_train,predictor
 0.011274615561408186,held-out R2 decrease,permutation_importance,regularized_ridge,1368,4104,model_seed
 -0.00014379506470756364,held-out R2 decrease,permutation_importance,regularized_ridge,1368,4104,nuisance_type
 0.9593617072684708,descriptive architecture-cell split,heldout_r2,random_forest,1368,4104,
-0.00421864889233825,held-out R2 decrease,permutation_importance,random_forest,1368,4104,sa_nuisance_attention_mass
+0.004218648892338273,held-out R2 decrease,permutation_importance,random_forest,1368,4104,sa_nuisance_attention_mass
 0.2492850898616025,held-out R2 decrease,permutation_importance,random_forest,1368,4104,sa_signal_attention_mass
 0.5132360791358795,held-out R2 decrease,permutation_importance,random_forest,1368,4104,window_numeric
 0.0008479289150578496,held-out R2 decrease,permutation_importance,random_forest,1368,4104,nuisance_distance
@@ -23,6 +23,6 @@ estimate,interpretation,metric,model,n_test,n_train,predictor
 0.16607448661773688,held-out R2 decrease,permutation_importance,random_forest,1368,4104,competitor_switch_rate
 0.4519027215047954,held-out R2 decrease,permutation_importance,random_forest,1368,4104,absolute_signal
 0.34929479215824116,held-out R2 decrease,permutation_importance,random_forest,1368,4104,layer
-0.0666122060471018,held-out R2 decrease,permutation_importance,random_forest,1368,4104,model_seed
+0.06661220604710186,held-out R2 decrease,permutation_importance,random_forest,1368,4104,model_seed
 -9.205908117104756e-06,held-out R2 decrease,permutation_importance,random_forest,1368,4104,nuisance_type
 included,cluster heterogeneity controlled by indicators,specification,cell_fixed_effect_control,0,5472,model_seed+nuisance_type

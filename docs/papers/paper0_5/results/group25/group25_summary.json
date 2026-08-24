@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "6cc12db70d9ba7158fe07a82fca52fab77a7bc542779873d827ac490403f36c1",
+  "artifact_hash": "43e6a8d50c0977caf09414643e7978d1ee19e8510c45ac2427c03b4c20fb76f4",
   "full_attention_accuracy": 0.9994936342592593,
   "full_attention_margin_variance": 1.8897740457806944,
   "local_trained_accuracy": 1.0,
@@ -8,10 +8,10 @@
   "mean_delta_variance_norm": -0.6547941100433581,
   "mean_delta_variance_sa": 4.810674508297604,
   "median_repair_fraction": 0.8123270584083382,
-  "nuisance_mask_signal_change": 0.2611090884440479,
-  "nuisance_mask_variance_reduction_fraction": 0.4391591375227685,
+  "nuisance_mask_signal_change": 0.22869605757296085,
+  "nuisance_mask_variance_reduction_fraction": 0.4048302563360495,
   "schema_version": "paper05.group25.summary.v1",
-  "signal_mask_accuracy": 0.2515190972222222,
+  "signal_mask_accuracy": 0.24891493055555555,
   "signal_only_accuracy": 0.4108455882352941,
   "variance_forest_heldout_r2": 0.9593617072684708
 }

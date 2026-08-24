@@ -125,9 +125,14 @@ def aggregate_attention(rows):
 def interventions(model,config,span,depth,seed):
     out=[];base=examples(config,span)
     for mask in ("none","nuisance","signal","random"):
-        rows=examples(config,span,mask=mask);x=torch.tensor([r["tokens"] for r in rows]);y=torch.tensor([r["target"] for r in rows]);blocked=()
-        layers=custom_trace(model,x,None,blocked);_,p,m,_,_,_=state_metrics(model,layers[-1][3],y)
-        for i,r in enumerate(rows):out.append({"model_seed":seed,"predictive_span":span,"depth":depth,"mask":mask,"nuisance_distance":r["nuisance_distance"],"nuisance_type":r["nuisance_type"],"family":r["family"],"realization":r["realization"],"target_margin":float(m[i]),"target_probability":float(p[i,r["target"]]),"top1_correct":int(p[i].argmax()==r["target"])})
+        for distance in sorted({r["nuisance_distance"] for r in base}):
+            rows=[r for r in base if r["nuisance_distance"]==distance];x=torch.tensor([r["tokens"] for r in rows]);y=torch.tensor([r["target"] for r in rows]);signal=rows[0]["signal_positions"];nuisance=rows[0]["nuisance_positions"]
+            if mask=="nuisance":blocked=nuisance
+            elif mask=="signal":blocked=signal
+            elif mask=="random":blocked=tuple(p for p in range(config["sequence_length"]-2,-1,-1) if p not in signal+nuisance)[:2]
+            else:blocked=()
+            layers=custom_trace(model,x,None,blocked);_,p,m,_,_,_=state_metrics(model,layers[-1][3],y)
+            for i,r in enumerate(rows):out.append({"model_seed":seed,"predictive_span":span,"depth":depth,"mask":mask,"nuisance_distance":r["nuisance_distance"],"nuisance_type":r["nuisance_type"],"family":r["family"],"realization":r["realization"],"target_margin":float(m[i]),"target_probability":float(p[i,r["target"]]),"top1_correct":int(p[i].argmax()==r["target"])})
     return out
 
 def file_hash(path):
@@ -135,6 +140,11 @@ def file_hash(path):
 
 def main(args):
     config=json.loads(Path(args.config).read_text());root=Path(args.output);check=root/"checkpoints";check.mkdir(parents=True,exist_ok=True);surfaces=[];sublayers=[];attention=[];decisions=[];training=[];window_interventions=[];raw_count=0
+    if args.interventions_only:
+        for seed in config["model_seeds"]:
+            for span in config["predictive_spans"]:
+                depth=max(config["depths"]);model=TinyTransformerLM(config["vocab_size"],config["sequence_length"],config["width"],depth,config["heads"]);model.load_state_dict(torch.load(check/f"full_s{span}_l{depth}_seed{seed}.pt",map_location="cpu",weights_only=True));window_interventions+=interventions(model.eval(),config,span,depth,seed)
+        write_csv(root/"group25_window_interventions.csv",window_interventions);print(json.dumps({"intervention_rows":len(window_interventions),"mode":"attention_key_blocking","artifact_hash":stable_hash(window_interventions)},indent=2));return
     for seed in config["model_seeds"]:
         for span in config["predictive_spans"]:
             for depth in config["depths"]:
@@ -150,4 +160,4 @@ def main(args):
     manifest={"schema_version":"paper05.group25.v1","config":config,"training":training,"raw_rows":raw_count,"surface_rows":len(surfaces),"sublayer_rows":len(sublayers),"attention_rows":len(attention),"decision_rows":len(decisions),"artifact_hash":stable_hash({"surface":surfaces,"sublayer":sublayers,"decision":decisions})};atomic_write_json(root/"group25_manifest.json",manifest);print(json.dumps(manifest,indent=2))
 
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/group25_sa_window_variance.json");p.add_argument("--output",default="docs/papers/paper0_5/results/group25");main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/group25_sa_window_variance.json");p.add_argument("--output",default="docs/papers/paper0_5/results/group25");p.add_argument("--interventions-only",action="store_true");main(p.parse_args())
