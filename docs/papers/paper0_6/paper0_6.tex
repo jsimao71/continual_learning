@@ -1,7 +1,8 @@
 \documentclass[11pt]{article}
-\usepackage[T1]{fontenc}\usepackage[utf8]{inputenc}\usepackage{lmodern}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
 \usepackage[a4paper,margin=22mm]{geometry}\usepackage{microtype,amsmath,amssymb,booktabs,graphicx,float}
 \usepackage[hidelinks]{hyperref}
+\emergencystretch=1em
 \title{Hierarchical Semantic Invariants Across Transformer Depth\\\large Abstraction, Residual Dynamics, and Layerwise Representation}
 \author{Jorge Sim\~ao\\EInnovator R\&D --- Center for the Sciences of Computation, Cognition, and Complexity}
 \date{Paper 0.6 --- Controlled Experiment Report --- August 2026}
@@ -15,6 +16,8 @@ Paper 0.5 asks how familiar sequential regularities are represented and transfor
 
 \section{Relation to Paper 0.5}
 The papers should share instrumentation but remain separate. Paper 0.5 controls recurrent token/sequential patterns and studies continuation relations. Paper 0.6 controls semantic hierarchy/specificity and studies category and relational invariants. N-gram frequency and next-token predictability become mandatory confounds in Paper 0.6: semantic effects should survive matching, stratification, or residualization against surface statistics.
+
+The new Paper 0.5 nested-pattern bridge sharpens this boundary. In behaviorally competent target-preserving lexical extensions, embedded-short update donors are causally more substitutable than unrelated same-target and nonequivalent donors, and training creates a matched update-similarity advantage absent at initialization. However, the same bridge fails competence for target-changing refinement, override, and multi-level hierarchy. Paper 0.6 may therefore reuse the donor hierarchy, matched controls, and update/head-overlap metrics, but not cite lexical nesting as semantic abstraction evidence. A future semantic run must first learn the target-changing hierarchy and then show causal reuse beyond surface and same-target controls.
 
 \section{Abstraction as Nested Invariance}
 Let $x\sim_k y$ mean that $x$ and $y$ are equivalent at abstraction level $k$. Falcon and penguin are equivalent under bird; falcon and dog become equivalent under animal. This induces nested classes $C_0(x)\subset C_1(x)\subset C_2(x)\ldots$. If $T_k$ is a family of substitutions preserving category $k$, an invariant representation satisfies $r_k(Tx)\approx r_k(x)$ for $T\in T_k$. Higher abstraction is therefore operationally stability under a larger transformation family.
@@ -157,7 +160,7 @@ Hierarchy separation changes across checkpoints rather than rising as a guarante
 \end{figure}
 
 \section{Series-Level Interpretation}
-The competence failure changes the series-level conclusion. Representational geometry can exceed a permutation baseline even when held-out behavior is poor; semantic-looking geometry is therefore not sufficient evidence of abstraction. Attention-motif invariance is also absent, while sibling/cross-category replacement contrasts are weak. Paper 0.5's predictive-equivalence result is stronger because its families are behaviorally realized and equivalent replacement preserves an actually learned continuation. Paper 1 may use Paper 0.6 features only as frozen negative controls until a competent replication exists. No semantic feature from this run authorizes persistent learning.
+The competence failure changes the series-level conclusion. Representational geometry can exceed a permutation baseline even when held-out behavior is poor; semantic-looking geometry is therefore not sufficient evidence of abstraction. Attention-motif invariance is also absent, while sibling/cross-category replacement contrasts are weak. Paper 0.5's same-target nested bridge is stronger because its qualified strata are behaviorally realized and embedded-short replacement preserves an actually learned continuation; its own target-changing hierarchy fails and is explicitly blocked. Paper 1 may use Paper 0.6 features only as frozen negative controls until a competent replication exists. No semantic feature from this run authorizes persistent learning.
 
 \section{Reproducibility and Reuse}
 The exact command is
