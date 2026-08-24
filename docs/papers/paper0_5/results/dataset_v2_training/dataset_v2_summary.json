@@ -1,0 +1,70 @@
+{
+  "accuracy": [
+    {
+      "generator_family": "balanced_ngram3",
+      "max_cell_accuracy": 0.998046875,
+      "mean_accuracy": 0.8854166666666666,
+      "min_cell_accuracy": 0.646484375
+    },
+    {
+      "generator_family": "balanced_pair",
+      "max_cell_accuracy": 1.0,
+      "mean_accuracy": 0.9129464285714286,
+      "min_cell_accuracy": 0.7265625
+    },
+    {
+      "generator_family": "functor",
+      "max_cell_accuracy": 1.0,
+      "mean_accuracy": 0.9125744047619048,
+      "min_cell_accuracy": 0.73046875
+    },
+    {
+      "generator_family": "nested_override",
+      "max_cell_accuracy": 0.998046875,
+      "mean_accuracy": 0.8869047619047619,
+      "min_cell_accuracy": 0.658203125
+    },
+    {
+      "generator_family": "nested_short",
+      "max_cell_accuracy": 1.0,
+      "mean_accuracy": 0.8895089285714286,
+      "min_cell_accuracy": 0.6484375
+    },
+    {
+      "generator_family": "sparse_pair",
+      "max_cell_accuracy": 1.0,
+      "mean_accuracy": 0.9077380952380952,
+      "min_cell_accuracy": 0.6640625
+    }
+  ],
+  "artifact_hash": "b10b4351682fdd50ad72e145521452383589caa26a0c5353d39275f3503a8b66",
+  "nested_stable_override_fraction": 0.7032442748091603,
+  "scaling_fits": [
+    {
+      "intercept": 7.100795177155523,
+      "model": "linear descriptive",
+      "n": 17994,
+      "predictor": "pattern_length",
+      "r2": 0.002480488114629198,
+      "slope": 0.44755914219147064
+    },
+    {
+      "intercept": 8.826770756284002,
+      "model": "linear descriptive",
+      "n": 17994,
+      "predictor": "dependency_span",
+      "r2": 0.0004352299510501645,
+      "slope": -0.1664812778182771
+    },
+    {
+      "intercept": 4.522477952247791,
+      "model": "linear descriptive",
+      "n": 17994,
+      "predictor": "nuisance_count",
+      "r2": 0.3537164005450234,
+      "slope": 2.5737179365775096
+    }
+  ],
+  "schema_version": "paper05.dataset_v2.summary.v1",
+  "stable_top1_fraction": 0.8946897374701671
+}

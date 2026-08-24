@@ -1,0 +1,3 @@
+# Dataset V2 controlled results
+
+All six balanced training families learned above chance across the full held-out nuisance matrix. Mean generator accuracy ranged from 0.885 (balanced_ngram3) to 0.913 (balanced_pair). The minimum cell accuracy was 0.646; seed variation is therefore material and is retained rather than pooled away. Stable top-1 behavior was observed for 89.5% of held-out identities. A stable long-rule-over-short-rule override was observed for 70.3% of nested cases. The scaling regressions are descriptive only: their small four-layer depth range does not identify a power law or phase transition.

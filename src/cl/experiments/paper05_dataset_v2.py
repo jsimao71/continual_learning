@@ -21,7 +21,7 @@ def rule(generator,indices,functor=0):
     if generator in {"balanced_pair","sparse_pair"}:return (indices[0]+indices[1])%4
     if generator=="balanced_ngram3":return sum(indices)%4
     if generator=="functor":return (indices[0]+indices[1])%4 if functor==0 else indices[0]^indices[1]
-    if generator=="nested_override":return sum(indices)%4
+    if generator in {"nested_short","nested_override"}:return sum(indices)%4
     raise ValueError(generator)
 
 def base_patterns(generator,K=4):
@@ -41,6 +41,9 @@ def base_patterns(generator,K=4):
         for i in range(K):
             for j in range(K):
                 for k in range(K):rows.append(((A[i],B[j],C[k]),(i,j,k),0))
+    elif generator=="nested_short":
+        for j in range(K):
+            for k in range(K):rows.append(((B[j],C[k]),(j,k),0))
     return rows
 
 def nuisance_tokens(level,count,rng,target_pair=(0,0)):
@@ -67,7 +70,8 @@ def position_context(pattern,nuisance,mode,length,rng,generator):
 
 def generate(config,split="train"):
     rows=[];length=config["sequence_length"]
-    for generator in config["generator_families"]:
+    generators=list(config["generator_families"])+(["nested_short"] if "nested_override" in config["generator_families"] else [])
+    for generator in generators:
         for pattern,indices,functor in base_patterns(generator,config["K"]):
             target_index=rule(generator,indices,functor);target=Y[target_index]
             for nuisance_level in config["nuisance_levels"]:
@@ -85,7 +89,8 @@ def generate(config,split="train"):
                                 "answer_changing_context":False,"continuation_entropy":0.0,"single_token_target_MI":None,"subset_target_MI":None,"full_pattern_target_MI":None,
                                 "position_mode":mode,"train_frequency":config["identity_realizations"],"split":split,"generator_seed":seed,
                                 "rule_signature":signature(generator,functor),"rule_inputs":list(indices),"rule_output":target,"tokens":list(tokens),
-                                "composition_depth":1,"intermediate_latent_class":""})
+                                "composition_depth":1,"intermediate_latent_class":"",
+                                "short_target_token":Y[(indices[-2]+indices[-1])%4] if generator=="nested_override" else ""})
     # Matched answer-changing controls: same B,C suffix, added A changes the valid target.
     for j in range(config["K"]):
         for k in range(config["K"]):
@@ -103,7 +108,7 @@ def generate(config,split="train"):
 
 def stable_int(*parts):return int(stable_hash(parts)[:12],16)%1_000_000
 def signature(generator,functor):
-    return {"balanced_pair":"latin_square_mod4","balanced_ngram3":"modular_sum3","sparse_pair":"sparse_latin_square_mod4","functor":("functor_add_mod4" if functor==0 else "functor_xor2"),"nested_override":"nested_mod4"}[generator]
+    return {"balanced_pair":"latin_square_mod4","balanced_ngram3":"modular_sum3","sparse_pair":"sparse_latin_square_mod4","functor":("functor_add_mod4" if functor==0 else "functor_xor2"),"nested_short":"nested_short_mod4","nested_override":"nested_mod4"}[generator]
 
 def annotate_information(rows):
     base=[r for r in rows if not r["answer_changing_context"] and r["nuisance_type"]=="N0" and r["position_mode"]=="aligned"]

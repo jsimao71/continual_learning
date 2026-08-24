@@ -37,6 +37,13 @@ Tokens are integer symbols; `51` designates the predictive pattern and `52` is t
 - nuisance: `N6` / `[]`
 - tokens: `[50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 51, 5, 8, 12, 52]`
 
+## nested_short
+
+- rule: `nested_short_mod4`
+- inputs: `[0, 0]` -> target `20`
+- nuisance: `N0` / `[]`
+- tokens: `[50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 51, 8, 12, 52]`
+
 ## sparse_pair
 
 - rule: `sparse_latin_square_mod4`

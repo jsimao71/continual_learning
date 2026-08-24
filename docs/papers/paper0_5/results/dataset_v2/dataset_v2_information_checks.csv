@@ -3,4 +3,5 @@ full_pattern_target_MI_bits,generator_family,max_singleton_target_MI_bits,n,sing
 2.0,balanced_pair,0.0,64,"[0.0, 0.0]",0.0,2.0
 2.0,functor,0.0,128,"[0.0, 0.0, 0.0]",0.0,2.0
 2.0,nested_override,0.0,256,"[0.0, 0.0, 0.0]",0.0,2.0
+2.0,nested_short,0.0,64,"[0.0, 0.0]",0.0,2.0
 2.0,sparse_pair,0.0,64,"[0.0, 0.0]",0.0,2.0

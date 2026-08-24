@@ -1,0 +1,76 @@
+{
+  "aggregate_rows": 1161,
+  "artifact_hash": "df6821d85f4ebc7a357e7212becb374a6fcf13e65010a2fe9543f485728b0724",
+  "config": {
+    "K": 4,
+    "batch_size": 128,
+    "device": "cpu",
+    "generator_families": [
+      "balanced_pair",
+      "balanced_ngram3",
+      "sparse_pair",
+      "functor",
+      "nested_override"
+    ],
+    "generator_seed": 631,
+    "identity_realizations": 4,
+    "learning_rate": 0.003,
+    "model": {
+      "heads": 4,
+      "layers": 4,
+      "width": 32
+    },
+    "model_seeds": [
+      11,
+      23,
+      37
+    ],
+    "nuisance_counts": [
+      0,
+      2,
+      4
+    ],
+    "nuisance_levels": [
+      "N0",
+      "N2",
+      "N3",
+      "N4"
+    ],
+    "position_modes": [
+      "aligned",
+      "randomized"
+    ],
+    "sequence_length": 24,
+    "singleton_mi_threshold_bits": 0.08,
+    "train_steps": 1600
+  },
+  "decision_rows": 20112,
+  "observation_rows": 315792,
+  "schema_version": "paper05.dataset_v2.training.v1",
+  "training": [
+    {
+      "checkpoint": "docs/papers/paper0_5/results/dataset_v2_training/checkpoints/seed_11.pt",
+      "checkpoint_hash": "6ffa7d9a64487b2fff29652e44f86eafc4c1189c3b5f5f01748d756217f03dab",
+      "final_loss": 0.6070456504821777,
+      "initial_loss": 29.486543655395508,
+      "model_seed": 11,
+      "steps": 1600
+    },
+    {
+      "checkpoint": "docs/papers/paper0_5/results/dataset_v2_training/checkpoints/seed_23.pt",
+      "checkpoint_hash": "a1e8b1bbf672ee35b37d1c150f62d5e2c022b9b4626840000427c6a0463196f3",
+      "final_loss": 0.07393715530633926,
+      "initial_loss": 26.809606552124023,
+      "model_seed": 23,
+      "steps": 1600
+    },
+    {
+      "checkpoint": "docs/papers/paper0_5/results/dataset_v2_training/checkpoints/seed_37.pt",
+      "checkpoint_hash": "6a3e2756575961df8e801bd4e96ef1d50eb02d77be92147301135eb605f9c1eb",
+      "final_loss": 0.0018267501145601273,
+      "initial_loss": 13.33764934539795,
+      "model_seed": 37,
+      "steps": 1600
+    }
+  ]
+}

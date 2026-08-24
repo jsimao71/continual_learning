@@ -1,21 +1,21 @@
 {
   "answer_changing_controls": 48,
-  "artifact_hash": "0ec399a9961376823a5edf7f0f465ea15445369410ea5bb3140bd8c6d55d0e6a",
+  "artifact_hash": "2a8a785c8245568ca7b5648356e9b4c7c0e0c966380f2b6464cd8afb08a0181c",
   "competing_count_target_MI_bits": 0.0,
   "failures": [],
-  "filler_target_MI_bits": 0.0016737282704731525,
+  "filler_target_MI_bits": 0.0019335902311446546,
   "max_conditional_nuisance_target_MI_bits": 0.0,
   "passed": true,
   "position_mode_target_MI_bits": 0.0,
   "schema_version": "paper05.dataset_v2.validation.v1",
   "singleton_threshold_bits": 0.08,
   "target_counts": {
-    "20": 2688,
-    "21": 2688,
-    "22": 2688,
-    "23": 2688
+    "20": 2912,
+    "21": 2912,
+    "22": 2912,
+    "23": 2912
   },
-  "test_rows": 10800,
-  "train_rows": 10800,
+  "test_rows": 11696,
+  "train_rows": 11696,
   "train_test_identity_overlap": 0
 }

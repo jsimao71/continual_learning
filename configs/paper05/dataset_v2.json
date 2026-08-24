@@ -2,5 +2,5 @@
  "generator_families": ["balanced_pair", "balanced_ngram3", "sparse_pair", "functor", "nested_override"],
  "nuisance_levels": ["N0", "N2", "N3", "N4"], "nuisance_counts": [0, 2, 4],
  "position_modes": ["aligned", "randomized"], "singleton_mi_threshold_bits": 0.08,
- "model_seeds": [11, 23, 37], "model": {"width": 64, "layers": 6, "heads": 4},
- "train_steps": 700, "batch_size": 96, "learning_rate": 0.001}
+ "model_seeds": [11, 23, 37], "model": {"width": 32, "layers": 4, "heads": 4},
+ "train_steps": 1600, "batch_size": 128, "learning_rate": 0.003, "device": "cpu"}
