@@ -1,0 +1,139 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,graphicx,float,hyperref,enumitem}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\title{Layer Composition and Predictive Stability in Transformers:\\Contextual Reachability and Distributed Head Contributions}
+\author{Paper 0.5 --- Residual / Layer-Composition Research Line}
+\date{Integrated controlled report --- August 2026}
+\begin{document}\maketitle
+
+\begin{abstract}
+We study three linked phenomena: how depth changes the stability of a response under irrelevant input variation, how the self-attention (SA) window limits transport of predictive context, and how heads contribute to stability and class discrimination.  The primary instruments are custom causal Transformers trained on known synthetic distributions.  A reproduced pilot shows post-block Jensen--Shannon (JS) dispersion $0.0650\to0.0307\to0.0106$ bits despite increasing within-example entropy.  A new three-seed matrix generalizes the first-to-last contraction to contiguous n-grams ($-0.0244$ bits, 95\% CI $[-0.0414,-0.0098]$), skip-grams ($-0.0415$, $[-0.0791,-0.0129]$), and binary functors ($-0.0402$, $[-0.0738,-0.0143]$), all at 100\% final accuracy.  Only 7 of 27 family--seed trajectories contract monotonically.  Local-window experiments show that graph reachability is necessary but not sufficient: unreachable cells remain near chance, several reachable cells achieve 80--100\%, but one graph-reachable narrow-window cell fails to learn.  In a four-layer/four-head model, equivalent-family head replacement is nearly neutral (0.0006-nat target-log-probability drop), whereas mismatch costs 0.0194 nats; pair effects are non-additive and motif specificity again fails to predict causal utility ($\rho=-0.0059$).  The supported theory is composed, anisotropic, state-dependent predictive refinement---not universal denoising, a sufficient $Lw\ge s$ law, or stable visual head semantics.
+\end{abstract}
+
+\section{The question and the three phenomena}
+Let an input be $x=(g,d)$, where $g$ is the predictive structure and $d$ is constructed nuisance, with
+\begin{equation}Y\perp d\mid g.\end{equation}
+We ask whether depth organizes the many surface realizations $(g,d_i)$ into a stable predictive class while retaining distinctions between different $g$.  This system-level question is investigated in dependency order:
+\begin{enumerate}
+\item \emph{layer composition}: does stability improve, and is the trajectory monotone?
+\item \emph{SA transport}: can decisive context reach the prediction position through a finite window?
+\item \emph{heads}: which parallel SA channels stabilize a class or distinguish classes?
+\end{enumerate}
+Continuous learning is not the experimental objective.  Pretrained and prior mechanistic results are retained as secondary external-validity evidence in the appendices.
+
+\section{A pedagogical theory of predictive ensembles}
+For a pre-norm block,
+\begin{align}r'_\ell&=r_\ell+A_\ell(r_\ell),&r_{\ell+1}&=r'_\ell+M_\ell(r'_\ell).\end{align}
+The key point is that layer $\ell+1$ acts on the state produced by layer $\ell$; layers are composed transformations, not independent estimates.  For family $g$, imagine a cloud
+\begin{equation}\mathcal E_\ell(g)=\{r_\ell(g,d_i)\}_{i=1}^m.\end{equation}
+Its centroid $\mu_{\ell,g}$ describes the common state and covariance $\Sigma_{\ell,g}$ describes realization-sensitive spread.  Applying the unembedding at every depth gives distributions $p_\ell(\cdot\mid g,d)$.  We measure
+\begin{align}
+D_{\rm within}(\ell)&=\mathbb E_g\mathbb E_d[JS(p_\ell(\cdot\mid g,d),\bar p_{\ell,g})],\\
+D_{\rm between}(\ell)&=\mathbb E_{g\ne g'}[JS(\bar p_{\ell,g},\bar p_{\ell,g'})],\\
+R_\ell&=\frac{D_{\rm between}(\ell)}{D_{\rm within}(\ell)+\epsilon}.
+\end{align}
+A useful layer trajectory lowers within-family fluctuation without erasing target signal or between-family separation.  Large $R_\ell$ is not self-interpreting when its denominator is nearly zero, so we always report accuracy, target probability, and numerator/denominator with it.
+
+\subsection{Why non-monotonicity is expected}
+For a perturbation $\delta r_\ell$, linearize one block:
+\begin{equation}\delta r_{\ell+1}\approx J_\ell\delta r_\ell,\qquad J_\ell=I+\frac{\partial F_\ell}{\partial r}.\end{equation}
+After $L$ blocks the relevant map is the product $J_{L-1}\cdots J_0$.  One factor may expand a nuisance direction and a later factor may rotate or contract it.  Hence final contraction does not imply contraction at every layer.  We test the approximation with Jacobian--vector products (JVPs), never by constructing a dense Jacobian.
+
+\subsection{Context as a causal cone}
+With a local window $w$, one layer can move information at most $w$ positions in the mask graph.  Thus $Lw\ge s$ is a necessary reachability condition for a source $s$ positions away in the simple mask used here.  It is not sufficient: attention weights, width, optimization, and intermediate coding can still prevent useful transport.
+
+\subsection{Heads as vector-field components}
+Write $A_\ell(r)=\sum_h A_{\ell h}(r)$.  For head $h$, define
+\begin{align}U^{\rm stab}_{\ell h}&=D^{(-h)}_{\rm within}-D^{\rm intact}_{\rm within},\\
+U^{\rm disc}_{\ell h}&=D^{\rm intact}_{\rm between}-D^{(-h)}_{\rm between}.
+\end{align}
+For two heads, $\Gamma(h,k)=U(h,k)-U(h)-U(k)$ distinguishes synergy ($\Gamma>0$) from redundancy or compensation ($\Gamma<0$).  These are causal, task-conditioned quantities; an attractive attention motif is not a substitute.
+
+\section{Controlled methods}
+The generator records predictive family, held-out surface identity, target, pattern tokens/length/span, nuisance tokens/count/type/seed, answer-changing status, continuation entropy, training frequency, split, and generator seed.  Group~1 uses contiguous n-grams, skip-grams, and binary functors: nine families, three model seeds, nuisance counts 0/4/8, twelve realizations, width 48, four layers, and four heads.  Group~2 uses eight $(s,w,L)$ cells, four predictive classes, an exactly tested local mask, and a separately labelled local-pattern task.  Group~3 uses a trained four-layer/four-head full-attention model and evaluates every head with zero ablation, batch-mean replacement, same-family replacement, mismatched replacement, and every within-layer pair.  Manifests store resolved configs, seeds, data identities, and checkpoint hashes.  Family/seed bootstrap is used for the confirmatory Group~1 contrasts; head scans are descriptive and no row-level significance is asserted.
+
+\part{I. Layer composition and response stability}
+\section{Pilot reproduction and generalization}
+The prior fixed-depth result reproduces exactly: under pattern evidence and four distractors, target-probability variance is $0.0347\to0.0106\to0.0109$, JS dispersion is $0.0650\to0.0307\to0.0106$ bits, and within-example entropy is $1.326\to2.094\to2.277$ bits.  Stable response across realizations is therefore different from low entropy within one realization.
+
+In the new matrix, all three generators achieve 100\% final accuracy with eight nuisances. First-to-last within-JS changes are $-0.0244$ bits for contiguous n-grams (family/seed CI $[-0.0414,-0.0098]$), $-0.0415$ for skip-grams ($[-0.0791,-0.0129]$), and $-0.0402$ for binary functors ($[-0.0738,-0.0143]$).  Stability generalizes beyond contiguous n-grams without sacrificing target signal.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_within_between_vs_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_R_vs_depth.png}
+\caption{Within-family JS and the separation-to-fluctuation ratio across depth under eight nuisances.}\end{figure}
+
+\section{Non-monotone composition and local linearization}
+Only 7/27 family--seed trajectories contract monotonically; 11 expand then contract, five oscillate, three contract late, and one does not contract.  This favors cumulative nonlinear composition over a layerwise denoising story.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_nonmonotonic_examples.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_jvp_prediction_quality.png}
+\caption{Trajectory classes and local JVP agreement. Median JVP/observed cosine is 0.984 for nuisance and 0.928 for signal directions; prediction-space relative errors are 0.179 and 0.311.}\end{figure}
+The Jacobian describes small nuisance propagation better than the larger answer-changing displacement, but neither local statistic determines the product of later transformations.
+
+\part{II. Self-attention window and contextual transport}
+\section{Reachability is necessary, not sufficient}
+The mask tests verify exact graph reachability.  Unreachable long-range cells remain near four-way chance: accuracies are 0.188 for $(s,w,L)=(2,1,1)$, 0.234 for $(4,1,2)$, and 0.234 for $(8,2,2)$. Reachable $(2,1,2)$ reaches 0.797; $(4,1,4)$, $(8,4,2)$, and $(8,\mathrm{full},2)$ reach 1.0.  Yet reachable $(8,2,4)$ reaches only 0.078.  The causal cone is a necessary structural bound, not a sufficient learning law.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g2_span_window_accuracy_phase.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g2_transport_delay.png}
+\caption{Final accuracy by span/window/depth cell and layerwise functional arrival.}\end{figure}
+Local-pattern accuracy is 0.75--0.953 in most cells, showing substantial robustness when the decisive token is retained, but it is not uniformly at ceiling.  The present smoke run does not independently identify a nested override trajectory; that confirmatory extension remains open.
+
+\part{III. Heads and the SA contribution}
+\section{Replacement, specialization, and interaction}
+Across 16 layer/head cells, mean target-log-probability drops are 0.0316 nats for zero ablation, 0.0108 for mean replacement, 0.0006 for equivalent-family replacement, and 0.0194 for mismatched replacement.  Zero ablation increases within-family JS by $4.0\times10^{-5}$ bits and reduces between-family JS by $3.93\times10^{-4}$ on average. Mismatch produces the largest discrimination damage ($1.44\times10^{-3}$ bits).  Stability and discrimination are therefore related but non-identical head roles.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g3_head_stability_utility.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g3_head_discrimination_utility.png}
+\caption{Causal stability and discrimination utilities for all layer/head cells.}\end{figure}
+Pair interactions range from $-0.0116$ to $+0.0187$ nats, with median $+0.0050$, so individual utilities do not add. Median correlation of head-output norms is 0.002, rejecting a simple globally correlated-channel account without establishing independence of the full vectors. Motif specificity is again unrelated to causal utility ($\rho=-0.0059$ across 16 cells), closely reproducing the prior $-0.009$ null.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g3_head_pair_interactions.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g3_motif_vs_causal_utility.png}
+\caption{Non-additive pair effects and the repeated motif--causal null.}\end{figure}
+
+\section{Integrated interpretation}
+The statistical view is supported: predictive-family dispersion contracts across three generators while signal remains.  The dynamical view is supported descriptively: trajectories are usually non-monotone and local JVP accuracy differs by perturbation type.  The information-theoretic view is only partially supported because class separation is measured but mutual information is not estimated.  The statistical-mechanical view is likewise partial: $R$ and covariance act as order parameters, but the experiment has no finite-size evidence for a phase transition.
+
+The most economical account is \emph{state-dependent anisotropic refinement}.  Layers transport, rotate, expand, and contract different perturbations; SA reachability constrains which distinctions can enter the prediction position; heads supply parallel, interacting vector-field components.  No single layer or head need be a complete estimator, and final stabilization need not be monotone.
+
+\section{Limitations and open tests}
+The new runs satisfy smoke rather than full scaling gates. Group~1 uses three generators rather than the full eight-family ladder. Group~2 has one seed per cell, does not complete nested override or formal competing-law fits, and contains a reachable optimization failure. Group~3 has one seed/model, no pattern-length recruitment comparison, no multi-seed head-role reproducibility, and only one head-count point; it does not establish head-count scaling. Huge $R$ values arise from near-zero within-family denominators and are not treated as precise effect sizes.
+
+\appendix
+\section{Prior controlled component and trajectory experiments}
+The preserved earlier experiment contains 21,630 atlas rows, 1,920 component rows, 1,920 motif/control rows, 2,880 entropy rows, 3,840 equivalence patches, and dense checkpoints. Familiar deterministic mappings are FFN-heavier under zero ablation (0.478 versus 0.301 nats) but not matched replacement; override/repair is SA-heavier (1.497 versus 0.261). Equivalent update replacement changes outputs less than nonequivalent replacement (layer-0 SA JS 0.028 versus 0.436 bits). Diagnostic logit progress often disagrees with causal magnitude, and controlled frequency/mechanism regression has only $R^2=0.073$. These results motivate distributed computation but are secondary to the three investigations.
+
+\section{Pretrained external validity and manifold control}
+The earlier four-family matrix found equivalent-minus-nonequivalent advantages of 1.047 nats for Pythia step 1,000, 1.206 for final Pythia, and 0.599 for Qwen, but no reliable random-initialization effect.  The expanded 32-family matrix found fully-nonequivalent advantages of 2.552 nats for final Pythia (CI $[1.991,3.070]$) and 0.763 for Qwen ($[0.623,0.899]$), with syntax mismatch more harmful than semantic mismatch.  This evidence is sharply qualified by behavioral competence (1.6\% for Pythia versus 68.8\% for Qwen) and an on-manifold falsification: Qwen's residual-nearest nonequivalent donor costs $-0.022$ nats (CI $[-0.082,0.023]$), essentially identical to equivalent replacement. Rank-1 removal remains harmful (Pythia $-1.019$, Qwen $-0.837$ nats), while addition is harmful. Common subspaces are contributory and state-dependent, but functional labels have not been isolated from residual proximity.
+
+\section{Override, training, and variance controls}
+Answer-changing contexts are never labelled nuisance. In the legacy grid their JS contraction is $-0.0328$ bits (CI $[-0.0543,-0.0141]$), weaker than irrelevant-nuisance contraction $-0.0474$ ($[-0.0778,-0.0217]$). Random checkpoints have low dispersion only because target signal is absent. Training-time SA/FF trajectories are non-monotone, and stable attention motifs do not predict causal SA utility. These negative controls constrain the theory rather than being discarded.
+
+\section{Relationship to later continual-learning work}
+Only here, after the mechanistic results, do we state the downstream implication. Stable predictive equivalence could become a diagnostic precursor for future adaptation, but Paper~0.5 neither implements nor validates continual learning. Common-direction addition is not beneficial, on-manifold controls weaken label-specific transfer, and the separate natural held-out utility gate remains negative. Persistent prototypes or adapters therefore remain blocked pending matched-budget future utility, override preservation, contamination controls, and rollback.
+
+\section{Reproducibility}
+\begin{verbatim}
+PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
+  --group 1 --config configs/paper05/group1.json --device cpu
+PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
+  --group 2 --config configs/paper05/group2.json --device cpu
+PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
+  --group 3 --config configs/paper05/group3.json --device cpu
+PYTHONPATH=src python -m cl.analysis.paper05_layer_composition
+\end{verbatim}
+All prior artifacts remain under \texttt{results/}; new raw, aggregate, figure, summary, and manifest artifacts are under \texttt{results/three\_parts/}. Tests cover deterministic replay, residual identities, trace parity, local-mask correctness, graph reachability, head-contribution shapes, and zero/replacement equivalence.
+
+\section{Conclusion}
+Depth reliably improves final predictive stability across three controlled pattern generators, but usually through non-monotone composition. SA windows impose a causal reachability constraint whose satisfaction does not guarantee learning. Heads contribute in distributed, non-additive ways; equivalent head states transfer better than mismatches, whereas attention motifs remain causally uninformative. Together these findings turn ``layer refinement'' into a measurable theory of predictive ensembles, causal cones, and interacting residual updates while preserving its failures and boundary conditions.
+
+\begin{thebibliography}{9}
+\bibitem{geva2021ffn} Mor Geva et al. Transformer Feed-Forward Layers Are Key-Value Memories. \emph{EMNLP}, 2021.
+\bibitem{olsson2022induction} Catherine Olsson et al. In-context Learning and Induction Heads. Transformer Circuits, 2022.
+\bibitem{biderman2023pythia} Stella Biderman et al. Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling. \emph{ICML}, 2023.
+\bibitem{qwen3report} Qwen Team. Qwen3 Technical Report. arXiv:2505.09388, 2025.
+\end{thebibliography}
+\end{document}
