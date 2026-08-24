@@ -1,0 +1,203 @@
+\documentclass[10pt]{article}
+\usepackage[margin=0.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,array,microtype,xcolor,graphicx,float}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\title{Layer Composition and Predictive Stability in Transformers:\\A Controlled Statistical-Mechanics Program}
+\author{Paper 0.5 --- Residual / Layer-Composition Research Line}
+\date{Reorganized experimental-theory plan --- August 2026}
+\begin{document}
+\maketitle
+\begin{abstract}
+This paper studies a single question: how does composition across Transformer depth make a next-token prediction increasingly stable to irrelevant variation while preserving sensitivity to variables that change the correct prediction? The main object is not an attention motif, an MLP memory, or an online-learning rule. It is the depth trajectory of a predictive equivalence class under repeated residual transformations. We use custom causal Transformers trained on fully controlled synthetic distributions so that pattern identity, continuation distribution, nuisance variables, dependency span, compositional structure, and training frequency are known exactly. The study is organized into three linked investigations. Investigation I develops the system-level theory of layer composition and predictive stability. Investigation II asks how self-attention range constrains transport of task-relevant information when predictive dependencies exceed the local attention window. Investigation III studies how multiple heads divide the work of stabilizing a predictive class and distinguishing nested or competing pattern families. Each investigation contains statistical, information-theoretic, dynamical-systems, and statistical-mechanical formulations, together with falsifiable experiments. Existing pilot results---including strong controlled reduction of nuisance-conditioned Jensen--Shannon dispersion with depth and important non-monotonic counterexamples---are treated as motivating evidence rather than as the final theory.
+\end{abstract}
+\section{Scope and Research Boundary}
+The paper deliberately separates three questions: (1) continuous or online learning from inference-time statistics; (2) the general representational division of labor between self-attention (SA) and feed-forward/MLP sublayers; and (3) the theory of how layer composition and residual accumulation transform an ensemble of noisy realizations into a more stable predictive state. Paper 0.5 is about the third question. Continuous learning is out of scope. SA/MLP and head-level analysis are included only when they explain the system-level stability mechanism.
+
+The central empirical object is a family of inputs
+\begin{equation}x=(g,d),\end{equation}
+where $g$ contains the task-relevant predictive structure and $d$ is a nuisance variable constructed so that
+\begin{equation}Y \perp d \mid g.\end{equation}
+For each predictive class $g$, different realizations $d_1,\dots,d_m$ should ideally converge toward equivalent predictive behavior with depth, while different predictive classes should remain distinguishable.
+
+\section{Why Controlled Custom Transformers Are Primary}
+Pretrained models are useful for external validity but poor instruments for discovering this theory because their effective training distributions are not known. An apparent n-gram may have been learned as a contiguous lexical sequence, a skip-gram, a syntactic template, a semantic relation, a functor-like rule, a sentence-level schema, or a mixture of these. Consequently, neither true pattern frequency nor nuisance status is known.
+
+The primary experiments therefore use custom decoder-only Transformers trained from scratch on exact generative distributions. The generator controls predictive family, pattern frequency, continuation entropy, dependency span, contiguous versus non-contiguous structure, nuisance count and entropy, competing or nested rules, compositional depth, answer-changing context, and train/test identity separation.
+
+The pattern ladder is
+\begin{equation}
+\text{n-gram}\rightarrow\text{skip-gram}\rightarrow\text{functor/template}\rightarrow\text{composition}\rightarrow\text{hierarchical rule}.
+\end{equation}
+Pretrained models are optional appendix-level external-validity checks only after the controlled laws are established.
+
+\section{Common Definitions and Measurements}
+Let $r_\ell(x)$ be the residual state at the prediction position before block $\ell$. For a pre-norm block,
+\begin{align}
+r'_\ell &= r_\ell + A_\ell(r_\ell),\\
+r_{\ell+1} &= r'_\ell + M_\ell(r'_\ell).
+\end{align}
+For predictive class $g$, define the layer ensemble
+\begin{equation}\mathcal{E}_\ell(g)=\{r_\ell(g,d_i)\}_{i=1}^{m}.\end{equation}
+Its centroid and covariance are
+\begin{align}
+\mu_{\ell,g}&=\mathbb{E}_d[r_\ell(g,d)],\\
+\Sigma_{\ell,g}&=\mathbb{E}_d[(r_\ell-\mu_{\ell,g})(r_\ell-\mu_{\ell,g})^\top].
+\end{align}
+For output distribution $p_\ell(\cdot\mid x)=\mathrm{softmax}(W_U\mathrm{Norm}(r_\ell(x)))$, define within-class dispersion
+\begin{equation}
+D_{\mathrm{within}}(\ell)=\mathbb{E}_{g,d_i,d_j}[d(p_\ell(\cdot\mid g,d_i),p_\ell(\cdot\mid g,d_j))]
+\end{equation}
+and between-class separation
+\begin{equation}
+D_{\mathrm{between}}(\ell)=\mathbb{E}_{g\neq g',d,d'}[d(p_\ell(\cdot\mid g,d),p_\ell(\cdot\mid g',d'))].
+\end{equation}
+The primary prediction-space distance is Jensen--Shannon divergence,
+\begin{align}
+M&=(P+Q)/2,\\
+JS(P,Q)&=\tfrac12 KL(P\|M)+\tfrac12 KL(Q\|M).
+\end{align}
+Define the separation-to-fluctuation order parameter
+\begin{equation}R_\ell=\frac{D_{\mathrm{between}}(\ell)}{D_{\mathrm{within}}(\ell)+\epsilon}.\end{equation}
+A successful trajectory need not have monotone decreasing entropy or hidden-state distance; the stronger target is increasing predictive-class organization over useful depth.
+
+\part{Investigation I: Layer Composition and Predictive Stability}
+\section{I.A Hypotheses}
+\paragraph{H1.1 Predictive stabilization.} For learned predictive families and irrelevant nuisance, $D_{\mathrm{within}}(L)<D_{\mathrm{within}}(0)$ while useful between-class separation is preserved or increased.
+\paragraph{H1.2 Anisotropic refinement.} Layer composition preferentially contracts nuisance-sensitive directions while preserving or expanding answer-changing directions.
+\paragraph{H1.3 Cumulative rather than layer-local mechanism.} Individual blocks may transiently expand nuisance variation. The relevant object is the composed map $F_{L:0}=F_{L-1}\circ\cdots\circ F_0$.
+\paragraph{H1.4 Controlled scaling.} The depth required to reach a target stability depends systematically on nuisance strength, pattern complexity, continuation entropy, and the number of competing predictive classes.
+
+\section{I.B Formalization}
+Decompose a local perturbation into task-relevant and nuisance components,
+\begin{equation}\delta r_\ell=\delta r_\ell^{\mathrm{sig}}+\delta r_\ell^{\mathrm{nuis}}.\end{equation}
+Linearizing one residual block,
+\begin{equation}\delta r_{\ell+1}\approx J_\ell\delta r_\ell,\qquad J_\ell=I+\frac{\partial F_\ell}{\partial r}.\end{equation}
+For nuisance covariance,
+\begin{equation}\Sigma_{\ell+1}^{\mathrm{nuis}}\approx J_\ell\Sigma_\ell^{\mathrm{nuis}}J_\ell^\top.\end{equation}
+If $J_\ell v_i=\lambda_{\ell,i}v_i$, then
+\begin{equation}\sigma_{L,i}^2\approx\sigma_{0,i}^2\prod_{\ell=0}^{L-1}|\lambda_{\ell,i}|^2.\end{equation}
+Thus weak selective contraction can compound strongly across depth.
+
+\section{I.C Possible Theory}
+\subsection{Statistical View}
+Depth maps $P_\ell(r\mid g)\rightarrow P_{\ell+1}(r\mid g)$. Test whether nuisance-conditioned variance falls relative to variance needed to distinguish classes. Measure covariance trace, effective rank, target-probability variance, target-margin variance, and class-conditioned JS dispersion.
+\subsection{Information-Theoretic View}
+Let $G$ be predictive class, $D$ nuisance, and $R_\ell$ residual representation. Measure preservation/increase of $I(R_\ell;G)$ and reduction of $I(R_\ell;D\mid G)$. Define the descriptive order parameter
+\begin{equation}\Phi_\ell=I(R_\ell;G)-\beta I(R_\ell;D\mid G).\end{equation}
+This is a measurement framework, not a claim of explicit information-bottleneck optimization.
+\subsection{Dynamical-Systems View}
+Residual depth defines the discrete flow $r_{\ell+1}=r_\ell+F_\ell(r_\ell)$ and, approximately, $dr/d\ell=F(r,\ell)$. Predictive classes may form attracting tubes: nuisance realizations approach one another in prediction-relevant directions without becoming identical in full hidden space.
+\subsection{Statistical-Mechanical View}
+Treat $\mathcal{E}_\ell(g)$ as a class-conditioned ensemble. Define
+\begin{align}
+q_\ell&=\mathbb{E}_g[\mathrm{Tr}\,\Sigma_{\ell,g}],\\
+m_\ell&=\mathbb{E}_{g\neq g'}[\|\mu_{\ell,g}-\mu_{\ell,g'}\|^2],\\
+\chi_\ell&=q_\ell/(m_\ell+\epsilon).
+\end{align}
+The qualitative prediction is $\chi_\ell\downarrow$ over useful depth. Increasing nuisance or complexity may reveal finite-capacity transition-like boundaries.
+
+\section{I.D Experimental Plan}
+Train small Transformers on exact synthetic distributions. Cross pattern type (contiguous, skip, functor/template, compositional, hierarchical), pattern length/span, nuisance count $k\in\{0,2,4,8,16\}$, nuisance similarity, continuation entropy, number of competing classes, train frequency, held-out surface identities, depth, width, and seed. Record at every layer/sub-layer: residual state, target probability/logit/margin, full output distribution, class covariance/effective rank, within/between JS, $R_\ell,q_\ell,m_\ell,\chi_\ell$, finite-difference nuisance/signal directions, and Jacobian-vector products. Compare observed $\delta r_{\ell+1}$ with $J_\ell\delta r_\ell$ separately for nuisance and answer-changing perturbations. Include random, shuffled-target, answer-changing, undertrained, too-shallow, and low-signal controls.
+
+\section{I.E Results Placeholder}
+\paragraph{Primary result table.} First-to-last changes in within-class JS, between-class JS, $R_\ell$, covariance trace, effective rank, target signal, and Jacobian-prediction error for every generator family.
+\paragraph{Scaling result.} Fit depth-to-stability $L^\star$ as a function of nuisance count, pattern complexity, and class entropy.
+\paragraph{Non-monotonic trajectories.} Identify temporary expansion followed by contraction and test whether it predicts later improvement.
+\paragraph{Prior pilot evidence.} The previous controlled experiment found, under pattern evidence with four distractors, target-probability variance $0.0347\rightarrow0.0106\rightarrow0.0109$ and JS dispersion $0.0650\rightarrow0.0307\rightarrow0.0106$ bits across depth, while within-example entropy increased. This motivates but does not establish the theory.
+
+\section{I.F Interpretation Placeholder}
+Interpret whether depth is best described as cumulative anisotropic contraction, expansion--selection--reconvergence, class-conditioned attractor dynamics, or distributed nonlinear refinement not captured by local Jacobians.
+
+\part{Investigation II: Self-Attention Transport, Window Size, and Pattern Span}
+\section{II.A Hypotheses}
+\paragraph{H2.1 SA as context transport.} SA becomes important when the correct prediction depends on information not already locally available at the prediction position.
+\paragraph{H2.2 Window--span interaction.} If attention window $w$ is shorter than dependency span $s$, sufficient depth is required to transport the decisive distinction through intermediate positions.
+\paragraph{H2.3 Local-pattern control.} If $Y$ is determined by a short local pattern, shrinking the SA window below irrelevant longer context should have little effect as long as the predictive tokens remain accessible.
+\paragraph{H2.4 Stability depends on reachability.} Predictive stability cannot emerge until information separating competing classes is causally reachable.
+
+\section{II.B Formalization}
+In a simple message-passing approximation, local attention gives an effective receptive field $\mathcal{R}(L,w)\sim O(Lw)$, suggesting
+\begin{equation}L_{\min}\gtrsim s/w.\end{equation}
+More generally define a reachability function $\mathcal{C}(L,w,s)$ for causal paths from distinguishing source tokens to the prediction position through the stacked attention graph.
+
+\section{II.C Possible Theory}
+\subsection{Statistical View} Condition stability metrics on $(L,w,s)$ and measure how $D_{\mathrm{within}}$ and $D_{\mathrm{between}}$ change.
+\subsection{Information-Theoretic View} For decisive source variable $Z$ and prediction-position state $R_\ell^{(t)}$, measure/probe $I(R_\ell^{(t)};Z)$ or source/predictive-class decodability. Expect delayed arrival when $w<s$.
+\subsection{Dynamical-Systems View} Local attention makes depth a spatial transport process. Measure causal propagation velocity in token-position/depth space.
+\subsection{Statistical-Mechanical View} Treat local attention as a finite-range interacting system: depth is interaction time, $w$ interaction radius, and $s$ spatial separation. Predictive stabilization should begin only once relevant information is inside the effective causal cone.
+
+\section{II.D Experimental Plan}
+Construct rule families where the answer depends on one local token, a contiguous n-gram, two relevant tokens separated by fillers, a prefix/suffix relation, a functor $F(a,b)\mapsto y$, and nested patterns where an $n$-token suffix predicts $Y_1$ but an $(n+k)$-token pattern predicts $Y_2$. Cross $s\in\{1,2,4,8,16,32\}$, $w\in\{1,2,4,8,16,\mathrm{full}\}$, and $L\in\{1,2,4,8,12\}$. Measure accuracy, target log probability, first layer where answer-changing information is decodable, first layer where $R_\ell$ crosses threshold, source-token causal effect, attention-path reachability, and source-to-target Jacobian sensitivity. Compare candidate scaling laws $L^\star\propto s/w$, $L^\star\propto\log s$, and $L^\star\propto(s/w)^\alpha$.
+
+\section{II.E Results Placeholder}
+Provide a $(L,w,s)$ success/stability phase diagram, transport-delay plot, scaling-law fit, local-pattern control, and nested-pattern override trajectory showing when longer context changes the preferred continuation.
+
+\section{II.F Interpretation Placeholder}
+Determine whether SA is adequately described as contextual transport/mixing, whether MLP computation compensates once information arrives, and where the simple $Lw$ picture fails because of nonlinear gating, positional encoding, bottlenecks, or attention topology.
+
+\part{Investigation III: Head-Level Contributions to Stability and Pattern Discrimination}
+\section{III.A Hypotheses}
+\paragraph{H3.1 Head specialization by predictive distinction.} Different heads may carry different parts of the information required to distinguish predictive classes, especially when longer patterns refine or override shorter ones.
+\paragraph{H3.2 Complementarity over redundancy.} Stability can arise from complementary heads rather than one head encoding the full pattern.
+\paragraph{H3.3 Pattern-length recruitment.} Increasing pattern span or complexity should systematically alter the set of causally useful heads.
+\paragraph{H3.4 Functional not visual utility.} Stable/distinctive attention motifs need not imply causal importance; head attribution must be intervention-based.
+
+\section{III.B Formalization}
+For head $h$ at layer $\ell$, let $\Delta r_{\ell,h}^{SA}$ be its output contribution. Define stability utility
+\begin{equation}U^{\mathrm{stab}}_{\ell,h}=D_{\mathrm{within}}^{(-h)}-D_{\mathrm{within}}^{(\mathrm{intact})}\end{equation}
+and discrimination utility
+\begin{equation}U^{\mathrm{disc}}_{\ell,h}=D_{\mathrm{between}}^{(\mathrm{intact})}-D_{\mathrm{between}}^{(-h)}.\end{equation}
+A combined descriptive score is $U_{\ell,h}=U^{\mathrm{disc}}_{\ell,h}+\lambda U^{\mathrm{stab}}_{\ell,h}$. For a subset $H$, define interaction
+\begin{equation}\Gamma(H)=U(H)-\sum_{h\in H}U(h).\end{equation}
+
+\section{III.C Possible Theory}
+\subsection{Statistical View} Treat heads as parallel estimators/transport channels and measure whether errors across nuisance realizations are independent, correlated, complementary, or antagonistic.
+\subsection{Information-Theoretic View} Measure/probe class information and nuisance information in head outputs, including $I(\Delta r_{\ell,h};G)$ and $I(\Delta r_{\ell,h};D\mid G)$ or controlled surrogates.
+\subsection{Dynamical-Systems View} Since $A_\ell(r)=\sum_h A_{\ell,h}(r)$, heads contribute vector-field components whose sum can contract, expand, rotate, cancel, or transport states.
+\subsection{Statistical-Mechanical View} Multi-head attention is a finite set of interacting channels contributing to the order parameter. More heads may improve robustness via redundancy, division of labor, or ensemble-like variance reduction, but correlations can eliminate naive $1/H$ gains.
+
+\section{III.D Experimental Plan}
+Use paired families $g_n\to Y_1$ and $g_{n+k}\to Y_2$. Cross head count, pattern span, nested-pattern depth, distractor count, and number of competing classes. For every head run zero/mean ablation, matched/mismatched activation replacement, measure contribution to within/between JS, source-position transport sensitivity, QK topology, OV/output contribution, and pairwise head-output covariance. Test subsets with greedy, random, and interaction-aware selection against all-head and matched-budget controls.
+
+\section{III.E Results Placeholder}
+Report head-by-pattern maps; redundancy/complementarity; separate stability versus discrimination roles; and motif-versus-causal-utility correlation. Preserve the earlier pilot null ($\rho\approx -0.009$) as a warning against motif-only interpretation.
+
+\section{III.F Interpretation Placeholder}
+Determine whether head organization is best described by specialization by dependency span, specialization by predictive role, redundant transport channels, or distributed interaction with no stable individual-head semantics.
+
+\section{Integration Across the Three Investigations}
+Interpret in dependency order. Investigation I first establishes whether depth increases predictive-class organization. Investigation II then asks whether this depends on contextual reachability under SA window constraints. Investigation III explains how the SA contribution is distributed across heads. Only after this ordering is established should broad claims about SA/FF roles be made.
+
+\section{Explaining Non-Monotonic Stability}
+Non-monotonicity is an explicit target. Candidate mechanisms are: expansion before contraction; SA import of realization-specific context; intermediate use of variables irrelevant to the final target; capacity competition; hidden/output geometry mismatch; and architecture-specific dynamics. For every non-monotonic case distinguish useful temporary expansion from failure to stabilize. Useful expansion should predict later improvement in $R_\ell$ or final performance.
+
+\section{Training and Model Matrix}
+Use at least three scales with multiple seeds: tiny (2--4 layers, width 32--64, 2--4 heads) for exhaustive intervention; small (6--8 layers, width 96--192, 4--8 heads) for depth/transport laws; deeper (10--12 layers, width 192--384, 6--12 heads) for scaling/non-monotonicity. Save dense checkpoints for selected cells to separate learned organization from architectural priors.
+
+\section{Statistics and Reproducibility}
+Use independent surface identities for train, validation, and mechanistic evaluation. Bootstrap at predictive-family and seed level. Record generator config/seed, model config/seed, checkpoint hash, intervention specification, and analysis version. Avoid significance claims based only on huge numbers of correlated token rows.
+
+\section{Falsification Criteria}
+Accept the following outcomes: depth does not reliably improve predictive-class separation relative to nuisance; the pilot effect is generator-specific; local Jacobians fail even in small-perturbation regimes; window/span behavior has no simple transport law; head contributions are unstable across seeds; non-monotonicity is generic optimization noise; or low dispersion repeatedly reflects weak/absent target signal.
+
+\section{Expected Contribution}
+A successful Paper 0.5 would support the claim that residual depth composes state-dependent transformations that progressively reorganize input realizations by predictive equivalence, suppressing nuisance-sensitive variation relative to answer-changing variation without requiring monotonic denoising at every layer. The strongest result would connect statistical, information-theoretic, dynamical-systems, and statistical-mechanical descriptions of the same phenomenon.
+
+\section{Relationship to Later Work}
+Continuous learning is intentionally deferred. Pretrained-model replication is secondary and should occur only after controlled laws are established.
+
+\section{Conclusion}
+Paper 0.5 reframes recurrent patterns from an interpretability probe into a controlled physics-like laboratory for depth. Custom Transformers make signal, nuisance, frequency, span, and rule family known by construction. The three investigations proceed from system-level stability, to SA-limited contextual transport, to head-level implementation, with the aim of replacing informal descriptions of refinement across layers with measurable laws of composition.
+
+\begin{thebibliography}{9}
+\bibitem{geva2021ffn} Mor Geva, Roei Schuster, Jonathan Berant, and Omer Levy. Transformer Feed-Forward Layers Are Key-Value Memories. \emph{EMNLP}, 2021.
+\bibitem{olsson2022induction} Catherine Olsson et al. In-context Learning and Induction Heads. Transformer Circuits, 2022.
+\bibitem{dong2025attention} Yihe Dong, Lorenzo Noci, Mikhail Khodak, and Mufan Li. Attention Retrieves, MLP Memorizes. arXiv:2506.01115, 2025.
+\bibitem{chang2025bigram} Tyler A. Chang and Benjamin K. Bergen. Bigram Subnetworks: Mapping to Next Tokens in Transformer Language Models. arXiv:2504.15471, 2025.
+\end{thebibliography}
+\end{document}
