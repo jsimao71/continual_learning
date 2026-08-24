@@ -1,4 +1,4 @@
-from cl.experiments.paper05_layer_composition import classify, generate_records
+from cl.experiments.paper05_layer_composition import classify, generate_records, reachable
 
 
 CONFIG={"seed":1,"generators":["contiguous_ngram","skip_gram","binary_functor"],
@@ -17,3 +17,9 @@ def test_trajectory_classifier_preserves_nonmonotonicity():
     assert classify(.4,[.5,.2],.1) == "expansion_then_contraction"
     assert classify(.4,[.3,.2],.1) == "monotone_contraction"
     assert classify(.1,[.2,.3],.2) == "no_contraction"
+
+
+def test_graph_reachability_matches_window_times_depth_bound():
+    assert not reachable(span=8, window=2, depth=3)
+    assert reachable(span=8, window=2, depth=4)
+    assert reachable(span=32, window=None, depth=1)

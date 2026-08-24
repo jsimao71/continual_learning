@@ -146,6 +146,7 @@ class TinyTransformerLM(nn.Module):
         layers: int = 2,
         heads: int = 2,
         mlp_ratio: int = 2,
+        attention_window: int | None = None,
     ):
         super().__init__()
         if width % heads:
@@ -153,6 +154,7 @@ class TinyTransformerLM(nn.Module):
         self.vocab_size = vocab_size
         self.max_length = max_length
         self.width = width
+        self.attention_window = attention_window
         self.token_embedding = nn.Embedding(vocab_size, width)
         self.position_embedding = nn.Embedding(max_length, width)
         self.blocks = nn.ModuleList(
@@ -174,8 +176,7 @@ class TinyTransformerLM(nn.Module):
             raise ValueError("sequence exceeds configured max_length")
         positions = torch.arange(length, device=input_ids.device)
         state = self.token_embedding(input_ids) + self.position_embedding(positions)[None, :, :]
-        mask = torch.full((length, length), float("-inf"), device=input_ids.device)
-        mask = torch.triu(mask, diagonal=1)
+        mask = self.causal_mask(length, input_ids.device)
         trace = ModelTrace() if capture else None
         for layer_index, block in enumerate(self.blocks):
             selected = intervention if intervention and intervention.layer == layer_index else None
@@ -188,6 +189,14 @@ class TinyTransformerLM(nn.Module):
             if trace is not None and layer_trace is not None:
                 trace.layers.append(layer_trace)
         return self.lm_head(self.final_norm(state)), trace
+
+    def causal_mask(self, length: int, device: torch.device | str) -> Tensor:
+        query = torch.arange(length, device=device)[:, None]
+        key = torch.arange(length, device=device)[None, :]
+        allowed = key <= query
+        if self.attention_window is not None:
+            allowed &= key >= query - self.attention_window
+        return torch.where(allowed, torch.tensor(0.0, device=device), torch.tensor(float("-inf"), device=device))
 
     def diagnostic_logits(self, state: Tensor) -> Tensor:
         return self.lm_head(self.final_norm(state))

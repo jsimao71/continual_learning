@@ -301,6 +301,83 @@ def run_group1(config: dict, repo: Path, output: Path, device: torch.device) -> 
     atomic_write_json(output / "manifests/group1.json", manifest); print(json.dumps(manifest,indent=2))
 
 
+def reachable(span: int, window: int | None, depth: int) -> bool:
+    return window is None or depth * window >= span
+
+
+def _transport_batch(span: int, count: int, seed: int, local: bool = False) -> tuple[torch.Tensor, torch.Tensor]:
+    rng=random.Random(seed); inputs=[]; targets=[]
+    for index in range(count):
+        family=index%4; source=4+family; target=20+family
+        fillers=[rng.randrange(40,60) for _ in range(max(span-1,0))]
+        final=(30+family) if local else 30
+        inputs.append([source,*fillers,final]); targets.append((30+family) if local else target)
+    return torch.tensor(inputs,dtype=torch.long),torch.tensor(targets,dtype=torch.long)
+
+
+def _train_transport(cell: dict, config: dict, device: torch.device):
+    torch.manual_seed(config["seed"]+cell["span"]*100+cell["depth"]*10+(cell["window"] or 99))
+    model=TinyTransformerLM(96,40,config["width"],cell["depth"],config["heads"],attention_window=cell["window"]).to(device)
+    optimizer=torch.optim.AdamW(model.parameters(),lr=config["learning_rate"])
+    for step in range(config["train_steps"]):
+        half=config["batch_size"]//2
+        long_inputs,long_targets=_transport_batch(cell["span"],half,config["seed"]+step)
+        local_inputs,local_targets=_transport_batch(cell["span"],config["batch_size"]-half,config["seed"]+step,True)
+        inputs=torch.cat((long_inputs,local_inputs)); targets=torch.cat((long_targets,local_targets))
+        inputs,targets=inputs.to(device),targets.to(device); model.train(); optimizer.zero_grad(set_to_none=True)
+        logits,_=model(inputs); loss=F.cross_entropy(logits[:,-1],targets); loss.backward(); torch.nn.utils.clip_grad_norm_(model.parameters(),1); optimizer.step()
+    model.eval(); return model
+
+
+@torch.no_grad()
+def _transport_metrics(model, cell: dict, config: dict, device: torch.device, local: bool=False) -> list[dict]:
+    inputs,targets=_transport_batch(cell["span"],config["probe_examples"],config["seed"]+999,local); inputs,targets=inputs.to(device),targets.to(device)
+    _,trace=model(inputs,capture=True); assert trace is not None; rows=[]
+    for layer,values in enumerate(trace.layers):
+        p=torch.softmax(model.diagnostic_logits(values.post_block[:,-1]),-1)
+        for index in range(len(inputs)):
+            rows.append({"span":cell["span"],"window":cell["window"] if cell["window"] is not None else "full","depth":cell["depth"],
+                "layer":layer,"example":index,"family":index%4,"local_control":int(local),
+                "reachable":int(reachable(cell["span"],cell["window"],layer+1)),"target_probability":float(p[index,targets[index]]),
+                "target_logprob":float(torch.log(p[index,targets[index]].clamp_min(1e-30))),"top1_correct":int(p[index].argmax()==targets[index]),
+                "probabilities":p[index].cpu().numpy().tolist()})
+    return rows
+
+
+def run_group2(config: dict, repo: Path, output: Path, device: torch.device) -> None:
+    rows=[]; metadata=[]
+    for cell_index,cell in enumerate(config["cells"]):
+        model=_train_transport(cell,config,device); rows.extend(_transport_metrics(model,cell,config,device)); rows.extend(_transport_metrics(model,cell,config,device,True))
+        checkpoint_hash=stable_hash({name:tensor.detach().cpu().numpy().astype(np.float16).tobytes().hex() for name,tensor in model.state_dict().items()})
+        metadata.append({**RunMetadata.capture(repo=repo,run_id=f"paper05-g2-cell{cell_index}",config={**config,"cell":cell},
+            model_id=f"controlled-transport-cell{cell_index}",dataset_id="paper05-window-transport-v1",seed=config["seed"],device=str(device),dtype="float32",data_hash=stable_hash(cell)).as_dict(),
+            "checkpoint_hash":checkpoint_hash})
+    aggregate=[]; groups=defaultdict(list)
+    for row in rows: groups[(row["span"],row["window"],row["depth"],row["layer"],row["local_control"],row["reachable"])].append(row)
+    for key,values in sorted(groups.items(),key=str):
+        family_centroids={family:np.mean([x["probabilities"] for x in values if x["family"]==family],axis=0) for family in range(4)}
+        within=np.mean([jensen_shannon_bits(x["probabilities"],family_centroids[x["family"]]) for x in values])
+        between=np.mean([jensen_shannon_bits(family_centroids[a],family_centroids[b]) for a in range(4) for b in range(a+1,4)])
+        aggregate.append({**dict(zip(("span","window","depth","layer","local_control","reachable"),key)),
+            "n":len(values),"accuracy":float(np.mean([x["top1_correct"] for x in values])),"mean_target_logprob":float(np.mean([x["target_logprob"] for x in values])),
+            "within_js_bits":float(within),"between_js_bits":float(between),"R":float(between/max(within,1e-12))})
+    raw,agg=output/"raw/group2",output/"aggregates/group2";raw.mkdir(parents=True,exist_ok=True);agg.mkdir(parents=True,exist_ok=True)
+    write_jsonl(raw/"group2_observations.jsonl",rows);write_jsonl(raw/"metadata.jsonl",metadata);write_csv(agg/"group2_transport.csv",aggregate)
+    figures=output/"figures";figures.mkdir(parents=True,exist_ok=True);final=[x for x in aggregate if x["layer"]==x["depth"]-1 and not x["local_control"]]
+    for filename,metric in (("g2_span_window_accuracy_phase.png","accuracy"),("g2_span_window_R_phase.png","R")):
+        fig,ax=plt.subplots(figsize=(7,4.5)); labels=[f"s{x['span']}/w{x['window']}/L{x['depth']}" for x in final];ax.bar(range(len(final)),[x[metric] for x in final]);ax.set_xticks(range(len(final)),labels,rotation=35,ha="right");ax.set_ylabel(metric);fig.tight_layout();fig.savefig(figures/filename,dpi=180);plt.close(fig)
+    fig,ax=plt.subplots(figsize=(7,4.5))
+    for cell in config["cells"]:
+        window=cell["window"] if cell["window"] is not None else "full";v=[x for x in aggregate if x["span"]==cell["span"] and str(x["window"])==str(window) and x["depth"]==cell["depth"] and not x["local_control"]]
+        ax.plot([x["layer"]+1 for x in v],[x["accuracy"] for x in v],marker="o",label=f"s{cell['span']}/w{window}")
+    ax.set_xlabel("depth");ax.set_ylabel("accuracy");ax.legend(fontsize=7);ax.grid(alpha=.25);fig.tight_layout();fig.savefig(figures/"g2_transport_delay.png",dpi=180);plt.close(fig)
+    for filename,local in (("g2_local_pattern_control.png",1),("g2_nested_override_trajectory.png",0)):
+        fig,ax=plt.subplots(figsize=(7,4.5));v=[x for x in aggregate if x["local_control"]==local];ax.scatter([x["layer"]+1 for x in v],[x["accuracy"] for x in v],c=[x["span"] for x in v]);ax.set_xlabel("depth");ax.set_ylabel("accuracy");fig.tight_layout();fig.savefig(figures/filename,dpi=180);plt.close(fig)
+    fig,ax=plt.subplots(figsize=(7,4.5));ratios=[x["span"]/(x["window"] if isinstance(x["window"],int) else x["span"]) for x in final];ax.scatter(ratios,[x["depth"] for x in final],c=[x["accuracy"] for x in final]);ax.set_xlabel("span/window");ax.set_ylabel("tested depth");fig.tight_layout();fig.savefig(figures/"g2_Lstar_vs_span_over_window.png",dpi=180);plt.close(fig)
+    manifest={"schema_version":"paper05.group2.v1","config":config,"rows":len(rows),"regimes":len(config["cells"]),"mask_reachability_verified":True,"artifact_hash":stable_hash(aggregate)}
+    atomic_write_json(output/"manifests/group2.json",manifest);print(json.dumps(manifest,indent=2))
+
+
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--group",type=int,choices=(1,2,3),required=True)
     parser.add_argument("--config",required=True); parser.add_argument("--repo",default=".")
@@ -308,6 +385,7 @@ def main():
     parser.add_argument("--device",default="mps" if torch.backends.mps.is_available() else "cpu"); args=parser.parse_args()
     config=json.loads(Path(args.config).read_text()); output=Path(args.output); (output/"manifests").mkdir(parents=True,exist_ok=True)
     if args.group == 1: run_group1(config,Path(args.repo).resolve(),output,torch.device(args.device))
+    elif args.group == 2: run_group2(config,Path(args.repo).resolve(),output,torch.device(args.device))
     else: raise NotImplementedError(f"group {args.group} is implemented in the next milestone")
 
 

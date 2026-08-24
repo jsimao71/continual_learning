@@ -1,0 +1,2 @@
+{"seed": 419, "width": 48, "heads": 4, "train_steps": 500, "batch_size": 64, "probe_examples": 64, "learning_rate": 0.001,
+ "cells": [{"span":2,"window":1,"depth":1},{"span":2,"window":1,"depth":2},{"span":4,"window":1,"depth":2},{"span":4,"window":1,"depth":4},{"span":8,"window":2,"depth":2},{"span":8,"window":2,"depth":4},{"span":8,"window":4,"depth":2},{"span":8,"window":null,"depth":2}]}

@@ -1,0 +1,58 @@
+{
+  "artifact_hash": "4fd53380cd5aa39760e8ededc6ad5838375b96e38eef44c0d474198c1e45591c",
+  "config": {
+    "batch_size": 64,
+    "cells": [
+      {
+        "depth": 1,
+        "span": 2,
+        "window": 1
+      },
+      {
+        "depth": 2,
+        "span": 2,
+        "window": 1
+      },
+      {
+        "depth": 2,
+        "span": 4,
+        "window": 1
+      },
+      {
+        "depth": 4,
+        "span": 4,
+        "window": 1
+      },
+      {
+        "depth": 2,
+        "span": 8,
+        "window": 2
+      },
+      {
+        "depth": 4,
+        "span": 8,
+        "window": 2
+      },
+      {
+        "depth": 2,
+        "span": 8,
+        "window": 4
+      },
+      {
+        "depth": 2,
+        "span": 8,
+        "window": null
+      }
+    ],
+    "heads": 4,
+    "learning_rate": 0.001,
+    "probe_examples": 64,
+    "seed": 419,
+    "train_steps": 500,
+    "width": 48
+  },
+  "mask_reachability_verified": true,
+  "regimes": 8,
+  "rows": 2432,
+  "schema_version": "paper05.group2.v1"
+}

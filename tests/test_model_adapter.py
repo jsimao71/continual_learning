@@ -46,3 +46,10 @@ def test_head_ablation_is_selective_and_finite():
     )
     assert torch.isfinite(ablated).all()
     assert not torch.equal(intact, ablated)
+
+
+def test_local_attention_window_mask_and_reachability():
+    model = TinyTransformerLM(vocab_size=20, max_length=8, width=16, layers=2, heads=2, attention_window=2)
+    mask = model.causal_mask(6, "cpu")
+    assert mask[5, 3] == 0 and torch.isneginf(mask[5, 2])
+    assert torch.isneginf(mask[2, 3])
