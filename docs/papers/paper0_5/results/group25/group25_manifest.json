@@ -1,0 +1,289 @@
+{
+  "artifact_hash": "92cf2dcf7677fe01c184e202c177c6c21e6c2f23b967b4b7fc7aa86bc496aba4",
+  "attention_rows": 5472,
+  "config": {
+    "batch_size": 128,
+    "dataset_seed": 2505,
+    "depths": [
+      2,
+      4,
+      6
+    ],
+    "heads": 4,
+    "learning_rate": 0.003,
+    "local_training_cells": [
+      {
+        "depth": 2,
+        "predictive_span": 2,
+        "window": 2
+      },
+      {
+        "depth": 4,
+        "predictive_span": 8,
+        "window": 8
+      },
+      {
+        "depth": 6,
+        "predictive_span": 16,
+        "window": 16
+      }
+    ],
+    "model_seeds": [
+      11,
+      23
+    ],
+    "nuisance_distances": [
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "nuisance_realizations": 4,
+    "nuisance_types": [
+      "N1",
+      "N2",
+      "N3"
+    ],
+    "predictive_spans": [
+      2,
+      8,
+      16
+    ],
+    "sequence_length": 36,
+    "train_steps": 1200,
+    "vocab_size": 64,
+    "width": 32,
+    "windows": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      null
+    ]
+  },
+  "decision_rows": 87552,
+  "raw_rows": 1488384,
+  "schema_version": "paper05.group25.v1",
+  "sublayer_rows": 5472,
+  "surface_rows": 23256,
+  "training": [
+    {
+      "checkpoint_hash": "38059b8278296e8ac28c577fb80e2db256a27a6b711b2bfd067c002ae948c728",
+      "depth": 2,
+      "final_loss": "checkpoint_reused",
+      "initial_loss": "checkpoint_reused",
+      "seed": 11,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "c1310b8e8f3ee44ade5ebeeffe33d758006997e25001d3b47147da6c233426ca",
+      "depth": 4,
+      "final_loss": 8.264475582109299e-06,
+      "initial_loss": 24.566099166870117,
+      "seed": 11,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "5e974ff7c77710b1a217916e3648cbb9ac138ad50ab898eca69bfa2854da2bb4",
+      "depth": 6,
+      "final_loss": 7.496152647945564e-06,
+      "initial_loss": 23.540706634521484,
+      "seed": 11,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "029116d26fa204e43a9b7e31561061820b9bc691430b0a48b04b846e6c466bcd",
+      "depth": 2,
+      "final_loss": 1.497822995588649e-05,
+      "initial_loss": 27.279970169067383,
+      "seed": 11,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "3cecdfe26de0f2d6b6040cd9ac5a599be0a36b440844c299759bb664f3b2db16",
+      "depth": 4,
+      "final_loss": 9.85329916147748e-06,
+      "initial_loss": 25.41069221496582,
+      "seed": 11,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "5ac081521cbaf07a18b68af86aae354cc0538be17b1865a6137e879ee4a79a4f",
+      "depth": 6,
+      "final_loss": 4.826080839848146e-06,
+      "initial_loss": 22.869699478149414,
+      "seed": 11,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "b6f2bac2a7577508c25aeb9728eabc7554e54c1774bdfa75482ff196ef4c7432",
+      "depth": 2,
+      "final_loss": 1.8396864106762223e-05,
+      "initial_loss": 28.373342514038086,
+      "seed": 11,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "7c797bca3daada52678255768494e62d1bbb1efbcb6647cc46a605e6b93d063f",
+      "depth": 4,
+      "final_loss": 8.08102049631998e-06,
+      "initial_loss": 25.76605796813965,
+      "seed": 11,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "e6d63f1f2a10907ba9bf3b1c2eb9587838ced30b1328162209059b2d72f6a354",
+      "depth": 6,
+      "final_loss": 8.284051546070259e-06,
+      "initial_loss": 23.165719985961914,
+      "seed": 11,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "depth": 2,
+      "final_loss": 9.192098332277965e-06,
+      "initial_loss": 31.017744064331055,
+      "predictive_span": 2,
+      "seed": 11,
+      "trained_window": 2,
+      "window": 2
+    },
+    {
+      "depth": 4,
+      "final_loss": 5.162295110494597e-06,
+      "initial_loss": 27.433956146240234,
+      "predictive_span": 8,
+      "seed": 11,
+      "trained_window": 8,
+      "window": 8
+    },
+    {
+      "depth": 6,
+      "final_loss": 4.244955562171526e-06,
+      "initial_loss": 24.805662155151367,
+      "predictive_span": 16,
+      "seed": 11,
+      "trained_window": 16,
+      "window": 16
+    },
+    {
+      "checkpoint_hash": "ee3eb9bef588a36ca884644be5acddb056129230f63400e6f2f81681363d7a2f",
+      "depth": 2,
+      "final_loss": 1.8348629964748397e-05,
+      "initial_loss": 24.520336151123047,
+      "seed": 23,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "239482cac542f329ea7f1dcf4680706196bb4ffa2f8b2a3c728cadc54c62e575",
+      "depth": 4,
+      "final_loss": 1.0467048014106695e-05,
+      "initial_loss": 25.736356735229492,
+      "seed": 23,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "6c7c4287081e9f54c57a8c67a565dd714ea884f241230135a61cf81befe494de",
+      "depth": 6,
+      "final_loss": 7.868684406275861e-06,
+      "initial_loss": 22.947134017944336,
+      "seed": 23,
+      "span": 2,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "dd207d86d05c878f7788bcb44f7bd60c7578312028a2dabd65b85acd5ceef44b",
+      "depth": 2,
+      "final_loss": 2.1493518943316303e-05,
+      "initial_loss": 24.719755172729492,
+      "seed": 23,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "32d31abf92d3e9f9e843067240b5ac7179e61a30a2351e9adf4d80cef3c9ae3d",
+      "depth": 4,
+      "final_loss": 9.31592148845084e-06,
+      "initial_loss": 24.270713806152344,
+      "seed": 23,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "44d9ba422e92a11a2386c022f97d2c4104e49ff71f39a927a45135d9e191cdc7",
+      "depth": 6,
+      "final_loss": 9.069142834050581e-06,
+      "initial_loss": 23.091096878051758,
+      "seed": 23,
+      "span": 8,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "cb42a5daa416b7f6ac8fcdf833cc87672c9bd8688dbe6d78a0ce268612aa7340",
+      "depth": 2,
+      "final_loss": 2.072797724395059e-05,
+      "initial_loss": 24.719470977783203,
+      "seed": 23,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "b847d7e5a19e16bb755c6ea88542833542931c2386a3bbe2047783b593e29cbc",
+      "depth": 4,
+      "final_loss": 9.733148544910364e-06,
+      "initial_loss": 25.30238151550293,
+      "seed": 23,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "checkpoint_hash": "6608d807868c819cf130c2733e41200bfb1f28fccdbd2548336c9406519094ed",
+      "depth": 6,
+      "final_loss": 1.0576929525996093e-05,
+      "initial_loss": 23.074356079101562,
+      "seed": 23,
+      "span": 16,
+      "trained_window": "full"
+    },
+    {
+      "depth": 2,
+      "final_loss": 6.888942607474746e-06,
+      "initial_loss": 25.226106643676758,
+      "predictive_span": 2,
+      "seed": 23,
+      "trained_window": 2,
+      "window": 2
+    },
+    {
+      "depth": 4,
+      "final_loss": 7.159963388403412e-06,
+      "initial_loss": 24.601646423339844,
+      "predictive_span": 8,
+      "seed": 23,
+      "trained_window": 8,
+      "window": 8
+    },
+    {
+      "depth": 6,
+      "final_loss": 8.146215805027168e-06,
+      "initial_loss": 23.57307243347168,
+      "predictive_span": 16,
+      "seed": 23,
+      "trained_window": 16,
+      "window": 16
+    }
+  ]
+}

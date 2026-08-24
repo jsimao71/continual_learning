@@ -1,0 +1,22 @@
+{
+  "dataset_seed": 2505,
+  "model_seeds": [11, 23],
+  "predictive_spans": [2, 8, 16],
+  "nuisance_distances": [2, 4, 8, 16, 32],
+  "windows": [1, 2, 4, 8, 16, null],
+  "depths": [2, 4, 6],
+  "nuisance_types": ["N1", "N2", "N3"],
+  "nuisance_realizations": 4,
+  "sequence_length": 36,
+  "vocab_size": 64,
+  "width": 32,
+  "heads": 4,
+  "train_steps": 1200,
+  "batch_size": 128,
+  "learning_rate": 0.003,
+  "local_training_cells": [
+    {"predictive_span": 2, "depth": 2, "window": 2},
+    {"predictive_span": 8, "depth": 4, "window": 8},
+    {"predictive_span": 16, "depth": 6, "window": 16}
+  ]
+}
