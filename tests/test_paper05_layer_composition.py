@@ -1,4 +1,5 @@
 from cl.experiments.paper05_layer_composition import classify, generate_records, reachable
+from cl.experiments.paper05_correctness import decisions
 
 
 CONFIG={"seed":1,"generators":["contiguous_ngram","skip_gram","binary_functor"],
@@ -23,3 +24,13 @@ def test_graph_reachability_matches_window_times_depth_bound():
     assert not reachable(span=8, window=2, depth=3)
     assert reachable(span=8, window=2, depth=4)
     assert reachable(span=32, window=None, depth=1)
+
+
+def test_first_and_stable_top1_are_distinct_and_missing_is_explicit():
+    base={"model_seed":1,"generator_family":"g","predictive_family_id":"g:r","surface_identity_id":"x","nuisance_count":4}
+    rows=[{**base,"depth_index":i,"prediction_correct":value} for i,value in enumerate((0,1,0,1,1))]
+    result=decisions(rows)[0]
+    assert result["first_top1_layer"]==1 and result["stable_top1_layer"]==3
+    assert result["settling_delay"]==2 and result["top1_reversal_count"]==3
+    never=decisions([{**base,"depth_index":i,"prediction_correct":0} for i in range(3)])[0]
+    assert never["first_top1_layer"]==never["stable_top1_layer"]==""

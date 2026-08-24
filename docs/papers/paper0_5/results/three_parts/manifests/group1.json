@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "9c1c3137ab64978391eb77528857ff282a9cf6323f461db36f1db95f6ee72c63",
+  "artifact_hash": "3fff4460626ca4587414e05df20ec4a4f9de9c557a21ad728a3260b989950e9f",
   "config": {
     "batch_size": 64,
     "generators": [

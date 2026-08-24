@@ -1,0 +1,11 @@
+{
+  "artifact_hash": "5cdbeb95133ea428892f338565a0c04db99717aae0fadb101232b0378f4b7c7b",
+  "covariance_rows": 5184,
+  "decision_rows": 972,
+  "order_parameter_rows": 729,
+  "rows": 8748,
+  "scaling_fits": 10,
+  "schema_version": "paper05.correctness.v1",
+  "sentinel": "empty string for never-top1",
+  "update_rows": 7776
+}

@@ -154,6 +154,9 @@ def jvp_diagnostics(model, records: list[PatternRecord], seed: int, device: torc
             tangent = right - left
             with torch.enable_grad():
                 actual_left, predicted = torch.autograd.functional.jvp(mapping, left.detach().requires_grad_(True), tangent)
+                decision_state=left.detach().requires_grad_(True);decision_logits=model.diagnostic_logits(decision_state[:,-1]);target=left_record.target_token
+                masked=decision_logits.clone();masked[:,target]=float("-inf");margin=decision_logits[:,target]-masked.max(-1).values
+                gradient=torch.autograd.grad(margin.sum(),decision_state)[0]
             actual_right = mapping(right)
             observed = actual_right[:, -1] - actual_left[:, -1]; predicted_final = predicted[:, -1]
             relative = float(torch.linalg.vector_norm(predicted_final - observed) / torch.linalg.vector_norm(observed).clamp_min(1e-12))
@@ -165,7 +168,10 @@ def jvp_diagnostics(model, records: list[PatternRecord], seed: int, device: torc
                          "input_delta_norm":float(torch.linalg.vector_norm(tangent[:, -1])),
                          "observed_delta_norm":float(torch.linalg.vector_norm(observed)),
                          "jvp_cosine":_cosine(predicted_final,observed),"relative_norm_error":relative,
-                         "prediction_space_relative_error":prediction_error})
+                         "prediction_space_relative_error":prediction_error,
+                         "jvp_contraction_ratio":float(torch.linalg.vector_norm(predicted)/torch.linalg.vector_norm(tangent).clamp_min(1e-12)),
+                         "decision_direction_projection":float((gradient*tangent).sum()),
+                         "decision_sensitivity_per_input_norm":float(abs((gradient*tangent).sum())/torch.linalg.vector_norm(tangent).clamp_min(1e-12))})
             left, right = actual_left.detach(), actual_right.detach()
     return rows
 
