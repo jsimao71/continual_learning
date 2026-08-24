@@ -9,7 +9,7 @@
 \begin{document}\maketitle
 
 \begin{abstract}
-We study three linked phenomena: how depth changes the stability of a response under irrelevant input variation, how the self-attention (SA) window limits transport of predictive context, and how heads contribute to stability and class discrimination.  The primary instruments are custom causal Transformers trained on known synthetic distributions.  A reproduced pilot shows post-block Jensen--Shannon (JS) dispersion $0.0650\to0.0307\to0.0106$ bits despite increasing within-example entropy.  A new three-seed matrix generalizes the first-to-last contraction to contiguous n-grams ($-0.0244$ bits, 95\% CI $[-0.0414,-0.0098]$), skip-grams ($-0.0415$, $[-0.0791,-0.0129]$), and binary functors ($-0.0402$, $[-0.0738,-0.0143]$), all at 100\% final accuracy.  Only 7 of 27 family--seed trajectories contract monotonically.  Local-window experiments show that graph reachability is necessary but not sufficient: unreachable cells remain near chance, several reachable cells achieve 80--100\%, but one graph-reachable narrow-window cell fails to learn.  In a four-layer/four-head model, equivalent-family head replacement is nearly neutral (0.0006-nat target-log-probability drop), whereas mismatch costs 0.0194 nats; pair effects are non-additive and motif specificity again fails to predict causal utility ($\rho=-0.0059$).  The supported theory is composed, anisotropic, state-dependent predictive refinement---not universal denoising, a sufficient $Lw\ge s$ law, or stable visual head semantics.
+We study three linked phenomena: how depth changes the stability and correctness of a response under irrelevant input variation, how the self-attention (SA) window limits transport of predictive context, and how heads contribute to stability and class discrimination.  The primary instruments are custom causal Transformers trained on known synthetic distributions.  A reproduced pilot shows post-block Jensen--Shannon (JS) dispersion $0.0650\to0.0307\to0.0106$ bits despite increasing within-example entropy.  A new three-seed matrix generalizes contraction to contiguous n-grams, skip-grams, and binary functors, all at 100\% final accuracy under eight nuisances. Dense correctness traces show mean target margin changing from $-32.02$ to $+10.51$ logits and top-1 fraction from 0 to 1. Absolute margin variance grows from 0 to 1.89, however: correct signal grows much faster than fluctuation rather than fluctuation universally contracting. Stable decisions occur near sublayer depth 3.88 with 0.47-boundary mean settling delay; neither decision depth nor margin SNR supports a scaling-law claim. Local-window experiments show that graph reachability is necessary but not sufficient.  In a four-layer/four-head model, equivalent-family head replacement is nearly neutral whereas mismatch is harmful; pair effects are non-additive and motif specificity again fails to predict causal utility ($\rho=-0.0059$).  The supported theory is composed, anisotropic, state-dependent predictive refinement---not universal denoising, a sufficient $Lw\ge s$ law, or stable visual head semantics.
 \end{abstract}
 
 \section{The question and the three phenomena}
@@ -36,6 +36,24 @@ R_\ell&=\frac{D_{\rm between}(\ell)}{D_{\rm within}(\ell)+\epsilon}.
 \end{align}
 A useful layer trajectory lowers within-family fluctuation without erasing target signal or between-family separation.  Large $R_\ell$ is not self-interpreting when its denominator is nearly zero, so we always report accuracy, target probability, and numerator/denominator with it.
 
+\subsection{Correctness-aware order parameters}
+Let $z_\ell(Y)$ be the correct-target logit and let $z_\ell(c^*)$ be the strongest competing logit. Define the per-realization margin
+\begin{equation}m_\ell(g,d)=z_\ell(Y)-z_\ell(c^*),\end{equation}
+which is positive exactly when the target is top-1. Across nuisance realizations, the signal and fluctuation are
+\begin{align}S_\ell&=\mathbb E_d[m_\ell(g,d)],&N_\ell^2&=\operatorname{Var}_d[m_\ell(g,d)],\\
+\Gamma_\ell&=\frac{S_\ell}{\sqrt{N_\ell^2+\epsilon}},&
+\Gamma_\ell^{\rm robust}&=\frac{\operatorname{median}_d m_\ell}{1.4826\operatorname{MAD}_d(m_\ell)+\epsilon}.
+\end{align}
+We always show $S_\ell$ and $N_\ell^2$ beside $\Gamma_\ell$: a large ratio can otherwise arise from a collapsed denominator.  Correctness and class organization are complementary: $\Gamma_\ell$ asks whether the externally specified answer wins reliably, whereas $R_\ell$ asks whether families separate. In representation space we use
+\begin{equation}\chi_\ell=\frac{q_\ell}{M_\ell^{\rm class}+\epsilon},\quad q_\ell=\mathbb E_g\operatorname{Tr}\Sigma_{\ell,g},\quad M_\ell^{\rm class}=\mathbb E_{g\ne g'}\|\mu_{\ell,g}-\mu_{\ell,g'}\|^2.\end{equation}
+The first top-1 depth is the first boundary where $m_\ell>0$; stable depth is the first boundary after which it remains positive. Never-correct trajectories use a missing sentinel, never the final layer.
+
+For boundary-to-boundary progress $a_{\ell i}=m_{\ell+1,i}-m_{\ell,i}$, write $a_{\ell i}=\mu_\ell^\Delta+\epsilon_{\ell i}^\Delta$. Then
+\begin{align}S_L^{\rm cum}&=\sum_\ell\mu_\ell^\Delta,\\
+(N_L^{\rm cum})^2&=\sum_\ell(\sigma_\ell^\Delta)^2+2\sum_{\ell<k}\operatorname{Cov}(\epsilon_\ell^\Delta,\epsilon_k^\Delta).
+\end{align}
+This decomposition makes repair visible: negative cross-layer covariance means that fluctuations introduced at one boundary tend to be counteracted later.
+
 \subsection{Why non-monotonicity is expected}
 For a perturbation $\delta r_\ell$, linearize one block:
 \begin{equation}\delta r_{\ell+1}\approx J_\ell\delta r_\ell,\qquad J_\ell=I+\frac{\partial F_\ell}{\partial r}.\end{equation}
@@ -52,7 +70,7 @@ U^{\rm disc}_{\ell h}&=D^{\rm intact}_{\rm between}-D^{(-h)}_{\rm between}.
 For two heads, $\Gamma(h,k)=U(h,k)-U(h)-U(k)$ distinguishes synergy ($\Gamma>0$) from redundancy or compensation ($\Gamma<0$).  These are causal, task-conditioned quantities; an attractive attention motif is not a substitute.
 
 \section{Controlled methods}
-The generator records predictive family, held-out surface identity, target, pattern tokens/length/span, nuisance tokens/count/type/seed, answer-changing status, continuation entropy, training frequency, split, and generator seed.  Group~1 uses contiguous n-grams, skip-grams, and binary functors: nine families, three model seeds, nuisance counts 0/4/8, twelve realizations, width 48, four layers, and four heads.  Group~2 uses eight $(s,w,L)$ cells, four predictive classes, an exactly tested local mask, and a separately labelled local-pattern task.  Group~3 uses a trained four-layer/four-head full-attention model and evaluates every head with zero ablation, batch-mean replacement, same-family replacement, mismatched replacement, and every within-layer pair.  Manifests store resolved configs, seeds, data identities, and checkpoint hashes.  Family/seed bootstrap is used for the confirmatory Group~1 contrasts; head scans are descriptive and no row-level significance is asserted.
+The generator records predictive family, held-out surface identity, target, pattern tokens/length/span, nuisance tokens/count/type/seed, answer-changing status, continuation entropy, training frequency, split, and generator seed.  Group~1 uses contiguous n-grams, skip-grams, and binary functors: nine families, three model seeds, nuisance counts 0/4/8, twelve realizations, width 48, four layers, and four heads. At the initial pre-SA state and every post-SA/post-block boundary we retain target logit/probability/rank/margin, strongest competitor, top-1 result, entropy, distribution hash, residual covariance, first/stable decision depth, reversals, layer-update signal/noise, and cross-layer covariance. Group~2 uses eight $(s,w,L)$ cells, four predictive classes, an exactly tested local mask, and a separately labelled local-pattern task.  Group~3 uses a trained four-layer/four-head full-attention model and evaluates every head with zero ablation, batch-mean replacement, same-family replacement, mismatched replacement, and every within-layer pair.  Manifests store resolved configs, seeds, data identities, and checkpoint hashes.  Family/seed bootstrap is used for the confirmatory Group~1 contrasts; head scans are descriptive and no row-level significance is asserted.
 
 \part{I. Layer composition and response stability}
 \section{Pilot reproduction and generalization}
@@ -63,6 +81,26 @@ In the new matrix, all three generators achieve 100\% final accuracy with eight 
 \includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_within_between_vs_depth.png}\hfill
 \includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_R_vs_depth.png}
 \caption{Within-family JS and the separation-to-fluctuation ratio across depth under eight nuisances.}\end{figure}
+
+\section{Correct signal grows faster than margin fluctuation}
+At eight nuisances, the aggregate mean correct-target margin changes from $-32.02$ logits initially to $+10.51$ finally, mean target probability from $1.4\times10^{-10}$ to 0.9998, and top-1 fraction from 0 to 1.  Each generator independently changes from negative to positive margin. This rules out the ``stable but uniformly wrong'' failure mode.
+
+The stronger absolute-contraction hypothesis is nevertheless false here. Margin variance starts at zero because the aligned prediction-position state is initially identical across nuisance realizations; it finishes at 1.89. Final median margin SNR is $+10.24$. Thus reliability comes from roughly 42.5 logits of signal growth outpacing fluctuation growth, not from an SNR denominator collapse. Prediction-space JS can contract even while logit-margin variance expands because the softmax geometry and the mean decision direction both change.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_target_margin_vs_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_signal_dispersion_phase_plane.png}
+\caption{Correct-target margin across sublayer depth and the signal--fluctuation phase plane. The trajectory moves from confidently wrong and identical to confidently correct with finite nuisance variation.}\end{figure}
+
+\section{Decision formation, update covariance, and scaling non-results}
+Mean first/stable top-1 depths are 3.00/3.40 boundaries at nuisance 0, 3.08/3.48 at nuisance 4, and 3.41/3.88 at nuisance 8. Mean settling delays are 0.48, 0.40, and 0.47; mean correctness reversals remain 1.37--1.52. Nuisance modestly delays decision formation, but a five-form comparison finds no scaling law: the best stable-depth fit has $R^2=0.013$ and held-out error 1.65 boundaries. Positive-margin SNR fits explain at most 1.0\% of variance; logarithmic and linear BIC differ by less than one. A power law is unsupported.
+
+Mean boundary update is $+5.12$ logits and 73.7\% of family/seed/noise transition cells have positive mean progress. Median cumulative signal is $+40.39$ logits. Median summed marginal update variance is 3.55, but median summed off-diagonal covariance is $-2.12$, leaving actual cumulative fluctuation variance 0.51. Later updates therefore cancel a substantial part of earlier realization-specific fluctuation.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_first_vs_stable_top1_layer.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_layer_update_covariance.png}
+\caption{First versus stable decision boundaries and cross-boundary margin-update covariance. Negative off-diagonal structure implements fluctuation cancellation/repair.}\end{figure}
+
+Entropy remains independent of correctness: its correlation with aggregate margin is only 0.081. It can increase while margin crosses zero and while within-family JS contracts.
 
 \section{Non-monotone composition and local linearization}
 Only 7/27 family--seed trajectories contract monotonically; 11 expand then contract, five oscillate, three contract late, and one does not contract.  This favors cumulative nonlinear composition over a layerwise denoising story.
@@ -95,12 +133,12 @@ Pair interactions range from $-0.0116$ to $+0.0187$ nats, with median $+0.0050$,
 \caption{Non-additive pair effects and the repeated motif--causal null.}\end{figure}
 
 \section{Integrated interpretation}
-The statistical view is supported: predictive-family dispersion contracts across three generators while signal remains.  The dynamical view is supported descriptively: trajectories are usually non-monotone and local JVP accuracy differs by perturbation type.  The information-theoretic view is only partially supported because class separation is measured but mutual information is not estimated.  The statistical-mechanical view is likewise partial: $R$ and covariance act as order parameters, but the experiment has no finite-size evidence for a phase transition.
+The statistical view is supported in relative form: predictive-family JS contracts, correct margin becomes strongly positive, and signal grows faster than absolute margin fluctuation. The dynamical view is supported descriptively: decisions reverse, trajectories are usually non-monotone, cross-layer fluctuations anticorrelate, and local JVP accuracy differs by perturbation type.  The information-theoretic view is only partially supported because class separation is measured but mutual information is not estimated.  The statistical-mechanical view is likewise partial: correctness signal, fluctuation, $R$, $\chi$, and covariance are measured, but neither empirical scaling nor a finite-size phase transition is supported.
 
 The most economical account is \emph{state-dependent anisotropic refinement}.  Layers transport, rotate, expand, and contract different perturbations; SA reachability constrains which distinctions can enter the prediction position; heads supply parallel, interacting vector-field components.  No single layer or head need be a complete estimator, and final stabilization need not be monotone.
 
 \section{Limitations and open tests}
-The new runs satisfy smoke rather than full scaling gates. Group~1 uses three generators rather than the full eight-family ladder. Group~2 has one seed per cell, does not complete nested override or formal competing-law fits, and contains a reachable optimization failure. Group~3 has one seed/model, no pattern-length recruitment comparison, no multi-seed head-role reproducibility, and only one head-count point; it does not establish head-count scaling. Huge $R$ values arise from near-zero within-family denominators and are not treated as precise effect sizes.
+The new runs satisfy smoke rather than full scaling gates. Group~1 uses three generators and one architecture scale; the tested range cannot support universal exponents. Zero nuisance has identical realizations and hence exactly zero fluctuation, producing extreme SNR values that are retained but excluded from positive-margin scaling fits. Group~2 has one seed per cell, does not complete nested override or formal competing-law fits, and contains a reachable optimization failure. Group~3 has one seed/model, no pattern-length recruitment comparison, no multi-seed head-role reproducibility, and only one head-count point; it does not establish head-count scaling. Huge $R$ values arise from near-zero within-family denominators and are not treated as precise effect sizes.
 
 \appendix
 \section{Prior controlled component and trajectory experiments}
@@ -124,11 +162,12 @@ PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
 PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
   --group 3 --config configs/paper05/group3.json --device cpu
 PYTHONPATH=src python -m cl.analysis.paper05_layer_composition
+PYTHONPATH=src python -m cl.experiments.paper05_correctness
 \end{verbatim}
 All prior artifacts remain under \texttt{results/}; new raw, aggregate, figure, summary, and manifest artifacts are under \texttt{results/three\_parts/}. Tests cover deterministic replay, residual identities, trace parity, local-mask correctness, graph reachability, head-contribution shapes, and zero/replacement equivalence.
 
 \section{Conclusion}
-Depth reliably improves final predictive stability across three controlled pattern generators, but usually through non-monotone composition. SA windows impose a causal reachability constraint whose satisfaction does not guarantee learning. Heads contribute in distributed, non-additive ways; equivalent head states transfer better than mismatches, whereas attention motifs remain causally uninformative. Together these findings turn ``layer refinement'' into a measurable theory of predictive ensembles, causal cones, and interacting residual updates while preserving its failures and boundary conditions.
+Depth reliably transforms strongly wrong initial margins into stable correct predictions across three controlled pattern generators, but usually through non-monotone composition. Correct signal grows faster than nuisance-conditioned fluctuation; absolute margin variance need not contract. Negative cross-layer update covariance reveals cancellation and repair, while the tested decision-depth and SNR scaling laws fail. SA windows impose a causal reachability constraint whose satisfaction does not guarantee learning. Heads contribute in distributed, non-additive ways; equivalent head states transfer better than mismatches, whereas attention motifs remain causally uninformative. Together these findings turn ``layer refinement'' into a measurable theory of predictive ensembles, causal cones, and interacting residual updates while preserving its failures and boundary conditions.
 
 \begin{thebibliography}{9}
 \bibitem{geva2021ffn} Mor Geva et al. Transformer Feed-Forward Layers Are Key-Value Memories. \emph{EMNLP}, 2021.

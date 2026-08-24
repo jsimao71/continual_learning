@@ -1,14 +1,15 @@
 {
-  "artifact_hash": "35d200178514aca29db590fab721aca22274cda5ef8998aa37eaa1ec2670e84e",
+  "artifact_hash": "ce67da7a27ee8dfeb8fa5943bfd2b769c6a857a70eba0753990034534791ae4f",
   "assessment": {
-    "dynamical_systems": "supported descriptively: non-monotone composition and JVP diagnostics",
+    "dynamical_systems": "supported descriptively: non-monotone decisions, reversals, and JVP diagnostics",
     "information_theoretic": "partially supported: prediction-space class separation improves; mutual information not estimated",
-    "statistical": "supported: family-conditioned JS contracts with preserved target signal",
-    "statistical_mechanical": "partially supported: R and covariance order parameters measured; no finite-size phase-transition claim"
+    "statistical": "supported in relative form: correct margin grows faster than fluctuation; absolute margin variance does not contract",
+    "statistical_mechanical": "partially supported: signal/noise and cross-layer covariance measured; no scaling law or finite-size phase-transition claim"
   },
   "schema_version": "paper05.integrated.v1",
   "sources": {
-    "group1": "9c1c3137ab64978391eb77528857ff282a9cf6323f461db36f1db95f6ee72c63",
+    "group1": "3fff4460626ca4587414e05df20ec4a4f9de9c557a21ad728a3260b989950e9f",
+    "group1_correctness": "5cdbeb95133ea428892f338565a0c04db99717aae0fadb101232b0378f4b7c7b",
     "group2": "4fd53380cd5aa39760e8ededc6ad5838375b96e38eef44c0d474198c1e45591c",
     "group3": "4d040ccc5c2f7c5500aba42d8618d88b2dc6dca3dc4720b89160847597807294"
   }

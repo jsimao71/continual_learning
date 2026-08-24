@@ -2,6 +2,14 @@ ci_high,ci_low,estimate,group,metric,phenomenon,status
 -0.014262007321701612,-0.07380685880793064,-0.04019486452729633,layer_composition,last_minus_first_within_js_bits,binary_functor,supported
 -0.009833050883764636,-0.04137018370837843,-0.024374365002345195,layer_composition,last_minus_first_within_js_bits,contiguous_ngram,supported
 -0.01285182573096989,-0.07914080846834504,-0.04148636851857244,layer_composition,last_minus_first_within_js_bits,skip_gram,supported
+,,-32.01907475789388,correctness,mean_target_margin,nuisance8_depth0,signal_growth
+,,0.0,correctness,var_target_margin,nuisance8_depth0,absolute_fluctuation_grows
+,,-320190.7475789388,correctness,margin_snr,nuisance8_depth0,signal_growth
+,,0.0,correctness,fraction_top1,nuisance8_depth0,signal_growth
+,,10.5069413361726,correctness,mean_target_margin,nuisance8_depth8,signal_growth
+,,1.889938556748483,correctness,var_target_margin,nuisance8_depth8,absolute_fluctuation_grows
+,,10.148465384578678,correctness,margin_snr,nuisance8_depth8,signal_growth
+,,1.0,correctness,fraction_top1,nuisance8_depth8,signal_growth
 ,,0.21875,attention_transport,mean_accuracy,unreachable,supported
 ,,0.775,attention_transport,mean_accuracy,reachable,partially_supported
 ,,0.03162066463846713,heads,mean_target_logprob_drop,zero,descriptive
