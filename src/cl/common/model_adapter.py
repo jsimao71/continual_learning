@@ -14,7 +14,7 @@ import torch.nn.functional as F
 class Intervention:
     layer: int
     component: Literal["sa", "ff"]
-    mode: Literal["zero", "mean", "replace", "head_zero"] = "zero"
+    mode: Literal["zero", "mean", "replace", "head_zero", "head_replace"] = "zero"
     replacement: Tensor | None = None
     head: int | None = None
 
@@ -27,6 +27,7 @@ class LayerTrace:
     delta_ff: Tensor
     post_block: Tensor
     attention: Tensor
+    head_outputs: Tensor | None = None
 
 
 @dataclass
@@ -92,6 +93,18 @@ class InstrumentedBlock(nn.Module):
         joined = head_outputs.transpose(1, 2).reshape(batch, length, width)
         return F.linear(joined, self.attention.out_proj.weight, self.attention.out_proj.bias)
 
+    def _head_contributions(self, normalized: Tensor, causal_mask: Tensor) -> Tensor:
+        """Return each head's post-output-projection residual contribution."""
+        batch,length,width=normalized.shape;heads=self.attention.num_heads;head_width=width//heads
+        projected=F.linear(normalized,self.attention.in_proj_weight,self.attention.in_proj_bias);query,key,value=projected.chunk(3,-1)
+        def split(x): return x.view(batch,length,heads,head_width).transpose(1,2)
+        query,key,value=split(query),split(key),split(value);probability=torch.softmax(query@key.transpose(-2,-1)/(head_width**.5)+causal_mask[None,None],-1)
+        values=probability@value; contributions=[]
+        for head in range(heads):
+            weight=self.attention.out_proj.weight[:,head*head_width:(head+1)*head_width]
+            contributions.append(F.linear(values[:,head],weight))
+        return torch.stack(contributions,dim=1)
+
     def forward(
         self,
         state: Tensor,
@@ -111,12 +124,16 @@ class InstrumentedBlock(nn.Module):
             average_attn_weights=False,
         )
         attention = self._diagnostic_attention(normalized, causal_mask) if capture else None
+        head_outputs = self._head_contributions(normalized, causal_mask) if capture or (intervention and intervention.mode == "head_replace") else None
         if intervention and intervention.component == "sa" and intervention.mode == "head_zero":
             if intervention.head is None:
                 raise ValueError("head_zero intervention requires a head index")
             manual_full = self._manual_attention(normalized, causal_mask)
             manual_ablated = self._manual_attention(normalized, causal_mask, zero_head=intervention.head)
             effective_sa = delta_sa + (manual_ablated - manual_full)
+        elif intervention and intervention.component == "sa" and intervention.mode == "head_replace":
+            if intervention.head is None or intervention.replacement is None: raise ValueError("head_replace requires head and replacement")
+            effective_sa = delta_sa + intervention.replacement.to(delta_sa).expand_as(delta_sa) - head_outputs[:,intervention.head]
         else:
             effective_sa = self._intervene(delta_sa, intervention if intervention and intervention.component == "sa" else None)
         post_sa = pre_sa + effective_sa
@@ -132,6 +149,7 @@ class InstrumentedBlock(nn.Module):
             delta_ff=delta_ff,
             post_block=post_block,
             attention=attention,
+            head_outputs=head_outputs,
         )
 
 

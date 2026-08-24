@@ -1,0 +1,30 @@
+{
+  "artifact_hash": "4d040ccc5c2f7c5500aba42d8618d88b2dc6dca3dc4720b89160847597807294",
+  "association": {
+    "n_heads": 16,
+    "prior_pilot_spearman": -0.009,
+    "spearman_motif_vs_causal": -0.0058823529411764705
+  },
+  "base": {
+    "R": 60012.77920179281,
+    "between_js_bits": 0.9998849869468381,
+    "within_js_bits": 1.6661201168249974e-05
+  },
+  "checkpoint_hash": "f6515b2f6dbbe93dcf6da1190d1a8482b23733ccf57b7f5c5bcb59dc4a6331a9",
+  "config": {
+    "batch_size": 64,
+    "depth": 4,
+    "heads": 4,
+    "learning_rate": 0.001,
+    "probe_examples": 64,
+    "seed": 523,
+    "span": 8,
+    "train_steps": 500,
+    "width": 48,
+    "window": null
+  },
+  "head_cells": 16,
+  "intervention_rows": 64,
+  "pair_rows": 24,
+  "schema_version": "paper05.group3.v1"
+}

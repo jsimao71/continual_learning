@@ -53,3 +53,12 @@ def test_local_attention_window_mask_and_reachability():
     mask = model.causal_mask(6, "cpu")
     assert mask[5, 3] == 0 and torch.isneginf(mask[5, 2])
     assert torch.isneginf(mask[2, 3])
+
+
+def test_head_contributions_and_replacement_preserve_tensor_semantics():
+    model=make_model();tokens=torch.tensor([[1,2,3,4]]);_,trace=model(tokens,capture=True)
+    heads=trace.layers[0].head_outputs
+    assert heads.shape == (1,2,4,16) and torch.isfinite(heads).all()
+    zero=torch.zeros_like(heads[:,0]);replaced,_=model(tokens,intervention=Intervention(0,"sa","head_replace",replacement=zero,head=0))
+    ablated,_=model(tokens,intervention=Intervention(0,"sa","head_zero",head=0))
+    assert torch.allclose(replaced,ablated,atol=1e-5,rtol=1e-5)

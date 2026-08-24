@@ -24,7 +24,7 @@ import torch.nn.functional as F
 from cl.analysis.equivalence import jensen_shannon_bits
 from cl.common.artifacts import RunMetadata, atomic_write_json, stable_hash, write_csv, write_jsonl
 from cl.common.metrics import bootstrap_ci
-from cl.common.model_adapter import TinyTransformerLM, train_step
+from cl.common.model_adapter import Intervention, TinyTransformerLM, train_step
 
 
 @dataclass(frozen=True)
@@ -378,6 +378,67 @@ def run_group2(config: dict, repo: Path, output: Path, device: torch.device) -> 
     atomic_write_json(output/"manifests/group2.json",manifest);print(json.dumps(manifest,indent=2))
 
 
+def _distribution_stats(probabilities: np.ndarray, families: np.ndarray) -> dict:
+    centroids={family:probabilities[families==family].mean(0) for family in sorted(set(families))}
+    within=float(np.mean([jensen_shannon_bits(p,centroids[int(f)]) for p,f in zip(probabilities,families)]))
+    keys=sorted(centroids);between=float(np.mean([jensen_shannon_bits(centroids[a],centroids[b]) for i,a in enumerate(keys) for b in keys[i+1:]]))
+    return {"within_js_bits":within,"between_js_bits":between,"R":between/max(within,1e-12)}
+
+
+def run_group3(config: dict, repo: Path, output: Path, device: torch.device) -> None:
+    cell={"span":config["span"],"window":config["window"],"depth":config["depth"]};model=_train_transport(cell,config,device)
+    inputs,targets=_transport_batch(config["span"],config["probe_examples"],config["seed"]+999);inputs,targets=inputs.to(device),targets.to(device)
+    with torch.no_grad(): logits,trace=model(inputs,capture=True)
+    assert trace is not None; baseline=torch.softmax(logits[:,-1],-1);families=np.asarray([i%4 for i in range(len(inputs))])
+    base_stats=_distribution_stats(baseline.cpu().numpy(),families);rows=[];pair_rows=[];covariance=[];motifs=[]
+    equivalent=torch.tensor([next(j for j in range(len(inputs)) if j!=i and j%4==i%4) for i in range(len(inputs))],device=device)
+    mismatch=torch.tensor([next(j for j in range(len(inputs)) if j%4!=(i%4)) for i in range(len(inputs))],device=device)
+    for layer,layer_trace in enumerate(trace.layers):
+        heads=layer_trace.head_outputs.shape[1]
+        for head in range(heads):
+            actual=layer_trace.head_outputs[:,head]
+            replacements={"mean":actual.mean(0,keepdim=True).expand_as(actual),"equivalent":actual[equivalent],"mismatched":actual[mismatch]}
+            interventions={"zero":Intervention(layer,"sa","head_zero",head=head)}
+            interventions.update({mode:Intervention(layer,"sa","head_replace",replacement=value,head=head) for mode,value in replacements.items()})
+            for mode,intervention in interventions.items():
+                changed,_=model(inputs,intervention=intervention);p=torch.softmax(changed[:,-1],-1);stats=_distribution_stats(p.detach().cpu().numpy(),families)
+                logdrop=(torch.log(baseline[range(len(inputs)),targets])-torch.log(p[range(len(inputs)),targets])).mean()
+                rows.append({"layer":layer,"head":head,"mode":mode,**stats,"stability_utility":stats["within_js_bits"]-base_stats["within_js_bits"],
+                    "discrimination_utility":base_stats["between_js_bits"]-stats["between_js_bits"],"target_logprob_drop":float(logdrop)})
+            norms=torch.linalg.vector_norm(actual[:,-1],dim=-1).cpu().numpy()
+            for other in range(head+1,heads):
+                other_norm=torch.linalg.vector_norm(layer_trace.head_outputs[:,other,-1],dim=-1).cpu().numpy()
+                covariance.append({"layer":layer,"head_a":head,"head_b":other,"norm_correlation":float(np.corrcoef(norms,other_norm)[0,1])})
+                replacement=-layer_trace.head_outputs[:,other]
+                changed,_=model(inputs,intervention=Intervention(layer,"sa","head_replace",replacement=replacement,head=head));p=torch.softmax(changed[:,-1],-1)
+                pair_drop=float((torch.log(baseline[range(len(inputs)),targets])-torch.log(p[range(len(inputs)),targets])).mean())
+                pair_rows.append({"layer":layer,"head_a":head,"head_b":other,"pair_target_logprob_drop":pair_drop})
+            attention=layer_trace.attention[:,head,-1].cpu().numpy();within=[];between=[]
+            for i in range(len(attention)):
+                within.append(float(np.dot(attention[i],attention[int(equivalent[i])])/(np.linalg.norm(attention[i])*np.linalg.norm(attention[int(equivalent[i])])+1e-12)))
+                between.append(float(np.dot(attention[i],attention[int(mismatch[i])])/(np.linalg.norm(attention[i])*np.linalg.norm(attention[int(mismatch[i])])+1e-12)))
+            motifs.append({"layer":layer,"head":head,"motif_specificity":float(np.mean(within)-np.mean(between))})
+    zero={(x["layer"],x["head"]):x["target_logprob_drop"] for x in rows if x["mode"]=="zero"}
+    for pair in pair_rows:
+        individual=zero[(pair["layer"],pair["head_a"])]+zero[(pair["layer"],pair["head_b"])]
+        pair["sum_individual_drop"]=individual;pair["gamma"]=pair["pair_target_logprob_drop"]-individual
+    motif_values=[x["motif_specificity"] for x in motifs];utility=[zero[(x["layer"],x["head"])] for x in motifs]
+    from cl.common.metrics import spearman
+    association={"spearman_motif_vs_causal":spearman(motif_values,utility),"n_heads":len(motifs),"prior_pilot_spearman":-0.009}
+    raw,agg=output/"raw/group3",output/"aggregates/group3";raw.mkdir(parents=True,exist_ok=True);agg.mkdir(parents=True,exist_ok=True)
+    write_jsonl(raw/"head_interventions.jsonl",rows);write_csv(agg/"head_utility.csv",rows);write_csv(agg/"head_pair_interactions.csv",pair_rows);write_csv(agg/"head_covariance.csv",covariance);write_csv(agg/"head_motifs.csv",motifs);atomic_write_json(agg/"motif_causal_association.json",association)
+    figures=output/"figures";figures.mkdir(parents=True,exist_ok=True)
+    for filename,metric in (("g3_head_stability_utility.png","stability_utility"),("g3_head_discrimination_utility.png","discrimination_utility"),("g3_head_by_pattern_length.png","target_logprob_drop")):
+        fig,ax=plt.subplots(figsize=(8,4.5));v=[x for x in rows if x["mode"]=="zero"];ax.bar(range(len(v)),[x[metric] for x in v]);ax.set_xlabel("layer/head");ax.set_ylabel(metric);fig.tight_layout();fig.savefig(figures/filename,dpi=180);plt.close(fig)
+    for filename,data,xkey,ykey in (("g3_head_pair_interactions.png",pair_rows,"sum_individual_drop","pair_target_logprob_drop"),("g3_head_output_covariance.png",covariance,"norm_correlation","layer"),("g3_motif_vs_causal_utility.png",[{**x,"utility":zero[(x["layer"],x["head"])]} for x in motifs],"motif_specificity","utility")):
+        fig,ax=plt.subplots(figsize=(6,4.5));ax.scatter([x[xkey] for x in data],[x[ykey] for x in data]);ax.set_xlabel(xkey);ax.set_ylabel(ykey);fig.tight_layout();fig.savefig(figures/filename,dpi=180);plt.close(fig)
+    # One fixed-capacity head-count point is complete; scaling remains explicitly pending.
+    fig,ax=plt.subplots(figsize=(6,4.5));ax.scatter([config["heads"]],[base_stats["R"]]);ax.set_xlabel("head count");ax.set_ylabel("final R");fig.tight_layout();fig.savefig(figures/"g3_head_count_scaling.png",dpi=180);plt.close(fig)
+    checkpoint_hash=stable_hash({name:tensor.detach().cpu().numpy().astype(np.float16).tobytes().hex() for name,tensor in model.state_dict().items()})
+    manifest={"schema_version":"paper05.group3.v1","config":config,"head_cells":len(motifs),"intervention_rows":len(rows),"pair_rows":len(pair_rows),"base":base_stats,"association":association,"checkpoint_hash":checkpoint_hash,"artifact_hash":stable_hash({"rows":rows,"pairs":pair_rows,"covariance":covariance,"motifs":motifs})}
+    atomic_write_json(output/"manifests/group3.json",manifest);print(json.dumps(manifest,indent=2))
+
+
 def main():
     parser=argparse.ArgumentParser(); parser.add_argument("--group",type=int,choices=(1,2,3),required=True)
     parser.add_argument("--config",required=True); parser.add_argument("--repo",default=".")
@@ -386,7 +447,7 @@ def main():
     config=json.loads(Path(args.config).read_text()); output=Path(args.output); (output/"manifests").mkdir(parents=True,exist_ok=True)
     if args.group == 1: run_group1(config,Path(args.repo).resolve(),output,torch.device(args.device))
     elif args.group == 2: run_group2(config,Path(args.repo).resolve(),output,torch.device(args.device))
-    else: raise NotImplementedError(f"group {args.group} is implemented in the next milestone")
+    else: run_group3(config,Path(args.repo).resolve(),output,torch.device(args.device))
 
 
 if __name__ == "__main__": main()

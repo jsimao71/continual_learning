@@ -1,0 +1,5 @@
+{
+  "n_heads": 16,
+  "prior_pilot_spearman": -0.009,
+  "spearman_motif_vs_causal": -0.0058823529411764705
+}
