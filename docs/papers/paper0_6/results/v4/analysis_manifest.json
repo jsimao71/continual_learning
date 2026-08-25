@@ -1,0 +1,37 @@
+{
+  "central_claim": "blocked_by_seed_instability",
+  "figures": [
+    "s1_Lmin_scaling_fits.png",
+    "s1_accuracy_vs_branching.png",
+    "s1_accuracy_vs_distractors.png",
+    "s1_accuracy_vs_required_path.png",
+    "s1_accuracy_vs_tree_depth.png",
+    "s1_attention_preferred_hop_vs_layer.png",
+    "s1_cross_depth_replacement_damage.png",
+    "s1_head_recruitment_vs_path_depth.png",
+    "s1_head_utility_by_predicate.png",
+    "s1_path_masking_effects.png",
+    "s1_phase_model_depth_vs_path_depth.png",
+    "s1_root_intermediate_node_trajectory.png",
+    "s1_sa_ff_causal_effects.png",
+    "s3_head_recruitment_by_order.png",
+    "s3_nested_replacement_by_layer.png",
+    "s3_sa_ff_by_predictive_order.png"
+  ],
+  "scaling": "threshold_failure_not_estimable",
+  "tables": [
+    "s1_Lmin_scaling_fits.csv",
+    "s1_attention_path.csv",
+    "s1_causal_replacement.csv",
+    "s1_depth_extrapolation.csv",
+    "s1_head_utility.csv",
+    "s1_intermediate_node_decoding.csv",
+    "s1_path_masking.csv",
+    "s1_predicate_competence.csv",
+    "s1_predicate_scorecard.csv",
+    "s1_sa_ff_ablation.csv",
+    "s3_causal_replacement.csv",
+    "s3_head_utility.csv",
+    "s3_sa_ff_ablation.csv"
+  ]
+}

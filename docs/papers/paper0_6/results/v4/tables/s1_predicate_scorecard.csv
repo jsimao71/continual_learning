@@ -1,0 +1,6 @@
+branching_generalization,causal_role_invariance,depth_generalization,distractor_robustness,hop_generalization,identity_generalization,learned_relation,mechanism_consistency,predicate,topology_generalization
+fail,blocked,fail,fail,not_applicable,pass,no,blocked,parent,fail
+fail,blocked,fail,fail,not_applicable,pass,no,blocked,grandparent,fail
+fail,blocked,fail,fail,fail,pass,no,blocked,ancestor_k,fail
+fail,local_only,fail,fail,not_applicable,pass,no,seed_unstable,isAncestor,pass
+fail,blocked,fail,fail,fail,pass,no,blocked,root,fail
