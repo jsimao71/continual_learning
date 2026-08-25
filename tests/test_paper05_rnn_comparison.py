@@ -12,6 +12,8 @@ def test_rnn_axes_complete_and_deterministic():
     rows=evaluation(CONFIG,2);assert len(rows)==sum(map(len,axis_values(CONFIG).values()))*2
     a=make_example(CONFIG,"span",64,7,"test");b=make_example(CONFIG,"span",64,7,"test")
     assert a==b and len(a["tokens"])==CONFIG["sequence_length"] and a["dependency_span"]==64
+    short=make_example(CONFIG,"length",2,9,"test");long=make_example(CONFIG,"length",32,9,"test")
+    assert short["target"]==long["target"] and short["family_id"]==long["family_id"]
 
 
 def test_recurrent_shapes():

@@ -22,3 +22,5 @@ def test_phase_matrix_and_replay():
     b=make_example(CONFIG,4,8,"large",8,17,"test")
     assert a==b and len(a["tokens"])==CONFIG["sequence_length"]
     assert a["predictive_order"]==4 and a["raw_length"]==8
+    control=make_example(CONFIG,4,4,"contiguous",0,17,"test")
+    assert a["target"]==control["target"] and a["family_id"]==control["family_id"]

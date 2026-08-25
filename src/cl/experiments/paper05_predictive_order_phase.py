@@ -59,7 +59,9 @@ def _surface_positions(order: int, span: str) -> list[int]:
 
 def make_example(config: dict, order: int, length: int, span: str, nuisance: int,
                  index: int, split: str) -> dict:
-    seed=config["dataset_seed"]+(0 if split=="train" else 20_000_000)+index*1597+order*101+length*17+nuisance*7+len(span)
+    # Match the latent predictive family across surface length, span, and
+    # nuisance controls; only the controlled surface transformation changes.
+    seed=config["dataset_seed"]+(0 if split=="train" else 20_000_000)+index*1597+order*101
     rng=random.Random(seed); values=[rng.randrange(4) for _ in range(order)]; target=target_rule(values)
     positions=_surface_positions(order,span); pattern=[NEUTRAL]*(positions[-1]+1)
     for role,(position,value) in enumerate(zip(positions,values)): pattern[position]=VALUE_ROLES[role][value]

@@ -20,7 +20,9 @@ QUERY,NEUTRAL=89,90
 
 
 def make_example(config: dict, axis: str, value: int, index: int, split: str) -> dict:
-    seed=config["dataset_seed"]+(0 if split=="train" else 30_000_000)+index*1613+value*37+AXIS_MARKER[axis]
+    # Hold the latent values fixed across surface-length/span/nuisance sweeps.
+    # Predictive-order cells share the same random prefix as order grows.
+    seed=config["dataset_seed"]+(0 if split=="train" else 30_000_000)+index*1613+AXIS_MARKER[axis]
     rng=random.Random(seed)
     order=value if axis=="predictive_order" else 2
     raw_length=value if axis=="length" else order
@@ -37,7 +39,7 @@ def make_example(config: dict, axis: str, value: int, index: int, split: str) ->
     if padding<0:raise ValueError((axis,value,len(body),nuisance))
     tokens=[NEUTRAL]*padding+noise+body+[QUERY]
     return {"tokens":tokens,"target":TARGETS[target],"axis":axis,"axis_value":value,"predictive_order":order,
-            "raw_length":raw_length,"dependency_span":span,"nuisance_count":nuisance,"family_id":f"{axis}:{value}:{tuple(values)}:{index%16}"}
+            "raw_length":raw_length,"dependency_span":span,"nuisance_count":nuisance,"family_id":f"{axis}:{tuple(values[:2])}:{index}"}
 
 
 def axis_values(config: dict) -> dict[str,list[int]]:
@@ -86,7 +88,7 @@ def train(config:dict,kind:str,device:torch.device,steps:int):
 
 @torch.no_grad()
 def evaluate(model:nn.Module,kind:str,rows:list[dict],batch_size:int=128):
-    device=next(model.parameters()).device;results=[];internal=[]
+    device=next(model.parameters()).device;results=[];internal=[];nuisance_baseline={}
     for start in range(0,len(rows),batch_size):
         batch=rows[start:start+batch_size];x=torch.tensor([r["tokens"] for r in batch],device=device);y=torch.tensor([r["target"] for r in batch],device=device)
         if kind=="transformer":
@@ -101,9 +103,15 @@ def evaluate(model:nn.Module,kind:str,rows:list[dict],batch_size:int=128):
             if i<16:
                 for j,z in enumerate(trajectory):
                     c=z[i,y[i]];o=z[i].clone();o[y[i]]=float("-inf")
+                    pair_distance=""
+                    if hidden is not None and r["axis"]=="nuisance":
+                        key=(r["family_id"],sample_times[j])
+                        if r["axis_value"]==0:nuisance_baseline[key]=hidden[i,sample_times[j]].detach().cpu()
+                        elif key in nuisance_baseline:pair_distance=float((hidden[i,sample_times[j]].detach().cpu()-nuisance_baseline[key]).norm())
                     internal.append({"model_type":kind,"axis":r["axis"],"axis_value":r["axis_value"],"family_id":r["family_id"],
                                      "computation_index":j if kind=="transformer" else sample_times[j],"target_margin":float(c-o.max()),
-                                     "top1_correct":int(z[i].argmax()==y[i]),"hidden_norm":float(hidden[i,sample_times[j]].norm()) if hidden is not None else ""})
+                                     "top1_correct":int(z[i].argmax()==y[i]),"hidden_norm":float(hidden[i,sample_times[j]].norm()) if hidden is not None else "",
+                                     "hidden_pair_distance":pair_distance})
     return results,internal
 
 
