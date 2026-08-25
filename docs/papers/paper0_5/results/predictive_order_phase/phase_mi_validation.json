@@ -1,0 +1,6 @@
+{
+  "artifact_hash": "5b6ba79ec137aca52a1751f6047155c7984a853c44d3876d4ba9816be8e30d00",
+  "note": "For p*=6,8, every proper subset is independent of the uniform modular sum because a missing uniform variable one-time-pads the target.",
+  "passed": true,
+  "schema_version": "paper05.predictive_order.mi.v1"
+}

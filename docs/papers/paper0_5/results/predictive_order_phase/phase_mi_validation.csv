@@ -1,0 +1,7 @@
+full_pattern_MI_bits,max_prohibited_subset_MI_bits,max_singleton_MI_bits,passed,predictive_order,validation_mode
+2.0,0.0,2.0,True,1,exhaustive
+2.0,0.0,0.0,True,2,exhaustive
+2.0,0.0,0.0,True,3,exhaustive
+2.0,0.0,0.0,True,4,exhaustive
+2.0,0.0,0.0,True,6,analytic_uniform_modular_secret_sharing
+2.0,0.0,0.0,True,8,analytic_uniform_modular_secret_sharing

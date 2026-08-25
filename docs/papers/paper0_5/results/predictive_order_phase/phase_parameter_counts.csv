@@ -1,0 +1,15 @@
+model_depth,model_seed,model_type,model_width,parameter_count,training_budget,training_steps
+2,11,transformer,32,22784,1,400
+2,11,transformer,64,78336,1,400
+4,11,transformer,32,39872,1,400
+4,11,transformer,64,145280,1,400
+8,11,transformer,32,74048,1,400
+8,11,transformer,64,279168,1,400
+8,11,transformer,64,279168,2,800
+8,11,transformer,64,279168,4,1600
+12,11,transformer,32,108224,1,400
+12,11,transformer,64,413056,1,400
+16,11,transformer,32,142400,1,400
+16,11,transformer,64,546944,1,400
+24,11,transformer,32,210752,1,400
+24,11,transformer,64,814720,1,400

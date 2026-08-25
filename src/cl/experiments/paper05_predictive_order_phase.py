@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import itertools
 import json
 import math
@@ -163,7 +164,16 @@ def main(args) -> None:
     if not audit["passed"]:raise RuntimeError(audit)
     device=resolve_device(args.device or config["device"]);eval_rows=evaluation(config,args.eval_examples)
     all_results=[];all_decisions=[];models=[];losses=[]
+    raw_path=out/"phase_grid_raw.csv";decision_path=out/"phase_internal_decision_depth_raw.csv"
+    if args.resume and raw_path.exists():
+        with raw_path.open(newline="",encoding="utf-8") as handle:all_results=list(csv.DictReader(handle))
+        if decision_path.exists():
+            with decision_path.open(newline="",encoding="utf-8") as handle:all_decisions=list(csv.DictReader(handle))
+        unique={(int(r["model_depth"]),int(r["model_width"]),int(r["training_budget"]),int(r["model_seed"])) for r in all_results}
+        models=[{"model_type":"transformer","model_depth":d,"model_width":w,"training_budget":b,"training_steps":config["base_steps"]*b,"model_seed":s,"parameter_count":int(next(r["parameter_count"] for r in all_results if int(r["model_depth"])==d and int(r["model_width"])==w and int(r["training_budget"])==b and int(r["model_seed"])==s))} for d,w,b,s in sorted(unique)]
     grid=architecture_grid(config,args.smoke)
+    completed={(m["model_depth"],m["model_width"],m["training_budget"],m["model_seed"]) for m in models}
+    grid=[cell for cell in grid if cell not in completed]
     if args.max_models:grid=grid[:args.max_models]
     for model_index,(depth,width,budget,seed) in enumerate(grid,1):
         print(f"[{model_index}/{len(grid)}] depth={depth} width={width} budget={budget} seed={seed}",flush=True)
@@ -181,4 +191,4 @@ def main(args) -> None:
 
 
 if __name__ == "__main__":
-    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/predictive_order_phase.json");p.add_argument("--output",default="docs/papers/paper0_5/results/predictive_order_phase");p.add_argument("--device");p.add_argument("--smoke",action="store_true");p.add_argument("--eval-examples",type=int);p.add_argument("--base-steps",type=int);p.add_argument("--max-models",type=int);main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/predictive_order_phase.json");p.add_argument("--output",default="docs/papers/paper0_5/results/predictive_order_phase");p.add_argument("--device");p.add_argument("--smoke",action="store_true");p.add_argument("--resume",action="store_true");p.add_argument("--eval-examples",type=int);p.add_argument("--base-steps",type=int);p.add_argument("--max-models",type=int);main(p.parse_args())

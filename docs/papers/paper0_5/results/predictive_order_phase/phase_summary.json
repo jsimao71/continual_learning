@@ -1,0 +1,39 @@
+{
+  "artifact_hash": "737dcbd082bb7a83644a4df0d77d5c6356bd35a73bc898f843809fd84e4eaad7",
+  "best_accuracy_by_order": {
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.9722222222222222,
+    "4": 0.5069444444444444,
+    "6": 0.3871527777777778,
+    "8": 0.390625
+  },
+  "best_base_accuracy_by_order": {
+    "1": 1.0,
+    "2": 1.0,
+    "3": 0.6336805555555556,
+    "4": 0.5069444444444444,
+    "6": 0.3871527777777778,
+    "8": 0.390625
+  },
+  "competent_orders_at_any_setting": [
+    1,
+    2,
+    3
+  ],
+  "depths": [
+    2,
+    4,
+    8,
+    12,
+    16,
+    24
+  ],
+  "frontier_interpretation": "Orders 1-2 reach competence at base budget; order 3 reaches competence only at 2x/4x training for depth 8, width 64. Orders 4, 6, and 8 never recover. Depth effects are non-monotonic, and interaction-model differences are small, so no order-to-minimum-depth scaling law is identified.",
+  "models_run": 14,
+  "schema_version": "paper05.predictive_order_phase.summary.v1",
+  "widths": [
+    32,
+    64
+  ]
+}

@@ -16,7 +16,7 @@
   "heads_by_width": {"32": 2, "64": 4},
   "training_budgets": [1, 2, 4],
   "base_steps": 400,
-  "extended_budget_depths": [8, 16, 24],
+  "extended_budget_depths": [8],
   "extended_budget_widths": [64],
   "batch_size": 128,
   "learning_rate": 0.003,

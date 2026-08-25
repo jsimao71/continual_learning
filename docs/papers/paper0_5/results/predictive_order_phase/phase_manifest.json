@@ -1,0 +1,103 @@
+{
+  "artifact_hash": "418987c658821a9579b321714cfbc2729cb61e54397ec1ac3b790bec34961447",
+  "config": {
+    "base_steps": 400,
+    "batch_size": 128,
+    "competence_thresholds": [
+      0.8,
+      0.9
+    ],
+    "dataset_seed": 7319,
+    "depths": [
+      2,
+      4,
+      8,
+      12,
+      16,
+      24
+    ],
+    "device": "auto",
+    "evaluation_examples_per_cell": 32,
+    "extended_budget_depths": [
+      8
+    ],
+    "extended_budget_widths": [
+      64
+    ],
+    "heads_by_width": {
+      "32": 2,
+      "64": 4
+    },
+    "learning_rate": 0.003,
+    "model_seeds": [
+      11
+    ],
+    "nuisance_counts": [
+      0,
+      2,
+      4,
+      8
+    ],
+    "predictive_orders": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8
+    ],
+    "schema_version": "paper05.predictive_order_phase.v1",
+    "sequence_length": 48,
+    "spans": [
+      "contiguous",
+      "moderate",
+      "large"
+    ],
+    "surface_lengths": {
+      "1": [
+        1,
+        4,
+        8
+      ],
+      "2": [
+        2,
+        4,
+        8
+      ],
+      "3": [
+        3,
+        6,
+        8
+      ],
+      "4": [
+        4,
+        6,
+        8
+      ],
+      "6": [
+        6,
+        8,
+        10
+      ],
+      "8": [
+        8,
+        10
+      ]
+    },
+    "training_budgets": [
+      1,
+      2,
+      4
+    ],
+    "vocab_size": 128,
+    "widths": [
+      32,
+      64
+    ]
+  },
+  "device": "mps",
+  "evaluation_examples": 3264,
+  "models": 14,
+  "schema_version": "paper05.predictive_order_phase.run.v1",
+  "smoke": false
+}
