@@ -1,0 +1,9 @@
+accuracy,label_mode,mean_margin,model_seed,n,position_mode,predictive_order
+0.0546875,natural,-22.92529347538948,11,128,aligned,4
+0.0546875,natural,-22.90256328880787,11,128,randomized,4
+0.0546875,arbitrary,-22.0096298456192,11,128,aligned,4
+0.0546875,arbitrary,-21.529091835021973,11,128,randomized,4
+0.046875,natural,-15.386878624558449,23,128,aligned,4
+0.078125,natural,-15.611746996641159,23,128,randomized,4
+0.046875,arbitrary,-18.10890866816044,23,128,aligned,4
+0.0625,arbitrary,-18.516354620456696,23,128,randomized,4

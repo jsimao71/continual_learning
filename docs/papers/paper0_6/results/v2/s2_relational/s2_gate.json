@@ -1,0 +1,8 @@
+{
+  "artifact_hash": "323bb3b5c5a73473852b161d82555fd8ec5c46be84bec54f67aea6fdfbe271c9",
+  "gate_passed": false,
+  "mean_accuracy": 0.056640625,
+  "minimum_cell_accuracy": 0.046875,
+  "schema_version": "paper06.s2.gate.v1",
+  "threshold": 0.8
+}

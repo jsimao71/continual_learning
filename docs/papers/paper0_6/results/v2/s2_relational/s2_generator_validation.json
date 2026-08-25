@@ -1,0 +1,15 @@
+{
+  "example_hash": "bb0fe74d06ef22d3a08e99cc0698b6f25fd64695c5052c6de81fff06f104e2b0",
+  "full_structure_mi_bits": 1.0,
+  "heldout_combination_rule": "S2 balanced explicit set {1,6,11,12}; S3 integer pattern modulo 5 equals zero",
+  "heldout_target_entropy_bits": {
+    "all": 1.0
+  },
+  "ontology_seed": 6207,
+  "passed": true,
+  "proper_subset_mi_bits": 0.0,
+  "schema_version": "paper06.s2.validation.v1",
+  "singleton_mi_bits": 0.0,
+  "target_entropy_bits": 1.0,
+  "train_test_identity_overlap": 0
+}
