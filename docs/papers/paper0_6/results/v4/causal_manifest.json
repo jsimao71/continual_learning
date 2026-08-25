@@ -1,0 +1,37 @@
+{
+  "central_predicate_claim": "blocked_by_seed_instability",
+  "eligible_local_isAncestor_cells": [
+    [
+      6,
+      11,
+      0.973611111111111,
+      0.9166666666666666
+    ],
+    [
+      4,
+      23,
+      0.9708333333333332,
+      0.875
+    ],
+    [
+      6,
+      37,
+      0.9907407407407408,
+      0.9375
+    ],
+    [
+      8,
+      11,
+      0.9888888888888887,
+      0.9375
+    ],
+    [
+      12,
+      23,
+      0.9240740740740743,
+      0.8125
+    ]
+  ],
+  "examples_per_condition": 8,
+  "s2_status": "blocked_by_competence"
+}
