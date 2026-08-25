@@ -1,0 +1,169 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.76in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,graphicx,float,hyperref,enumitem}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\input{docs/papers/paper0_5/results/final_experiment_macros.tex}
+\title{Predictive Refinement Across Transformer Depth:\\Signal, Fluctuation, Information Exposure, and Predictive Order}
+\author{Paper 0.5 --- Residual / Layer-Composition Research Line}
+\date{Final controlled iteration --- August 2026}
+\begin{document}\maketitle
+
+\begin{abstract}
+Once relevant context is accessible, what does Transformer depth compute? We study small causal Transformers on balanced generators that independently control predictive structure, nuisance, information exposure, raw length, dependency span, and predictive order. Correct-target margin grows from strongly negative to positive while absolute margin variance can increase; later updates exhibit negative cross-layer covariance, and only 7/27 primary trajectories contract monotonically. Thus depth is neither monotonic denoising nor entropy reduction. One-step Jacobian--vector products are directionally accurate, but cumulative fidelity degrades sharply. Causal window experiments show that reachability is necessary but not sufficient: arbitrary restriction breaks learned routing, whereas selectively blocking nuisance keys preserves perfect accuracy and reduces margin variance by 40.5\%. Target-preserving length through eight does not consistently delay stabilization. \PhaseAbstract\ \RNNAbstract\ The supported account is \emph{nonlinear predictive refinement}: accessible evidence is transformed until correct-target contrast dominates realization-dependent fluctuation and competing alternatives, with later layers often repairing earlier deviations. Pretrained diagnostics, exhaustive head scans, and legacy pilots remain secondary.
+\end{abstract}
+
+\section{Introduction}
+Once relevant context is accessible, what computation does Transformer depth perform? Self-attention can make distant information available at a prediction position, but access does not imply that the model has extracted the right predictive consequence. Conversely, a long input need not demand many refinement steps when a small sufficient subset already determines the target. This distinction is obscured when context length, transport distance, nuisance, and integration complexity vary together.
+
+We call \emph{predictive refinement} the depthwise process by which correct-target evidence becomes increasingly dominant over realization-dependent fluctuation and competing alternatives. The definition is behavioral and trajectory-based. It does not assume that hidden-state variance shrinks, that entropy falls, that every layer improves the answer, or that a visually recurrent attention motif is causal.
+
+We use controlled generators because the target, sufficient subset, nuisance relation, and attention-mask graph are known exactly. Our contributions are:
+\begin{enumerate}
+\item a correctness-aware signal/fluctuation framework with an exact cross-layer repair decomposition;
+\item causal tests separating information reachability, learned routing, arbitrary restriction, and selective nuisance exclusion;
+\item matched controls separating raw length $n$, dependency span $s$, nuisance count $k$, and predictive order $p^*$;
+\item a depth--width--training competence surface and a matched Transformer/RNN/GRU/LSTM sensitivity comparison;
+\item a claim audit that retains falsifications, failed competence cells, and weak external validity.
+\end{enumerate}
+
+\section{Related work}
+LayerDrop and conditional-depth methods show that Transformer computation can be pruned or allocated non-uniformly \cite{fan2019layerdrop,raposo2024mod,skip2023}; early-exit work and the tuned lens decode intermediate predictions \cite{belrose2023tuned}. We instead ask which controlled predictive variables change the formation and stabilization of the correct answer, without training an exit policy.
+
+Mechanistic work studies induction heads, residual streams, causal tracing, activation replacement, and FF layers as associative memories \cite{olsson2022induction,meng2022rome,geva2021ffn}. These motivate our interventions but not our conclusions: component magnitude, motif recurrence, and causal utility are measured separately, and localization is not treated as semantic storage.
+
+Long-context studies document position effects and irrelevant-context degradation \cite{liu2023lost}. Sparse/local attention establishes graph constraints, while retrieval noise can alter behavior. Our mask experiments distinguish formal reachability from learned functional transport and compare arbitrary truncation with selective key exclusion.
+
+Residual networks motivate dynamical and Jacobian views \cite{chen2018ode,sander2022resnet}; representation and information analyses motivate separation-to-fluctuation statistics. We test local and cumulative linearization directly rather than assuming a smooth global flow. Finally, recurrence has a sequential path whose length grows with source--target distance, whereas full attention provides a direct edge within each layer \cite{vaswani2017attention,hochreiter1997lstm,cho2014gru}. Our matched synthetic comparison concerns sensitivity along controlled axes, not universal architecture superiority and not modern state-space or recurrent-attention models.
+
+Prior work typically treats depth allocation, interpretability, context interference, dynamics, or recurrence separately. Our modest novelty is to control predictive order, surface length, nuisance, reachability, correctness, and architecture in one competence-gated framework.
+
+\section{Controlled framework and theory}
+\subsection{Signal, fluctuation, and repair}
+A residual block is
+\begin{equation}r_{l+1}=r_l+F_l(r_l).
+\end{equation}
+For realization $i$, define correct-target margin
+\begin{equation}m_{li}=z_{li}(Y)-\max_{y\ne Y}z_{li}(y)=S_l+\eta_{li},\end{equation}
+where $S_l=\mathbb E_i[m_{li}]$, $N_l^2=\operatorname{Var}_i(m_{li})$, and
+\begin{equation}\Gamma_l=\frac{S_l}{\sqrt{N_l^2+\epsilon}}.\end{equation}
+Positive margin is exactly correct top-1 behavior. We report $S_l$ and $N_l^2$ beside $\Gamma_l$ because a large ratio can arise from a nearly zero denominator.
+
+Write a boundary update as $\Delta m_{li}=\mu_l+\varepsilon_{li}$. Then
+\begin{align}
+m_{Li}&=m_{0i}+\sum_l\mu_l+\sum_l\varepsilon_{li},\\
+\operatorname{Var}(\sum_l\varepsilon_l)&=\sum_l\sigma_l^2+2\sum_{l<j}\operatorname{Cov}(\varepsilon_l,\varepsilon_j).
+\end{align}
+Negative off-diagonal covariance means later updates cancel part of earlier realization-specific deviation. This \emph{repair} need not be monotone layer by layer.
+
+\subsection{Predictive order and controlled axes}
+For token-index set $A$, define
+\begin{equation}
+p^*=\min_A |A|\quad\text{s.t.}\quad H(Y\mid X_A)\le\delta,
+\end{equation}
+with fixed audit threshold $\delta$. Raw length $n$ counts surface tokens; dependency span $s$ measures distance among indispensable tokens; nuisance $k$ counts tokens satisfying $Y\perp d\mid g$. These quantities are crossed rather than used interchangeably. Necessary modular generators have zero target MI for prohibited proper subsets and two bits for the full pattern.
+
+\subsection{Local linearization and information access}
+For a paired displacement,
+\begin{equation}\delta r_{l+1}=J_l\delta r_l+O(\|\delta r_l\|^2).\end{equation}
+We test one-step and cumulative JVP predictions; the full propagation derivation is in the appendix. With local attention window $w$, $Lw\ge s$ is a graph reachability condition in our mask, not a learning guarantee. Attention makes a distinction accessible; composed SA/FF transformations determine whether and how it affects the decision.
+
+\section{Experimental setup}
+The primary generators use four balanced targets, role-specific value tokens, same-vocabulary nuisance, disjoint deterministic train/test families, and exact information audits. Dataset V2 contains pair, three-token, sparse, functor, and nested rules. Every residual/SA/FF boundary records target probability, margin, rank, top-1, entropy, first/stable decision depth, reversals, and covariance statistics. Causal interventions include local windows, key-selective masks, component/head ablations, and matched activation donors.
+
+The final phase grid evaluates $p^*\in\{1,2,3,4,6,8\}$ over depths 2--24, a compute-feasible width subset, and 1x/2x/4x budgets at selected difficult cells. Each order has multiple $n\ge p^*$, three spans, and four nuisance levels. Primary/secondary competence thresholds are 0.80/0.90. The recurrent comparison holds generator, optimizer family, examples, update count, vocabulary, target entropy, and training tokens fixed across Transformer, vanilla RNN, GRU, and LSTM; exact parameter counts are reported. Internal RNN time is not equated with Transformer depth.
+
+\section{Results}
+\subsection{Result 1: depth builds correct predictive contrast}
+Across the primary three-generator matrix, eight-nuisance accuracy is 1.000. Mean correct margin changes from $-32.02$ initially to $+10.51$ finally, while target probability rises from $1.4\times10^{-10}$ to 0.9998. Absolute margin variance increases from zero to 1.89, so reliability comes from signal growth outpacing fluctuation rather than denominator collapse. Entropy is largely independent of margin (correlation 0.081) and may rise while correctness forms.
+
+Only 7/27 family--seed trajectories contract monotonically; 11 expand then contract and the rest oscillate, contract late, or fail to contract. Mean first/stable boundaries increase modestly with nuisance, but settling delay remains short. Transformer depth is therefore not a sequence of independent estimators or guaranteed denoisers.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_target_margin_vs_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_signal_dispersion_phase_plane.png}
+\caption{Correct-target margin and the signal--fluctuation trajectory. Correct contrast grows despite finite and sometimes increasing realization-dependent variation.}\end{figure}
+
+\subsection{Result 2: refinement includes correlated repair and is globally nonlinear}
+Mean boundary progress is positive, yet only 73.7\% of family/seed/noise transition cells improve on average. Median summed marginal update variance is 3.55, while median summed off-diagonal covariance is $-2.12$, leaving cumulative fluctuation variance 0.51. Later transformations therefore repair a substantial portion of earlier deviation.
+
+Local JVPs predict nuisance and signal directions well over one block. Across 85 behaviorally filtered Dataset V2 pairs, cumulative directional cosine drops from 0.782 at one block to 0.552 at two and 0.335 at four; relative error rises from 0.624 to 1.047. Piecewise re-linearization improves on the frozen product. Local directional structure is real, but globally linear composition is falsified.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_layer_update_covariance.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/dataset_v2_jacobian/c_cumulative_error_vs_horizon.png}
+\caption{Cross-boundary update covariance and cumulative-JVP error. Negative covariance implements repair; linearization deteriorates with horizon.}\end{figure}
+
+\subsection{Result 3: information exposure changes refinement burden}
+The local-window mask verifies exact graph reachability. Unreachable cells remain near chance, but reachability is not sufficient: one reachable $(s,w,L)=(8,2,4)$ cell attains only 0.078 accuracy. Full-trained models evaluated under arbitrary truncation average only 0.411 in the nominal signal-reachable/nuisance-unreachable regime, whereas locally trained restricted models reach 1.000. Learned routing and exposure during training matter.
+
+Selective masking provides the cleaner causal contrast. Blocking nuisance keys preserves 1.000 accuracy, increases mean target margin by 0.229 logits, and reduces nuisance-conditioned margin variance from 1.864 to 1.109 (40.5\%). Blocking predictive keys collapses accuracy to 0.249. SA and FF both change variance, and median repair fraction is 0.812. Less context helps only when exclusion respects the learned signal path.
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/group25/g25_accuracy_surface.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/group25/g25_selective_masking.png}
+\caption{Arbitrary window restriction versus selective masking. Reachability does not guarantee learned transport; selective nuisance exclusion reduces burden without deleting signal.}\end{figure}
+
+\subsection{Result 4: raw context length is not the controlling variable}
+In the competence-gated nested study, redundant accuracy stays 0.961--1.000 and supportive accuracy 0.994--1.000 through length eight. Their stable decision boundaries do not increase consistently; the descriptive raw-length fit has $R^2=0.016$. Necessary-pattern accuracy in the initial smoke falls from 0.996 at order two to 0.500, 0.322, and 0.240 at orders four, six, and eight. Those failures motivated rather than answered the final phase experiment.
+
+\PhaseResult
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/predictive_order_phase/phase_depth_predictive_order_width32.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/predictive_order_phase/accuracy_vs_depth_by_predictive_order.png}
+\caption{Predictive-order competence surface and accuracy versus depth. Internal timing is interpreted only where the 0.80 gate is met.}\end{figure}
+
+\RNNResult
+\begin{figure}[H]\centering
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/rnn_comparison/rnn_transformer_accuracy_vs_length.png}\hfill
+\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/rnn_comparison/rnn_transformer_accuracy_vs_span.png}
+\caption{Matched controlled sensitivity to raw length and indispensable-token span. Parameter counts and predictive-order/nuisance curves are reported in the appendix.}\end{figure}
+
+Target-preserving nested replacement supplies complementary causal evidence. Short-pattern donors are less damaging than nonequivalent donors, while block/head overlap remains partial. This supports reuse of a short computation under competent extension, not a fixed semantic circuit or a general hierarchy.
+
+\subsection{Hypothesis audit}
+\begin{table}[H]\centering\small
+\begin{tabular}{p{.44\linewidth}p{.15\linewidth}p{.33\linewidth}}\toprule
+Hypothesis&Status&Decisive evidence\\\midrule
+Correct signal grows relative to fluctuation&supported&margin/SNR trajectory\\
+Monotonic nuisance suppression; entropy reduction&falsified&non-monotone paths; entropy independence\\
+Later correlated repair&supported&negative off-diagonal covariance\\
+Global frozen-Jacobian composition&falsified&horizon-dependent JVP failure\\
+Reachability is sufficient&falsified&reachable optimization failure\\
+Selective nuisance exclusion helps&supported&paired key masking\\
+Raw length controls settling depth&not supported&competent length null\\
+Predictive order controls required depth&\PhaseStatus&phase competence frontier\\
+Stable head motifs explain utility&not supported&repeated motif--causal null\\
+RNNs are more length/span sensitive&\RNNStatus&matched controlled curves\\\bottomrule
+\end{tabular}
+\caption{Claims are classified as supported, falsified, not supported, or unresolved; failed competence cells never become positive mechanism evidence.}\end{table}
+
+\section{Discussion and limitations}
+\paragraph{Information access versus refinement.} Attention shortens the graph path by which evidence can reach the query, but useful prediction still requires learned nonlinear transformations. Width, depth, and training may trade off, yet an observed failure identifies none of them until competence recovers somewhere on the controlled surface.
+
+\paragraph{Selective exposure.} More context is neither inherently better nor worse. Arbitrary restriction can break trained routing; selective exclusion of known nuisance can reduce fluctuation without deleting signal. This distinction matters for sparse-context systems, but the synthetic oracle labels do not solve nuisance identification in natural text.
+
+\paragraph{Architecture.} \RNNAbstract\ The comparison is limited to conventional unidirectional RNN/GRU/LSTM baselines and a small Transformer. It excludes state-space models, recurrent attention, and extensive architecture-specific tuning.
+
+The main limitations are synthetic modular generators, small custom models, one-seed final architecture surfaces, limited semantic complexity, difficult high-order optimization, and weak pretrained external validity. No universal scaling exponent or general Transformer superiority is claimed. Head roles are task-conditioned causal summaries. Pretrained Pythia/Qwen results remain appendix diagnostics because the true training families and sufficient subsets are unknown.
+
+\section{Conclusion}
+Transformer depth is not well described as monotonic denoising or computation proportional to context length. In these controlled tasks, depth performs nonlinear predictive refinement: correct evidence grows relative to realization-dependent fluctuation and competitors, later layers repair earlier deviations, and information exposure constrains but does not determine the learned computation. Raw target-preserving extent is a weak predictor of settling depth. \PhaseResult\ The resulting theory is deliberately conditional and competence-gated: structured predictive distinctions, not token count alone, determine the burden that remains after context becomes accessible.
+
+\appendix
+\input{docs/papers/paper0_5/appendix.tex}
+
+\begin{thebibliography}{20}
+\bibitem{vaswani2017attention} A. Vaswani et al. Attention Is All You Need. \emph{NeurIPS}, 2017.
+\bibitem{fan2019layerdrop} A. Fan, E. Grave, and A. Joulin. Reducing Transformer Depth on Demand with Structured Dropout. \emph{ICLR}, 2020.
+\bibitem{raposo2024mod} D. Raposo et al. Mixture-of-Depths: Dynamically Allocating Compute in Transformer-Based Language Models. arXiv:2404.02258, 2024.
+\bibitem{skip2023} Z. Wang et al. Learning to Skip for Language Modeling. arXiv:2311.15436, 2023.
+\bibitem{belrose2023tuned} N. Belrose et al. Eliciting Latent Predictions from Transformers with the Tuned Lens. arXiv:2303.08112, 2023.
+\bibitem{olsson2022induction} C. Olsson et al. In-context Learning and Induction Heads. Transformer Circuits, 2022.
+\bibitem{meng2022rome} K. Meng et al. Locating and Editing Factual Associations in GPT. \emph{NeurIPS}, 2022.
+\bibitem{geva2021ffn} M. Geva et al. Transformer Feed-Forward Layers Are Key-Value Memories. \emph{EMNLP}, 2021.
+\bibitem{liu2023lost} N. F. Liu et al. Lost in the Middle: How Language Models Use Long Contexts. \emph{TACL}, 2024.
+\bibitem{chen2018ode} R. T. Q. Chen et al. Neural Ordinary Differential Equations. \emph{NeurIPS}, 2018.
+\bibitem{sander2022resnet} M. E. Sander, P. Ablin, and G. Peyr\'e. Do Residual Neural Networks Discretize Neural Ordinary Differential Equations? \emph{NeurIPS}, 2022.
+\bibitem{hochreiter1997lstm} S. Hochreiter and J. Schmidhuber. Long Short-Term Memory. \emph{Neural Computation}, 1997.
+\bibitem{cho2014gru} K. Cho et al. Learning Phrase Representations using RNN Encoder--Decoder for Statistical Machine Translation. \emph{EMNLP}, 2014.
+\bibitem{biderman2023pythia} S. Biderman et al. Pythia: A Suite for Analyzing Large Language Models Across Training and Scaling. \emph{ICML}, 2023.
+\end{thebibliography}
+\end{document}

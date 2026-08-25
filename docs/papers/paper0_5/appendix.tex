@@ -1,0 +1,71 @@
+\section{Generator definitions and information audits}
+All controlled targets have four balanced classes.  For the no-shortcut family, active values $X_j$ are independent and uniform on $\mathbb Z_4$ and
+\[
+Y=\left(\sum_{j=1}^{p^*}X_j\right)\bmod 4.
+\]
+For $p^*>1$, any prohibited proper subset is independent of $Y$: conditioning on that subset leaves at least one independent uniform summand, which one-time-pads the modular total.  Consequently $I(X_A;Y)=0$ for every proper $A\subsetneq\{1,\ldots,p^*\}$, whereas $I(X_1,\ldots,X_{p^*};Y)=H(Y)=2$ bits.  Orders up to four are audited exhaustively; orders six and eight use this analytic identity plus exhaustive singleton/full-pattern checks.  Role-specific token pools prevent a bag-of-token-count shortcut.  Train and test examples use disjoint deterministic identity ranges.
+
+The length controls alter distinct variables.  Redundant extensions retain a sufficient two-token core and add conditionally irrelevant tokens.  Supportive extensions add target-compatible evidence and therefore intentionally have informative singleton cues.  Necessary extensions increase $p^*$.  The final phase generator matches the latent values and target while varying raw length $n$, span $s$, and nuisance count $k$.
+
+\section{Training and configuration}
+\begingroup\raggedright
+The primary controlled Transformer is a pre-norm causal residual model with tied input/output embeddings, multi-head self-attention, GELU feed-forward blocks, and a shared diagnostic decoder. Optimization uses AdamW, gradient-norm clipping at one, balanced online generation, fixed seeds, and held-out deterministic families. The predictive-order phase grid crosses the tracked depths, widths, and training budgets in \path{configs/paper05/predictive_order_phase.json}. The compute-feasible width subset and all omitted grid cells are explicit in the manifest; a blank minimum-depth/width cell means that competence was not reached, not that the boundary lies at infinity.\par
+\endgroup
+
+The recurrent comparison uses vanilla RNN, GRU, and LSTM baselines with the same vocabulary, generated examples, optimizer family, update count, batch size, target entropy, and token budget as its Transformer baseline. Exact parameter counts are reported rather than described as perfectly equal. Architecture-specific tuning was not enlarged after seeing test results. Recurrent time $t$ and Transformer layer $l$ are never treated as commensurate compute units.
+
+\section{Statistical details and failed scaling fits}
+The scientific unit is a held-out predictive family, model seed, and architecture cell rather than correlated token occurrences. Competence thresholds are fixed at 0.80 (primary) and 0.90 (secondary). Internal decision-depth, reuse, and head analyses exclude architecture/order strata below the primary threshold. Descriptive regressions include $p^*$, $n$, $s$, $k$, depth, width, training steps, and preregistered interactions. Constant, linear, logarithmic, power, threshold, and saturating descriptions are compared where variation permits; no power law is promoted unless it clearly improves held-out error and information criteria. Existing fits do not meet that standard.
+
+Dataset V2 uses family/seed bootstrap intervals. Group~2.5 uses architecture-cell holdouts for its nonlinear attribution model and paired selective-mask contrasts. The controlled bridge uses identity-matched donors. All negative, failed, and near-chance cells remain in machine-readable artifacts even when excluded from positive mechanistic interpretation.
+
+\section{Signal, fluctuation, and repair derivation}
+For realization $i$, write the correct-target margin as $m_{li}=S_l+\eta_{li}$ with $S_l=\mathbb E_i[m_{li}]$ and $N_l^2=\operatorname{Var}_i(m_{li})$.  A scale-free diagnostic is $\Gamma_l=S_l/\sqrt{N_l^2+\epsilon}$.  With layer update $\Delta m_{li}=\mu_l+\varepsilon_{li}$,
+\[
+m_{Li}=m_{0i}+\sum_l\mu_l+\sum_l\varepsilon_{li},
+\]
+and therefore
+\[
+\operatorname{Var}\!\left(\sum_l\varepsilon_l\right)
+=\sum_l\sigma_l^2+2\sum_{l<j}\operatorname{Cov}(\varepsilon_l,\varepsilon_j).
+\]
+Negative off-diagonal covariance is an operational signature of later repair: later updates cancel part of earlier realization-specific deviation. It does not imply that every layer contracts variance, nor that total hidden-state variance must shrink.
+
+For a paired displacement, local linearization gives
+\[
+\delta r_{l+1}=J_l\delta r_l+O(\|\delta r_l\|^2).
+\]
+The frozen cumulative approximation is $\widehat{\delta r_b}=J_{b-1}\cdots J_a\delta r_a$.  It is evaluated by directional cosine, relative norm error, and decision-margin projection. Piecewise re-linearization recomputes the Jacobian along the perturbed path. Controlled results show strong one-step directional agreement but degrading cumulative fidelity, so the Jacobian is a local diagnostic rather than a globally linear explanation.
+
+\section{Full head analyses}
+Zero ablation, mean replacement, equivalent-family replacement, mismatched replacement, and pair interventions separate generic component magnitude from family-specific causal utility. Equivalent replacement is least damaging in the original controlled scan, while mismatch produces greater discrimination damage. Pair utilities are non-additive. Attention-motif recurrence does not predict causal head utility in either the original or consolidated scan. Nested target-preserving comparisons show partial top-head overlap and continued recruitment, not a stable semantic head inventory.
+
+\section{Nested-pattern details}
+The causal bridge crosses irrelevant, supportive, refining, override, and multilevel extensions with matched embedded-short, unrelated-same-target, and nonequivalent donors. Only target-preserving strata clear competence. Embedded-short replacement is less damaging than nonequivalent replacement, supporting partial reuse of a learned increment. Target-changing hierarchy and override variants remain failure diagnostics. The later length study likewise restricts internal interpretation to competent cells.
+
+\section{Predictive-order phase grid}
+\begingroup\raggedright
+The complete tracked tables are \path{phase_grid_results.csv}, \path{phase_min_depth.csv}, \path{phase_min_width.csv}, \path{phase_internal_decision_depth.csv}, and \path{phase_model_fits.csv}. They report every trained depth/width/budget/order cell and preserve failed high-order attempts. Multiple surface lengths, three dependency spans, and four nuisance counts are averaged only after their matched cell results are retained.\par
+\endgroup
+
+\section{Recurrent comparison details}
+R1 fixes $p^*=2$ and varies raw length; R2 fixes $p^*=2$ and varies the distance between the two indispensable values; R3 varies predictive order at controlled span; R4 varies same-vocabulary nuisance. Recurrent target margin and hidden norm are sampled through time. Matched nuisance pairs additionally record $\|h_t^{(k)}-h_t^{(0)}\|_2$. Transformer margins are decoded at depth boundaries. These plots diagnose different axes and do not equate a recurrent transition with a Transformer block.
+
+\section{Pretrained Pythia and Qwen diagnostics}
+Behavioral filtering retains 10 of 12 equal-length pairs across pinned Pythia-70M and Qwen3-0.6B checkpoints. Mean cumulative directional cosine is 0.768, 0.733, and 0.702 over one, two, and four blocks, but relative-norm error exceeds one in several cells. The broader replacement matrix finds equivalent/nonequivalent contrasts, while an on-manifold nearest-donor control sharply weakens a label-specific interpretation. These are external-validity diagnostics, not evidence that the controlled equivalence classes occur naturally at scale.
+
+\section{Legacy pilot and continual-learning boundary}
+The preserved pilot contains the original atlas, component interventions, motif controls, entropy trajectories, equivalence patches, and training checkpoints. Familiar low-entropy mappings are FF-heavier under zero ablation, whereas contextual override/repair is SA-heavier. Controlled frequency/mechanism regression is weak. These results motivate distributed, state-dependent computation but are secondary to the central refinement theory.
+
+Paper~0.5 neither implements nor validates continual learning. Stable predictive equivalence is at most a diagnostic precursor. Persistent prototypes or adapters remain blocked pending natural held-out causal utility, matched-budget benefit, contamination controls, and rollback.
+
+\section{Reproduction commands}
+\begin{verbatim}
+PYTHONPATH=src python -m cl.experiments.paper05_predictive_order_phase
+PYTHONPATH=src python -m cl.analysis.paper05_predictive_order_phase
+PYTHONPATH=src python -m cl.experiments.paper05_rnn_comparison
+PYTHONPATH=src python -m cl.analysis.paper05_rnn_comparison
+PYTHONPATH=src python -m cl.experiments.paper05_layer_composition
+PYTHONPATH=src python -m cl.experiments.paper05_group25_sa_variance
+PYTHONPATH=src python -m cl.experiments.paper05_nested_patterns
+\end{verbatim}
