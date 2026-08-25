@@ -1,0 +1,150 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,graphicx,float,hyperref,enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\graphicspath{{docs/papers/paper0_6/results/v2/figures/}{docs/papers/paper0_6/results/figures/}}
+
+\title{Hierarchical Semantic Invariants Across Transformer Depth:\\
+Competence Gates, Predictive Order, and Generator-Dependent Generalization}
+\author{Paper 0.6 --- Semantic / Abstraction Research Line}
+\date{August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We ask when a Transformer learns causally usable semantic equivalence classes under an exactly known generator.  A six-layer Transformer is tested on three progressively different instruments: in-context taxonomic lookup (S1), relational parity on held-out relation combinations (S2), and nested attribute composition on unseen combinations (S3).  An 80\% worst-cell competence gate precedes mechanism interpretation.  S1 passes (98.45\% mean; 85.16\% worst cell), S2 fits training to zero loss but fails transfer (5.66\%; 4.69\%), and S3 passes (99.93\%; 99.22\%).  In competent S3, the mean boundary at which the answer becomes and remains top-1 increases from 1.75 to 2.49 to 4.75 for predictive semantic orders one, two, and three.  Thus depth tracks the amount of target-relevant composition in this controlled regime, but semantic generalization is not implied by low training loss or attractive geometry.  The earlier six-tree pilot is retained as a negative control: it showed above-permutation geometry despite 1.4--15.3\% behavioral accuracy.  Together the experiments support a competence-first, generator-dependent account rather than a universal abstraction ladder.
+\end{abstract}
+
+\section{Question and scope}
+Paper 0.6 studies nested semantic equivalence across Transformer depth when category membership and nuisance transformations are known exactly.  This differs from Paper 0.5, where equivalence is induced by sequential predictive structure.  The central question is not whether residual vectors form visually plausible clusters, but whether a model first generalizes the intended rule and then develops a stable, measurable computation for it.
+
+Pretrained models are appendix-level external validity only: their ontology, exposures, and frequencies are unknown.  Continual-learning implications are likewise downstream.  Neither is used to establish the controlled claim.
+
+\section{A competence-first formalism}
+Let an instance have a generated semantic path
+\[
+x\rightarrow C_1(x)\rightarrow\cdots\rightarrow C_K(x),
+\qquad x\sim_k y\iff C_k(x)=C_k(y).
+\]
+At residual boundary $\ell$, a shared diagnostic readout assigns target margin
+\[
+m_{\ell,k}(x)=z_\ell(C_k(x))-\max_{c\ne C_k(x)}z_\ell(c).
+\]
+The simplest useful ``order parameter'' is its mean signal, accompanied by its fluctuation:
+\[
+S_{\ell,k}=\mathbb E[m_{\ell,k}],\qquad
+N^2_{\ell,k}=\operatorname{Var}(m_{\ell,k}),\qquad
+\Gamma_{\ell,k}=\frac{S_{\ell,k}}{\sqrt{N^2_{\ell,k}+\epsilon}}.
+\]
+Pedagogically, $S$ asks whether the correct class is favored, $N$ asks how unevenly that preference is distributed, and $\Gamma$ prevents a large but unreliable mean from being mistaken for stable computation.
+
+For a class $c$, let $\mu_{\ell,c}$ and $\Sigma_{\ell,c}$ be the residual centroid and covariance.  We report within-class dispersion $D_{\rm within}$, between-centroid variation $D_{\rm between}$, their ratio
+\[
+R_{\ell,k}=D_{\rm between}/(D_{\rm within}+\epsilon),
+\]
+covariance trace, effective rank, class-agreement RSA, and nearest-class recovery.  These quantities become semantic evidence only after the corresponding held-out behavior passes the gate.
+
+Finally define
+\[
+L_{\rm first}(x)=\min\{\ell:\hat y_\ell=y\},\qquad
+L_{\rm stable}(x)=\min\{\ell:\hat y_j=y\ \forall j\ge\ell\}.
+\]
+$L_{\rm stable}$ is more stringent: a transient correct guess does not count as a settled decision.
+
+\section{Shared experimental design}
+All new stages use two model seeds (11 and 23), sequence length 32, vocabulary 384, width 64, six Transformer blocks, four heads, batch size 128, and AdamW at learning rate 0.003.  S1 and S3 train for 700 updates; the S2 schedule was calibrated to 400 because pilot loss was already essentially zero by update 300.  Four surface templates and aligned/randomized positions are crossed.  Train and test entity-token pools are disjoint.  The preregistered gate requires every reported held-out cell to reach 80\% accuracy; 90\% is preferred.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.72\linewidth]{semantic_accuracy_by_generator.png}
+\caption{Behavioral competence precedes mechanism interpretation. S1 and S3 pass the 80\% worst-cell gate; S2 fails despite perfect training fit.}
+\label{fig:competence}
+\end{figure}
+
+\part{I. S1 --- Taxonomic lookup}
+\section{Generator and controls}
+S1 presents explicit balanced trees with branching factors two and four, depths two and three, and eight or sixteen instances per leaf group.  Natural and arbitrary label vocabularies are disjoint.  Queries request the instance's parent, ancestor, or root.  Four clause-order templates and two position regimes yield 192 controlled cells per seed, evaluated with 32 examples each (12,288 examples per seed).  Test leaves never occur in training, but their definition chain appears in context, making this a held-out identity test of hierarchical lookup rather than stored-token recall.
+
+Generator validation verifies zero train/test identity overlap, balanced templates, in-vocabulary labels, valid relation clauses, and deterministic replay.  Unlike the legacy corpus, this regime deliberately trains until competence is established before geometry is read semantically.
+
+\section{S1 results}
+Across two seeds, mean held-out accuracy is 98.45\%; the minimum cell is 85.16\%, above the gate.  Margin SNR becomes positive at boundary 3 and rises through later computation (Fig.~\ref{fig:snr}).  Consequently the accompanying hierarchy geometry, covariance, update, and decision-depth tables are eligible observational diagnostics.  They are not yet causal localization: head ablation and donor replacement remain explicitly marked pending rather than silently inferred from residual proximity.
+
+\part{II. S2 --- Relational category learning}
+\section{Generator, shortcut audit, and failed transfer}
+S2 describes an unseen entity with four reusable binary relations.  Its category is the parity of the full relation vector.  Under the uniform 16-pattern universe, every singleton and every proper relation subset has zero mutual information with the target, while the full vector carries one bit.  Four patterns $\{1,6,11,12\}$ are held out; they and the remaining twelve are each parity-balanced.  Natural/arbitrary output regimes are explicitly signaled, templates and positions are crossed, and entity identities are disjoint.
+
+This detail matters.  An initial audit caught an invalid modulo-five split whose test set had zero target entropy; that run was rejected before publication.  The corrected generator has exactly one bit of held-out target entropy and passes its shortcut validator.
+
+Both corrected runs reach essentially zero training loss, yet mean held-out accuracy is only 5.66\% and the worst cell 4.69\%.  The strongly negative final margin SNR in Fig.~\ref{fig:snr} shows confident wrong extrapolation, not mere uncertainty.  S2 therefore demonstrates memorization of observed relation combinations without learning the intended full-structure rule.  All S2 geometry, replacement, SA/FF, and head claims are blocked by the competence gate.
+
+\part{III. S3 --- Compositional semantic abstraction}
+\section{Generator and predictive semantic order}
+S3 assigns each instance six balanced binary attributes.  Three requested levels use sufficient subsets of sizes one, two, and three:
+\[
+y_1=a_1,\qquad y_2=a_1\oplus a_3,\qquad
+y_3=a_1\oplus a_3\oplus a_6.
+\]
+Thus predictive semantic order is known by construction rather than estimated from token length.  Attribute combinations whose integer code is divisible by five are excluded from training.  At every order, held-out target entropy exceeds 0.95 bits; identities, templates, and positions are controlled as above.
+
+\section{S3 results: competence and decision depth}
+S3 achieves 99.93\% mean unseen-combination accuracy and 99.22\% in the worst cell.  Accuracy remains near one for all three orders, so depth comparisons are not confounded by comparing learned and unlearned tasks.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.48\linewidth]{semantic_compositional_generalization.png}\hfill
+\includegraphics[width=.48\linewidth]{semantic_abstraction_decision_depth.png}
+\caption{Left: held-out compositional accuracy by predictive semantic order. Right: mean stable decision boundary rises from 1.75 to 2.49 to 4.75 as the minimum sufficient attribute subset grows from one to three.}
+\label{fig:s3depth}
+\end{figure}
+
+The result supports a restricted depth law: within one competent generator and fixed architecture, additional target-relevant composition is associated with later stabilization.  It does not imply that semantic ``coarseness'' universally appears later, nor that raw tree depth or sequence length determines network depth.  The unit of explanation is the computation required by the target rule.
+
+\section{Cross-stage interpretation}
+\begin{figure}[H]
+\centering
+\includegraphics[width=.68\linewidth]{semantic_margin_snr_vs_depth.png}
+\caption{Correctness signal relative to across-example fluctuation. Competent S1 and S3 cross into positive SNR and strengthen; incompetent S2 remains confidently negative.}
+\label{fig:snr}
+\end{figure}
+
+The three stages separate phenomena often conflated under ``abstraction.''  S1 succeeds because an explicit local definition chain supports lookup over unseen leaves.  S3 succeeds because repeated attribute rules support systematic reuse on unseen combinations.  S2 shows that balanced inputs and perfect optimization do not guarantee acquisition of a combinatorial rule.  Hence neither depth nor geometry alone is the causal variable: the match among generator, supervision, hypothesis class, and optimization determines whether an invariant becomes behaviorally usable.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=.48\linewidth]{semantic_hierarchy_rsa_vs_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{semantic_within_between_vs_depth.png}
+\caption{Competence-gated class geometry for S1 and S3 only. S2 is deliberately omitted because its held-out task failed. These are observational diagnostics, not replacements for causal interventions.}
+\label{fig:geometry}
+\end{figure}
+
+\section{What is and is not established}
+The new results establish two competent controlled regimes, a failure regime, and an order-dependent decision-depth effect.  They do not yet establish which attention heads or SA/FF components are necessary.  The artifact tables reserve those analyses as pending for competent S1/S3 and blocked for S2.  This separation is substantive: a missing causal experiment is preferable to converting a correlational plot into a mechanism claim.
+
+\section{Reproducibility}
+The versioned configuration is \path{configs/paper06/semantic_v2.json}.  Generators, runners, and analysis live in \path{src/cl/semantic/v2.py} and the three \path{paper06_*_v2.py} experiment modules.  Raw competence and layer tables, generator validations, gate decisions, nine integrated CSV tables, ten figures, four summaries, and a manifest are stored under \path{docs/papers/paper0_6/results/v2/}.  Checkpoints are locally reproducible but excluded from version control; all published numeric claims are backed by tracked raw tables.
+
+\section{Limitations and next tests}
+Only one new architecture and two seeds are reported.  S1 uses explicit in-context facts, and S2/S3 use symbolic binary relations rather than natural language.  Predictive order is tested only to three.  Geometry estimates use a balanced diagnostic subset.  Causal replacement, SA/FF ablation, head utility, scaling fits, selected-branch holdouts, and pretrained external validity remain future experiments.  In particular, the S2 failure should next be tested with curriculum, explicit rule demonstrations, and architecture/training sweeps without relaxing the held-out gate.
+
+\section{Conclusion}
+Semantic abstraction is not licensed by a label, a cluster, or low training loss.  It requires held-out behavior under a known generator.  S1 and S3 satisfy that condition; S2 does not.  In the competent compositional regime, stable prediction moves later with predictive semantic order, yielding a clear but deliberately local theory of depth as iterative target-relevant composition.
+
+\appendix
+\section{Legacy six-tree pilot: preserved negative control}
+The previous Paper 0.6 experiment used six balanced binary trees: natural and arbitrary noun, action, and relation families, parent/root queries, three templates, and permuted-parent controls.  Architectures were width/depth/heads 32/2/2 and 48/3/3 with seeds 11 and 23; checkpoints were recorded at steps 0, 40, 100, and 160.  Its tracked artifact set contains 4,320 representation rows, 2,880 causal-component rows, 4,320 entropy rows, 5,760 replacement rows, 2,304 checkpoint-competence rows, 108 aggregate geometry rows, 13 figures, and four dense checkpoints for the first model/seed.  Final language-model loss ranged from 0.457 to 0.530.
+
+None of its four trained runs passed the 80\% gate: final accuracy ranged from 1.4\% to 15.3\%.  Nevertheless, post-block normalized separation was 0.110, hierarchy RSA 0.194, and parent-neighbor recovery 0.477 versus 0.254 under label permutation; cross-template cosine was 0.960.  This mismatch is the motivating negative control for the present paper.
+
+Same-parent sibling output distributions were only modestly closer than cross-family outputs (0.660 versus 0.746 JS bits).  At layer-0 FFN, sibling versus cross-category complete-update replacement changed output by 0.241 versus 0.284 JS bits; at layer-0 SA the corresponding values were 0.205 and 0.243.  Target-probability changes were near zero for sibling donors and more negative for cross-category donors, but an unlearned target makes the contrast non-semantic.
+
+Entropy increased from pre-SA to post-block for both parent and root requests.  Within- and between-category residual variation both grew, their ratio rose only modestly, semantic attention-motif specificity averaged slightly below zero, and geometry was partly present at layer 0.  Developmental curves, residual commonality, task-conditioned component responsibility, natural/arbitrary contrasts, and cross-domain variation therefore remain useful underfit diagnostics, not evidence of learned hierarchy.  The legacy conclusion is unchanged: geometry can beat a permutation baseline while behavior fails.
+
+\section{Pretrained and continual-learning boundary}
+The retained pretrained audit concerns graph recovery rather than the controlled hierarchies above and cannot satisfy their competence gate.  WordNet-style siblings, paraphrase invariance, residual-matched donors, and JVP direction tests remain possible external-validity probes, but unknown exposure prevents generator-level semantic claims.  Likewise, no S2 feature should enter persistent-learning experiments; competent S1/S3 features require causal validation before Paper 1 reuse.
+
+\end{document}

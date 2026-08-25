@@ -1,0 +1,701 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,graphicx,float,hyperref,enumitem}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\title{Hierarchical Semantic Invariants Across Transformer Depth:\\
+Controlled Ontologies, Predictive Abstraction, and Layer Composition}
+\author{Paper 0.6 --- Semantic / Abstraction Research Line}
+\date{Reorganized experimental-theory plan --- August 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This paper studies how Transformer depth organizes explicitly generated semantic hierarchies into stable, causally usable predictive classes. The primary scientific instrument is a family of custom Transformers trained from scratch on exact synthetic ontologies, not pretrained language models. The ontology generator provides known category trees, relation graphs, abstraction levels, instance memberships, transformation classes, and held-out compositional generalization. Behavioral competence is a mandatory gate: no semantic interpretation is made unless the model reliably solves the corresponding parent, ancestor, relation, or compositional classification task. The experimental program is organized into three semantic-generator levels: taxonomic lookup, relational category learning, and compositional semantic abstraction. For competent regimes we measure correctness-aware order parameters, within/between-class variance, hierarchy recovery, residual/update reuse, causal substitution, SA/FF contributions, head overlap, abstraction depth, and hierarchical refinement. Pretrained models are retained only as appendix-level external validity because their true semantic training distribution is unknown.
+\end{abstract}
+
+\section{Scope}
+
+Paper 0.6 asks:
+
+\begin{quote}
+How does a Transformer represent and refine nested semantic equivalence classes across depth when the ontology and data-generating process are known exactly?
+\end{quote}
+
+This is distinct from Paper 0.5. Paper 0.5 studies predictive equivalence induced by sequential structure and nuisance. Paper 0.6 studies equivalence under known semantic/category transformations.
+
+The paper does not assume semantic structure from geometry alone. The generator defines the intended ontology, but only behavioral competence establishes that the model has learned a usable ontology.
+
+\section{Relation to Paper 0.5}
+
+Paper 0.5 established several methodological requirements that are carried forward:
+
+\begin{enumerate}
+\item behavioral competence must gate mechanistic interpretation;
+\item raw residual cosine is insufficient;
+\item block/SA/FF update similarity is more diagnostic;
+\item causal replacement is stronger evidence than geometry;
+\item nuisance and target-changing context must be separated;
+\item correctness signal and fluctuation must be reported jointly;
+\item non-monotonic layer trajectories are allowed;
+\item pretrained models are weaker external-validity tests because their generating distribution is unknown.
+\end{enumerate}
+
+The nested-pattern bridge provides only a narrow precursor: competent target-preserving lexical extensions partially reuse a causally substitutable short computation. Paper 0.6 asks whether analogous reuse and hierarchy emerge for semantic relations that generalize beyond lexical nesting.
+
+\section{Ground-Truth Semantic Generator}
+
+Let the ontology be a rooted tree or directed acyclic graph:
+
+\[
+\mathcal{T}=(V,E).
+\]
+
+Each instance \(x\) has a known semantic path
+
+\[
+x \rightarrow C_1(x) \rightarrow C_2(x) \rightarrow \cdots \rightarrow C_K(x),
+\]
+
+where \(C_k(x)\) is the class containing \(x\) at abstraction level \(k\).
+
+Define semantic equivalence:
+
+\[
+x \sim_k y
+\iff
+C_k(x)=C_k(y).
+\]
+
+Thus:
+
+\[
+C_0(x)\subset C_1(x)\subset \cdots \subset C_K(x).
+\]
+
+A transformation \(T\) is level-\(k\) preserving if
+
+\[
+C_k(Tx)=C_k(x).
+\]
+
+The generator therefore supplies exact semantic invariance classes and exact tree distances.
+
+\section{Three Semantic Generator Levels}
+
+\part{I. S1 --- Taxonomic Lookup}
+
+\section{I.A Hypothesis}
+
+A Transformer trained on repeated parent/ancestor relations should learn a usable hierarchical classification before any semantic geometry is interpreted.
+
+Examples:
+
+\[
+x_i \to C_j,
+\qquad
+C_j \to R.
+\]
+
+Queries:
+
+\[
+Q_{\mathrm{parent}}(x_i)\to C_j,
+\]
+
+\[
+Q_{\mathrm{root}}(x_i)\to R.
+\]
+
+Natural-label and arbitrary-label trees are both required.
+
+\section{I.B Formalization}
+
+For leaf \(x\), define correct target \(Y_k=C_k(x)\).
+
+At layer \(\ell\):
+
+\[
+m_{\ell,k}(x)
+=
+z_\ell(Y_k)-\max_{y\neq Y_k}z_\ell(y).
+\]
+
+Define:
+
+\[
+S_{\ell,k}
+=
+E_x[m_{\ell,k}(x)],
+\]
+
+\[
+N_{\ell,k}^2
+=
+\mathrm{Var}_x[m_{\ell,k}(x)],
+\]
+
+\[
+\Gamma_{\ell,k}
+=
+\frac{S_{\ell,k}}
+{\sqrt{N_{\ell,k}^2+\epsilon}}.
+\]
+
+Semantic class organization is measured with:
+
+\[
+D_{\mathrm{within},k}(\ell),
+\qquad
+D_{\mathrm{between},k}(\ell),
+\]
+
+and:
+
+\[
+R_{\ell,k}
+=
+\frac{D_{\mathrm{between},k}(\ell)}
+{D_{\mathrm{within},k}(\ell)+\epsilon}.
+\]
+
+\section{I.C Possible Theory}
+
+\subsection{Statistical View}
+
+Each semantic class defines an ensemble:
+
+\[
+\mathcal E_{\ell,k}(C)
+=
+\{r_\ell(x):C_k(x)=C\}.
+\]
+
+Measure class centroid, covariance trace, effective rank, within-class dispersion, and between-class separation.
+
+\subsection{Information-Theoretic View}
+
+The generator knows:
+
+\[
+I(X;C_k)
+\]
+
+exactly or empirically.
+
+The model should increase decodability/usable information about the requested abstraction level while becoming invariant to template nuisance.
+
+\subsection{Dynamical-Systems View}
+
+Depth defines a trajectory:
+
+\[
+r_{\ell+1}=r_\ell+F_\ell(r_\ell).
+\]
+
+Semantic abstraction need not appear monotonically. Parent and root information may emerge, disappear, re-enter, or coexist.
+
+\subsection{Statistical-Mechanical View}
+
+For abstraction level \(k\), define:
+
+\[
+q_{\ell,k}
+=
+E_C[\mathrm{Tr}\Sigma_{\ell,k,C}],
+\]
+
+\[
+M_{\ell,k}
+=
+E_{C\neq C'}
+\|\mu_{\ell,k,C}-\mu_{\ell,k,C'}\|^2,
+\]
+
+\[
+\chi_{\ell,k}
+=
+\frac{q_{\ell,k}}
+{M_{\ell,k}+\epsilon}.
+\]
+
+The semantic ``ordered'' regime requires high behavioral competence plus increasing class separation relative to within-class fluctuation.
+
+\section{I.D Experimental Plan}
+
+Use balanced trees with multiple branching factors and depths.
+
+Suggested matrix:
+
+\[
+b\in\{2,4,8\},
+\qquad
+K\in\{2,3,4\},
+\]
+
+with at least 8--32 leaves per parent where compute permits.
+
+Cross:
+
+\begin{itemize}
+\item natural labels;
+\item arbitrary labels;
+\item 3--5 query templates;
+\item parent versus root versus intermediate ancestor;
+\item aligned versus randomized surface positions;
+\item held-out leaves;
+\item held-out template forms;
+\item multiple seeds and model depths.
+\end{itemize}
+
+\section{I.E Competence Gate}
+
+No semantic interpretation unless held-out accuracy exceeds a preregistered threshold.
+
+Suggested:
+
+\[
+\mathrm{Acc}\ge 0.80
+\]
+
+for confirmatory claims.
+
+Near-chance cells are retained as failure diagnostics only.
+
+\section{I.F Results Placeholder}
+
+Report:
+
+\begin{itemize}
+\item held-out parent/root/ancestor accuracy;
+\item first/stable semantic decision depth;
+\item hierarchy recovery;
+\item RSA with exact tree distance;
+\item cross-template invariance;
+\item \(R_{\ell,k}\), \(\Gamma_{\ell,k}\), \(\chi_{\ell,k}\);
+\item random/permuted-tree controls.
+\end{itemize}
+
+\section{I.G Interpretation Placeholder}
+
+Determine whether semantic hierarchy is learned as:
+
+\begin{enumerate}
+\item direct lookup;
+\item nested class geometry;
+\item reusable update directions;
+\item distributed class-conditioned dynamics.
+\end{enumerate}
+
+\part{II. S2 --- Relational Category Learning}
+
+\section{II.A Hypothesis}
+
+Category meaning should not depend on memorized leaf identifiers alone. The model should infer category membership from repeated relational structure across many instances.
+
+Represent relations explicitly:
+
+\[
+F(x,C)
+\]
+
+or:
+
+\[
+x \xrightarrow{\text{is-a}} C.
+\]
+
+Hold out instances while preserving the relational generator.
+
+\section{II.B Formalization}
+
+Each instance \(x_i\) is generated with relation set:
+
+\[
+\mathcal R(x_i)
+=
+\{R_1(x_i,a),R_2(x_i,b),\ldots\}.
+\]
+
+Category membership is determined by a known relational rule:
+
+\[
+C(x)=f(\mathcal R(x)).
+\]
+
+Train/test splits separate instance identity from relational type.
+
+\section{II.C Possible Theory}
+
+\subsection{Statistical View}
+
+If category representation is relational, within-category residual/update similarity should survive held-out entity identity.
+
+\subsection{Information-Theoretic View}
+
+Require:
+
+\[
+I(\text{entity token};Y)
+\]
+
+to be low for held-out identities, while relation structure carries target information.
+
+\subsection{Dynamical-Systems View}
+
+Depth should progressively integrate relational evidence into a stable category decision.
+
+\subsection{Statistical-Mechanical View}
+
+Instances sampled from the same relational class form semantic ensembles whose predictive signal should dominate identity-specific fluctuation.
+
+\section{II.D Experimental Plan}
+
+Use arbitrary entity labels and reusable relation vocabularies.
+
+Examples:
+
+\[
+\text{has-feature}(x,a),
+\qquad
+\text{acts-like}(x,b),
+\qquad
+\text{located-in}(x,c).
+\]
+
+Generate category by a known relation conjunction/disjunction.
+
+Hold out:
+
+\begin{itemize}
+\item entity identities;
+\item some relation combinations;
+\item some templates.
+\end{itemize}
+
+Compare same-category relationally different examples with same-surface-statistics controls.
+
+\section{II.E Causal Reuse}
+
+For same-category examples, compare:
+
+\begin{itemize}
+\item residual cosine;
+\item block-update cosine;
+\item SA-update cosine;
+\item FF-update cosine;
+\item causal replacement damage;
+\item head causal utility overlap.
+\end{itemize}
+
+Require same-category donors to outperform unrelated same-target and cross-category donors.
+
+\section{II.F Results Placeholder}
+
+Report whether category structure generalizes beyond memorized entity identity.
+
+\section{II.G Interpretation Placeholder}
+
+Only if competence succeeds should the result be called relational semantic abstraction.
+
+\part{III. S3 --- Compositional Semantic Abstraction}
+
+\section{III.A Hypothesis}
+
+The strongest synthetic semantic test is compositional generalization: instances are generated from attributes and category membership is determined by a latent rule rather than a stored leaf-to-class mapping.
+
+Let:
+
+\[
+x=(a_1,a_2,\ldots,a_m)
+\]
+
+and:
+
+\[
+Y=f(a_1,\ldots,a_m).
+\]
+
+Test on unseen combinations.
+
+\section{III.B Generator}
+
+Example attributes:
+
+\begin{itemize}
+\item shape;
+\item color;
+\item motion;
+\item texture;
+\item relation to another object.
+\end{itemize}
+
+Define nested categories such as:
+
+\[
+C_1:\text{shape=round},
+\]
+
+\[
+C_{1,2}:\text{shape=round AND motion=move},
+\]
+
+\[
+C_{1,2,3}:\text{round AND move AND relation=above}.
+\]
+
+Use balanced rules so no singleton attribute trivially determines all abstraction levels.
+
+\section{III.C Formalization}
+
+For level \(k\), define minimum sufficient semantic subset size:
+
+\[
+p_k^\star
+=
+\min |S|
+\quad\text{s.t.}\quad
+H(C_k\mid A_S)\le \tau.
+\]
+
+Test whether stable semantic decision depth is better explained by:
+
+\[
+p_k^\star
+\]
+
+than raw sequence length.
+
+\section{III.D Possible Theory}
+
+\subsection{Statistical View}
+
+Higher abstraction corresponds to equivalence under a larger family of attribute-preserving transformations.
+
+\subsection{Information-Theoretic View}
+
+Track how much of the generator's semantic information is structurally required for each abstraction level.
+
+\subsection{Dynamical-Systems View}
+
+Nested abstraction may appear as sequential refinement:
+
+\[
+\text{instance evidence}
+\rightarrow
+\text{subcategory}
+\rightarrow
+\text{category}
+\rightarrow
+\text{root}.
+\]
+
+But monotonic depth ordering is a hypothesis, not an assumption.
+
+\subsection{Statistical-Mechanical View}
+
+Each semantic level defines a different coarse-graining of the same instance ensemble. The same residual population is partitioned into progressively larger equivalence classes.
+
+\section{III.E Experimental Plan}
+
+Use:
+
+\[
+m\in\{2,3,4,6\}
+\]
+
+attributes and multiple abstraction depths.
+
+Hold out complete attribute combinations.
+
+Compare:
+
+\begin{itemize}
+\item same instance, different template;
+\item same category, different attributes;
+\item same parent, different subcategory;
+\item different branch;
+\item permuted ontology.
+\end{itemize}
+
+\section{III.F Results Placeholder}
+
+Report:
+
+\begin{itemize}
+\item held-out compositional accuracy;
+\item abstraction-level stable decision depth;
+\item hierarchy recovery;
+\item nested representation reuse;
+\item causal donor hierarchy;
+\item head recruitment by abstraction level.
+\end{itemize}
+
+\section{III.G Interpretation Placeholder}
+
+A successful result would support semantic abstraction beyond lookup.
+
+\part{IV. Shared Mechanistic Analysis}
+
+\section{SA versus FFN}
+
+Capture:
+
+\[
+r'_\ell=r_\ell+\Delta_\ell^{SA},
+\]
+
+\[
+r_{\ell+1}=r'_\ell+\Delta_\ell^{FF}.
+\]
+
+At each semantic level measure:
+
+\begin{itemize}
+\item target-margin gain;
+\item within/between-class change;
+\item update similarity;
+\item causal ablation;
+\item matched donor replacement.
+\end{itemize}
+
+Do not assume SA ``retrieves semantics'' or FF ``stores concepts.'' Test relative roles.
+
+\section{Heads}
+
+For every head \(h\), measure:
+
+\[
+U_{\ell h}^{class},
+\qquad
+U_{\ell h}^{hier},
+\]
+
+from causal ablation/replacement effects.
+
+Compare head utility overlap across:
+
+\begin{itemize}
+\item siblings;
+\item same parent/different members;
+\item parent versus root query;
+\item natural versus arbitrary labels;
+\item S1 versus S2 versus S3.
+\end{itemize}
+
+\section{Semantic Replacement Hierarchy}
+
+For target example \(x\), compare donors:
+
+\begin{enumerate}
+\item same entity/template variant;
+\item same category;
+\item sibling category under same parent;
+\item unrelated same-target;
+\item cross-category;
+\item permuted-tree control.
+\end{enumerate}
+
+Measure JS damage, target-margin damage, top-1 flips, and downstream stability.
+
+\section{Abstraction Depth}
+
+For requested level \(k\), define:
+
+\[
+L_k^{first},
+\qquad
+L_k^{stable}.
+\]
+
+Test whether:
+
+\[
+L_{k+1}^{stable}>L_k^{stable}
+\]
+
+for coarser abstraction, or whether abstraction levels coexist/re-enter.
+
+No monotonic ladder is assumed.
+
+\section{Hierarchy Geometry}
+
+At every depth compute:
+
+\begin{itemize}
+\item RSA with exact tree distance;
+\item nearest-neighbor parent recovery;
+\item class separation;
+\item update-space hierarchy;
+\item causal donor hierarchy.
+\end{itemize}
+
+Geometry is interpreted only after competence.
+
+\section{Pretrained Models --- Appendix-Level External Validity}
+
+Pretrained models do not provide a known semantic generator. Therefore use them only after the controlled semantic theory is established.
+
+Possible tests:
+
+\begin{itemize}
+\item WordNet-like category pairs;
+\item natural semantic sibling/cross-category replacements;
+\item target-preserving paraphrase/category prompts;
+\item directional JVP comparisons;
+\item causal replacement matched by residual proximity.
+\end{itemize}
+
+Claims must remain architectural/behavioral, not corpus-statistical.
+
+\appendix
+
+\section{Legacy Paper 0.6 Pilot}
+
+Retain the current six-tree natural/arbitrary noun/action/relation experiment as a negative-control baseline. Report its failed 80\% competence gate, geometry, entropy, variance decomposition, and replacement diagnostics, but do not use it as positive semantic evidence.
+
+\section{Reproducibility}
+
+All generator configs must store:
+
+\begin{itemize}
+\item ontology seed;
+\item exact tree/graph;
+\item category memberships;
+\item relation rules;
+\item attribute rules;
+\item train/test identities;
+\item target entropy;
+\item MI/no-shortcut checks;
+\item model seed;
+\item checkpoint hash;
+\item intervention manifest.
+\end{itemize}
+
+\section{Falsification Criteria}
+
+The semantic-abstraction program is weakened if:
+
+\begin{enumerate}
+\item models fail competence despite sufficient capacity/training;
+\item same-category geometry does not exceed matched controls;
+\item causal replacement does not respect semantic distance;
+\item hierarchy recovery disappears under held-out entity identity;
+\item compositional generalization fails;
+\item apparent hierarchy is explained by token identity/template;
+\item pretrained effects vanish after residual-proximity matching.
+\end{enumerate}
+
+\section{Expected Contribution}
+
+A successful Paper 0.6 would establish that controlled Transformers can learn nested semantic equivalence classes whose internal computations are partially reusable across members and abstraction levels, and that these classes can be tracked through residual, SA, FFN, and head-level dynamics under exact generator-grounded controls.
+
+\section{Conclusion}
+
+Paper 0.6 should move from ``semantic-looking geometry'' to generator-grounded, competence-gated semantic mechanism. The ontology is known by construction; semantic claims are earned only when the model reliably uses that ontology on held-out identities and compositions. The three-level progression---taxonomic lookup, relational category learning, and compositional abstraction---provides a controlled path from simple hierarchy acquisition to genuine semantic generalization.
+
+\end{document}
