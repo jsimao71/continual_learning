@@ -1,0 +1,105 @@
+{
+  "figures": [
+    "semantic_abstraction_decision_depth.png",
+    "semantic_accuracy_by_generator.png",
+    "semantic_compositional_generalization.png",
+    "semantic_head_overlap.png",
+    "semantic_hierarchy_rsa_vs_depth.png",
+    "semantic_margin_snr_vs_depth.png",
+    "semantic_replacement_damage.png",
+    "semantic_sa_ff_update_similarity.png",
+    "semantic_tree_recovery.png",
+    "semantic_within_between_vs_depth.png"
+  ],
+  "gates": {
+    "s1": {
+      "artifact_hash": "8d4ad52c1a274c9401d46b9c187eee0aaad3b627feae8710de00a4fe512ce703",
+      "config": {
+        "batch_size": 128,
+        "branching_factors": [
+          2,
+          4
+        ],
+        "competence_threshold": 0.8,
+        "depth": 6,
+        "device": "auto",
+        "evaluation_examples_per_cell": 32,
+        "heads": 4,
+        "instances_per_leaf_group": [
+          8,
+          16
+        ],
+        "label_modes": [
+          "natural",
+          "arbitrary"
+        ],
+        "learning_rate": 0.003,
+        "model_seeds": [
+          11,
+          23
+        ],
+        "ontology_seed": 6207,
+        "position_modes": [
+          "aligned",
+          "randomized"
+        ],
+        "preferred_threshold": 0.9,
+        "query_levels": [
+          "parent",
+          "ancestor",
+          "root"
+        ],
+        "s1_steps": 700,
+        "s2_steps": 400,
+        "s3_steps": 700,
+        "schema_version": "paper06.semantic_v2.v1",
+        "sequence_length": 32,
+        "templates": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "tree_depths": [
+          2,
+          3
+        ],
+        "vocab_size": 384,
+        "width": 64
+      },
+      "gate_passed": true,
+      "mean_accuracy": 0.9844970703125,
+      "mechanism_status": "eligible",
+      "minimum_cell_accuracy": 0.8515625,
+      "schema_version": "paper06.s1.gate.v1",
+      "threshold": 0.8
+    },
+    "s2": {
+      "artifact_hash": "323bb3b5c5a73473852b161d82555fd8ec5c46be84bec54f67aea6fdfbe271c9",
+      "gate_passed": false,
+      "mean_accuracy": 0.056640625,
+      "minimum_cell_accuracy": 0.046875,
+      "schema_version": "paper06.s2.gate.v1",
+      "threshold": 0.8
+    },
+    "s3": {
+      "artifact_hash": "fc42090b48137168c4f66bbae8ec610006daff27126d515bc6cf189617097a70",
+      "gate_passed": true,
+      "mean_accuracy": 0.9993489583333334,
+      "minimum_cell_accuracy": 0.9921875,
+      "schema_version": "paper06.s3.gate.v1",
+      "threshold": 0.8
+    }
+  },
+  "tables": [
+    "semantic_abstraction_depth.csv",
+    "semantic_competence.csv",
+    "semantic_generator_validation.csv",
+    "semantic_head_utility.csv",
+    "semantic_hierarchy_geometry.csv",
+    "semantic_order_parameters.csv",
+    "semantic_replacement_damage.csv",
+    "semantic_scaling_fits.csv",
+    "semantic_update_similarity.csv"
+  ]
+}

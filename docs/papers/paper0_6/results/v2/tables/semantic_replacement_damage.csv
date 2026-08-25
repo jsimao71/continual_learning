@@ -1,0 +1,4 @@
+stage,status
+s1,pending_competent_checkpoint_analysis
+s2,blocked_by_competence
+s3,pending_competent_checkpoint_analysis

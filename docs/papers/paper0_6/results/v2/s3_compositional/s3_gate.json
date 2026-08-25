@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "9bf0f3e9607647dc731a39ce7bd5b07fb267d15d27d5cd8bac49d058d5bfd2b5",
+  "artifact_hash": "fc42090b48137168c4f66bbae8ec610006daff27126d515bc6cf189617097a70",
   "gate_passed": true,
   "mean_accuracy": 0.9993489583333334,
   "minimum_cell_accuracy": 0.9921875,

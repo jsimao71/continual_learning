@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "facfd839e8ca08689267c31153f3b7c810a918ecc447eb3275f17ab70214f029",
+  "artifact_hash": "8d4ad52c1a274c9401d46b9c187eee0aaad3b627feae8710de00a4fe512ce703",
   "config": {
     "batch_size": 128,
     "branching_factors": [
@@ -36,8 +36,8 @@
       "root"
     ],
     "s1_steps": 700,
-    "s2_steps": 1400,
-    "s3_steps": 1400,
+    "s2_steps": 400,
+    "s3_steps": 700,
     "schema_version": "paper06.semantic_v2.v1",
     "sequence_length": 32,
     "templates": [
