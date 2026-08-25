@@ -126,7 +126,7 @@ def main(args)->None:
         print(f"[{index}/{len(kinds)}] {kind}",flush=True);model,loss=train(config,kind,device,config["training_steps"]);result,trace=evaluate(model,kind,rows)
         count=parameter_count(model);parameters.append({"model_type":kind,"parameter_count":count,"training_steps":config["training_steps"],"training_tokens":config["training_steps"]*config["batch_size"]*config["sequence_length"]})
         results.extend(result);internal.extend(trace);losses.extend(loss);torch.save(model.to("cpu").state_dict(),out/f"{kind}_checkpoint.pt")
-        write_csv(out/"rnn_transformer_results.csv",results);write_csv(out/"rnn_transformer_internal.csv",internal)
+        write_csv(out/"rnn_transformer_raw.csv",results);write_csv(out/"rnn_transformer_internal_raw.csv",internal)
     write_csv(out/"rnn_transformer_parameter_match.csv",parameters);write_csv(out/"rnn_transformer_training_loss.csv",losses)
     manifest={"schema_version":"paper05.rnn_comparison.run.v1","device":str(device),"config":config,"models":kinds,"evaluation_examples":len(rows),
               "artifact_hash":stable_hash({"parameters":parameters,"results":results})};atomic_write_json(out/"rnn_transformer_manifest.json",manifest);print(json.dumps(manifest,indent=2))

@@ -121,15 +121,22 @@ def evaluate_model(model: TinyTransformerLM, rows: list[dict], meta: dict, batch
     device=next(model.parameters()).device;final_rows=[];decision_rows=[]
     for start in range(0,len(rows),batch_size):
         batch=rows[start:start+batch_size];x=torch.tensor([r["tokens"] for r in batch],device=device);y=torch.tensor([r["target"] for r in batch],device=device)
-        logits,trace=model(x,capture=True);states=[trace.layers[0].pre_sa]+[layer.post_block for layer in trace.layers]
-        correct=[];margins=[]
+        logits,_=model(x);z=logits[:,-1];chosen=z.gather(1,y[:,None]).squeeze(1);other=z.clone();other.scatter_(1,y[:,None],float("-inf"));margin=chosen-other.max(1).values
+        for i,r in enumerate(batch):
+            common={**meta,**{k:r[k] for k in ("predictive_order","raw_length","dependency_span","span_mode","nuisance_count","family_id")}}
+            final_rows.append({**common,"top1_correct":int(z[i].argmax()==y[i]),"final_margin":float(margin[i])})
+    # Depth trajectories use canonical cells only; competence itself above is
+    # still measured on the full length/span/nuisance surface.
+    selected=[r for r in rows if r["raw_length"]==r["predictive_order"] and r["span_mode"]=="contiguous" and r["nuisance_count"]==0]
+    for start in range(0,len(selected),batch_size):
+        batch=selected[start:start+batch_size];x=torch.tensor([r["tokens"] for r in batch],device=device);y=torch.tensor([r["target"] for r in batch],device=device)
+        _,trace=model(x,capture=True);states=[trace.layers[0].pre_sa]+[layer.post_block for layer in trace.layers];correct=[];margins=[]
         for state in states:
             z=model.diagnostic_logits(state[:,-1]);chosen=z.gather(1,y[:,None]).squeeze(1);other=z.clone();other.scatter_(1,y[:,None],float("-inf"));margins.append((chosen-other.max(1).values).cpu());correct.append((z.argmax(1)==y).cpu())
         correct=torch.stack(correct,1);margins=torch.stack(margins,1)
         for i,r in enumerate(batch):
             c=correct[i].tolist();m=margins[i].tolist();first=next((j for j,v in enumerate(c) if v),None);stable=next((j for j in range(len(c)) if all(c[j:])),None)
             common={**meta,**{k:r[k] for k in ("predictive_order","raw_length","dependency_span","span_mode","nuisance_count","family_id")}}
-            final_rows.append({**common,"top1_correct":int(c[-1]),"final_margin":m[-1]})
             decision_rows.append({**common,"first_top1_layer":first if first is not None else "","stable_top1_layer":stable if stable is not None else "",
                                   "settling_delay":stable-first if stable is not None and first is not None else "",
                                   "top1_reversals":sum(a!=b for a,b in zip(c,c[1:])),"margin_trajectory":";".join(f"{v:.6g}" for v in m)})
@@ -166,7 +173,7 @@ def main(args) -> None:
                                     "training_steps":config["base_steps"]*budget,"model_seed":seed,"parameter_count":parameter_count(model)}
         result,decision=evaluate_model(model,eval_rows,meta);all_results.extend(result);all_decisions.extend(decision)
         models.append(meta);losses.extend({**meta,**row} for row in loss)
-        write_csv(out/"phase_grid_results.csv",all_results);write_csv(out/"phase_internal_decision_depth.csv",all_decisions)
+        write_csv(out/"phase_grid_raw.csv",all_results);write_csv(out/"phase_internal_decision_depth_raw.csv",all_decisions)
     write_csv(out/"phase_parameter_counts.csv",models);write_csv(out/"phase_training_loss.csv",losses)
     manifest={"schema_version":"paper05.predictive_order_phase.run.v1","device":str(device),"smoke":args.smoke,"models":len(models),
               "evaluation_examples":len(eval_rows),"config":config,"artifact_hash":stable_hash({"models":models,"results":all_results})}

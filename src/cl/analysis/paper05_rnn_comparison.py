@@ -17,7 +17,7 @@ COLORS={"transformer":"#2878b5","rnn":"#d32f2f","gru":"#f9a825","lstm":"#43a047"
 
 
 def main(args)->None:
-    root=Path(args.results);fig=Path(args.figures);fig.mkdir(parents=True,exist_ok=True);raw=pd.read_csv(root/"rnn_transformer_results.csv");internal=pd.read_csv(root/"rnn_transformer_internal.csv");params=pd.read_csv(root/"rnn_transformer_parameter_match.csv")
+    root=Path(args.results);fig=Path(args.figures);fig.mkdir(parents=True,exist_ok=True);raw=pd.read_csv(root/"rnn_transformer_raw.csv");internal=pd.read_csv(root/"rnn_transformer_internal_raw.csv");params=pd.read_csv(root/"rnn_transformer_parameter_match.csv")
     cells=raw.groupby(["model_type","axis","axis_value","predictive_order","raw_length","dependency_span","nuisance_count"],as_index=False).agg(accuracy=("top1_correct","mean"),mean_margin=("target_margin","mean"))
     write_csv(root/"rnn_transformer_results.csv",cells.to_dict("records"));fits=[]
     for (model,axis),g in cells.groupby(["model_type","axis"]):

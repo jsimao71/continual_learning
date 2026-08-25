@@ -26,9 +26,19 @@ def heat(data:pd.DataFrame,width:int,path:Path)->None:
     plt.xticks(range(len(q.columns)),q.columns);plt.yticks(range(len(q.index)),q.index);plt.xlabel("Transformer blocks");plt.ylabel("predictive order p*");plt.colorbar(label="held-out accuracy");plt.title(f"width {width}");plt.tight_layout();plt.savefig(path,dpi=180);plt.close()
 
 
+def bootstrap_interval(values:np.ndarray,seed:int,repetitions:int=1000)->tuple[float,float]:
+    rng=np.random.default_rng(seed);draw=values[rng.integers(0,len(values),size=(repetitions,len(values)))].mean(1)
+    return float(np.quantile(draw,.025)),float(np.quantile(draw,.975))
+
+
 def main(args)->None:
-    root=Path(args.results);fig=Path(args.figures);fig.mkdir(parents=True,exist_ok=True);raw=pd.read_csv(root/"phase_grid_results.csv");dec=pd.read_csv(root/"phase_internal_decision_depth.csv")
-    cells=raw.groupby(["model_seed","model_depth","model_width","training_budget","training_steps","parameter_count","predictive_order","raw_length","dependency_span","span_mode","nuisance_count"],as_index=False).agg(accuracy=("top1_correct","mean"),mean_margin=("final_margin","mean"))
+    root=Path(args.results);fig=Path(args.figures);fig.mkdir(parents=True,exist_ok=True);raw=pd.read_csv(root/"phase_grid_raw.csv");dec=pd.read_csv(root/"phase_internal_decision_depth_raw.csv")
+    keys=["model_seed","model_depth","model_width","training_budget","training_steps","parameter_count","predictive_order","raw_length","dependency_span","span_mode","nuisance_count"]
+    cell_rows=[]
+    for index,(key,g) in enumerate(raw.groupby(keys,sort=True)):
+        low,high=bootstrap_interval(g.top1_correct.to_numpy(float),7319+index)
+        cell_rows.append({**dict(zip(keys,key)),"accuracy":float(g.top1_correct.mean()),"accuracy_ci_low":low,"accuracy_ci_high":high,"mean_margin":float(g.final_margin.mean()),"n_families":int(g.family_id.nunique())})
+    cells=pd.DataFrame(cell_rows)
     write_csv(root/"phase_grid_results.csv",cells.to_dict("records"))
     primary=cells.groupby(["model_seed","model_depth","model_width","training_budget","training_steps","parameter_count","predictive_order"],as_index=False).agg(accuracy=("accuracy","mean"),worst_control_accuracy=("accuracy","min"),mean_margin=("mean_margin","mean"))
     minima_depth=[];minima_width=[]
