@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "ff78eded2aaa4970c4ed72546f0cd546f816ef82fa0e926e7939e0cbff2fe681",
+  "artifact_hash": "86b70e89215a3d799f96513861d65f4bc67d9ae2efadc8e5ec802e7fce9d9bae",
   "config": {
     "batch_size": 64,
     "branching_factors": [
@@ -16,6 +16,7 @@
       16,
       64
     ],
+    "effective_training_steps": 500,
     "evaluation_examples_per_cell": 16,
     "heads": 4,
     "label_modes": [
@@ -105,47 +106,103 @@
   "mechanism_eligibility": {
     "ancestor_k": false,
     "grandparent": false,
-    "isAncestor": true,
+    "isAncestor": false,
     "parent": false,
     "root": false
   },
   "predicate_score": {
     "ancestor_k": {
-      "deep_accuracy": 0.06157407407407409,
-      "mean_accuracy": 0.10875706214689264,
+      "deep_accuracy": 0.06515432098765432,
+      "mean_accuracy": 0.10661487758945384,
+      "minimum_cell_accuracy": 0.0,
+      "training_depth_accuracy": 0.2946180555555556
+    },
+    "grandparent": {
+      "deep_accuracy": 0.07722222222222222,
+      "mean_accuracy": 0.16430555555555557,
       "minimum_cell_accuracy": 0.0,
       "training_depth_accuracy": 0.3125
     },
-    "grandparent": {
-      "deep_accuracy": 0.1,
-      "mean_accuracy": 0.16666666666666666,
-      "minimum_cell_accuracy": 0.020833333333333332,
-      "training_depth_accuracy": 0.2986111111111111
-    },
     "isAncestor": {
-      "deep_accuracy": 0.973611111111111,
-      "mean_accuracy": 0.9781073446327683,
-      "minimum_cell_accuracy": 0.9166666666666666,
-      "training_depth_accuracy": 0.9895833333333333
+      "deep_accuracy": 0.7762345679012346,
+      "mean_accuracy": 0.7853107344632768,
+      "minimum_cell_accuracy": 0.3541666666666667,
+      "training_depth_accuracy": 0.8185763888888888
     },
     "parent": {
-      "deep_accuracy": 0.05,
-      "mean_accuracy": 0.18333333333333332,
+      "deep_accuracy": 0.0786111111111111,
+      "mean_accuracy": 0.17597222222222222,
       "minimum_cell_accuracy": 0.0,
-      "training_depth_accuracy": 0.3541666666666667
+      "training_depth_accuracy": 0.32685185185185184
     },
     "root": {
-      "deep_accuracy": 0.07291666666666666,
-      "mean_accuracy": 0.13125000000000003,
+      "deep_accuracy": 0.07569444444444445,
+      "mean_accuracy": 0.13500000000000004,
       "minimum_cell_accuracy": 0.0,
-      "training_depth_accuracy": 0.36458333333333337
+      "training_depth_accuracy": 0.3722222222222222
     }
   },
   "schema_version": "paper06.predicate_v4.phase.v1",
   "trained_cells": [
     {
+      "model_depth": 2,
+      "model_seed": 11
+    },
+    {
+      "model_depth": 2,
+      "model_seed": 23
+    },
+    {
+      "model_depth": 2,
+      "model_seed": 37
+    },
+    {
+      "model_depth": 4,
+      "model_seed": 11
+    },
+    {
+      "model_depth": 4,
+      "model_seed": 23
+    },
+    {
+      "model_depth": 4,
+      "model_seed": 37
+    },
+    {
       "model_depth": 6,
       "model_seed": 11
+    },
+    {
+      "model_depth": 6,
+      "model_seed": 23
+    },
+    {
+      "model_depth": 6,
+      "model_seed": 37
+    },
+    {
+      "model_depth": 8,
+      "model_seed": 11
+    },
+    {
+      "model_depth": 8,
+      "model_seed": 23
+    },
+    {
+      "model_depth": 8,
+      "model_seed": 37
+    },
+    {
+      "model_depth": 12,
+      "model_seed": 11
+    },
+    {
+      "model_depth": 12,
+      "model_seed": 23
+    },
+    {
+      "model_depth": 12,
+      "model_seed": 37
     }
   ]
 }
