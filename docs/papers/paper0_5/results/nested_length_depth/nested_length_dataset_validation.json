@@ -1,0 +1,6 @@
+{
+  "failures": [],
+  "note": "For n=6,8 necessary rules, proper-subset independence follows analytically from uniform modular secret sharing; exhaustive singleton and full-pattern checks are retained.",
+  "passed": true,
+  "schema_version": "paper05.nested_length.validation.v1"
+}

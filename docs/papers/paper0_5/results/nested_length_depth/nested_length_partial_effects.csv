@@ -1,0 +1,5 @@
+aic,bic,intercept,leave_one_cell_out_mae,n,outcome,predictor,qualification,r2,slope,status
+12916.806840809008,12930.03221115476,5.253228887434705,2.26805867677626,5501,stable_top1_layer,pattern_length,competent cells only,0.0009849099547163398,-0.04753806468607767,descriptive only: one seed and one architecture depth
+12635.479713924697,12648.705084270448,2.8855404410942707,2.228010503456773,5501,stable_top1_layer,predictive_order,competent cells only,0.050791200118929125,1.2506447652257426,descriptive only: one seed and one architecture depth
+12919.564881195753,12932.790251541504,5.162794482979134,2.2656224201596786,5501,stable_top1_layer,dependency_span,competent cells only,0.00048390744605275593,-0.018971905466100426,descriptive only: one seed and one architecture depth
+12920.357589385732,12933.582959731484,4.980558642959059,2.263261360898116,5501,stable_top1_layer,nuisance_count,competent cells only,0.00033986423875775884,0.02024078398637619,descriptive only: one seed and one architecture depth

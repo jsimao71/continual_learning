@@ -1,0 +1,3 @@
+aic,bic,intercept,leave_one_cell_out_mae,n,outcome,predictor,r2,slope,status
+2.0038482418364527,2.9736615414124534,5.326694706507243,0.78289168106178,12,stable_top1_layer,pattern_length,0.01608805065969887,-0.05534046146763005,descriptive only: one seed and one architecture depth
+-12.300413833602889,-11.330600534026889,2.807059010828518,0.5218356844596576,12,stable_top1_layer,predictive_order,0.7012776427142986,1.3053935625378827,descriptive only: one seed and one architecture depth

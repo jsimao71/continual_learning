@@ -1,0 +1,49 @@
+{
+  "architecture_depths_run": [
+    8
+  ],
+  "artifact_hash": "a98e25a776aabe5bf04a936c0e1bccf75f69f3d35693d229e001af8192ac584e",
+  "blocked_regimes_lengths": [
+    "necessary:n4",
+    "necessary:n6",
+    "necessary:n8"
+  ],
+  "competence": {
+    "necessary:n2": 0.99609375,
+    "necessary:n3": 0.8515625,
+    "necessary:n4": 0.5,
+    "necessary:n6": 0.322265625,
+    "necessary:n8": 0.240234375,
+    "redundant:n2": 1.0,
+    "redundant:n3": 0.982421875,
+    "redundant:n4": 0.9609375,
+    "redundant:n6": 0.982421875,
+    "redundant:n8": 0.98828125,
+    "supportive:n2": 0.99609375,
+    "supportive:n3": 0.99609375,
+    "supportive:n4": 0.994140625,
+    "supportive:n6": 1.0,
+    "supportive:n8": 0.998046875
+  },
+  "competent_regimes_lengths": [
+    "necessary:n2",
+    "necessary:n3",
+    "redundant:n2",
+    "redundant:n3",
+    "redundant:n4",
+    "redundant:n6",
+    "redundant:n8",
+    "supportive:n2",
+    "supportive:n3",
+    "supportive:n4",
+    "supportive:n6",
+    "supportive:n8"
+  ],
+  "gate_passed": false,
+  "interpretation": "Length alone does not delay competent target-preserving computations, while growing predictive order coincides with optimization collapse; the failed cells cannot identify an internal or architectural depth requirement.",
+  "model_seeds_run": [
+    11
+  ],
+  "scaling_claim": "not identified: architecture sweep blocked by necessary-pattern competence failure",
+  "schema_version": "paper05.nested_length.summary.v1"
+}
