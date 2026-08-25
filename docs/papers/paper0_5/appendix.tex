@@ -29,7 +29,7 @@ and therefore
 \operatorname{Var}\!\left(\sum_l\varepsilon_l\right)
 =\sum_l\sigma_l^2+2\sum_{l<j}\operatorname{Cov}(\varepsilon_l,\varepsilon_j).
 \]
-Negative off-diagonal covariance is an operational signature of later repair: later updates cancel part of earlier realization-specific deviation. It does not imply that every layer contracts variance, nor that total hidden-state variance must shrink.
+Negative off-diagonal covariance is an operational signature of later repair: later updates cancel part of earlier realization-specific deviation. The reported summed off-diagonal term is $2\sum_{l<j}\operatorname{Cov}(\varepsilon_l,\varepsilon_j)$ and already includes the factor of two. It does not imply that every layer contracts variance, nor that total hidden-state variance must shrink.
 
 For a paired displacement, local linearization gives
 \[
