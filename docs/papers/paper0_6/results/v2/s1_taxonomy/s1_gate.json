@@ -1,0 +1,62 @@
+{
+  "artifact_hash": "facfd839e8ca08689267c31153f3b7c810a918ecc447eb3275f17ab70214f029",
+  "config": {
+    "batch_size": 128,
+    "branching_factors": [
+      2,
+      4
+    ],
+    "competence_threshold": 0.8,
+    "depth": 6,
+    "device": "auto",
+    "evaluation_examples_per_cell": 32,
+    "heads": 4,
+    "instances_per_leaf_group": [
+      8,
+      16
+    ],
+    "label_modes": [
+      "natural",
+      "arbitrary"
+    ],
+    "learning_rate": 0.003,
+    "model_seeds": [
+      11,
+      23
+    ],
+    "ontology_seed": 6207,
+    "position_modes": [
+      "aligned",
+      "randomized"
+    ],
+    "preferred_threshold": 0.9,
+    "query_levels": [
+      "parent",
+      "ancestor",
+      "root"
+    ],
+    "s1_steps": 700,
+    "s2_steps": 1400,
+    "s3_steps": 1400,
+    "schema_version": "paper06.semantic_v2.v1",
+    "sequence_length": 32,
+    "templates": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "tree_depths": [
+      2,
+      3
+    ],
+    "vocab_size": 384,
+    "width": 64
+  },
+  "gate_passed": true,
+  "mean_accuracy": 0.9844970703125,
+  "mechanism_status": "eligible",
+  "minimum_cell_accuracy": 0.8515625,
+  "schema_version": "paper06.s1.gate.v1",
+  "threshold": 0.8
+}

@@ -1,0 +1,18 @@
+{
+  "example_hash": "9a9a4086c76abf1adbed4fd1620ea67cb095a8d91c648b643e84fe27716f18a1",
+  "ontology_families": [
+    "b2-d2-i16",
+    "b2-d2-i8",
+    "b2-d3-i16",
+    "b2-d3-i8",
+    "b4-d2-i16",
+    "b4-d2-i8",
+    "b4-d3-i16",
+    "b4-d3-i8"
+  ],
+  "passed": true,
+  "schema_version": "paper06.s1.validation.v1",
+  "target_entropy_bits": 4.89624062518029,
+  "template_balance": true,
+  "train_test_identity_overlap": 0
+}
