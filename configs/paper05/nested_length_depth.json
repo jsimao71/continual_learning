@@ -1,0 +1,23 @@
+{
+  "dataset_seed": 5721,
+  "smoke_seed": 11,
+  "model_seeds": [11, 23, 37],
+  "regimes": ["redundant", "supportive", "necessary"],
+  "pattern_lengths": [2, 3, 4, 6, 8],
+  "architecture_depths": [2, 4, 6, 8, 12],
+  "nuisance_counts": [0, 2, 4, 8],
+  "span_modes": ["contiguous", "sparse"],
+  "position_modes": ["aligned", "randomized"],
+  "sequence_length": 48,
+  "vocab_size": 112,
+  "width": 64,
+  "heads": 4,
+  "smoke_depth": 8,
+  "smoke_train_steps": 3600,
+  "full_train_steps": 3000,
+  "batch_size": 128,
+  "learning_rate": 0.003,
+  "evaluation_examples_per_cell": 32,
+  "preferred_competence": 0.80,
+  "minimum_competence": 0.70
+}
