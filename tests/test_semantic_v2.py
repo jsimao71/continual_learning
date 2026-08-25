@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from cl.semantic.v2 import rule_evaluation,rule_validation,s1_evaluation,s1_example,s1_validation
+from cl.semantic.v2 import LABEL_MODE_TOKEN,rule_evaluation,rule_validation,s1_evaluation,s1_example,s1_validation
 
 CONFIG=json.loads(Path("configs/paper06/semantic_v2.json").read_text())
 
@@ -35,3 +35,5 @@ def test_rule_generators_hold_out_identities_and_combinations():
         validation=rule_validation(CONFIG,stage);assert validation["passed"]
         rows=rule_evaluation(CONFIG,stage,2);assert rows and all(len(r.tokens)==CONFIG["sequence_length"] for r in rows)
         assert all(r.tokens[-1] in range(100,180) for r in rows)
+    s2=rule_evaluation(CONFIG,"s2",1)
+    assert all(LABEL_MODE_TOKEN[r.label_mode] in r.tokens for r in s2)

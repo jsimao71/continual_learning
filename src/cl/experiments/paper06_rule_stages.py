@@ -37,6 +37,7 @@ def evaluate(model,rows,stage,seed,batch_size=128):
 def main(args):
     config=json.loads(Path(args.config).read_text());stage=args.stage;out=Path(args.output)/({"s2":"s2_relational","s3":"s3_compositional"}[stage]);out.mkdir(parents=True,exist_ok=True);validation=rule_validation(config,stage);atomic_write_json(out/f"{stage}_generator_validation.json",validation)
     if not validation["passed"]:raise RuntimeError(validation)
+    if args.steps is not None:config={**config,f"{stage}_steps":args.steps}
     if args.smoke:config={**config,f"{stage}_steps":4,"batch_size":8,"model_seeds":[11]}
     rows=rule_evaluation(config,stage,args.eval_examples);device=resolve_device(args.device or config["device"]);raw=[];layers=[];losses=[]
     for seed in config["model_seeds"]:
@@ -46,4 +47,4 @@ def main(args):
     cells=[{"model_seed":k[0],"label_mode":k[1],"predictive_order":k[2],"position_mode":k[3],"accuracy":float(np.mean([r["top1_correct"] for r in v])),"mean_margin":float(np.mean([r["target_margin"] for r in v])),"n":len(v)} for k,v in groups.items()];write_csv(out/f"{stage}_competence.csv",cells);minimum=min(r["accuracy"] for r in cells);decision={"schema_version":f"paper06.{stage}.gate.v1","gate_passed":minimum>=config["competence_threshold"],"mean_accuracy":float(np.mean([r["accuracy"] for r in cells])),"minimum_cell_accuracy":minimum,"threshold":config["competence_threshold"],"artifact_hash":stable_hash({"cells":cells,"layers":layers})};atomic_write_json(out/f"{stage}_gate.json",decision);print(json.dumps(decision,indent=2))
 
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--stage",choices=("s2","s3"),required=True);p.add_argument("--config",default="configs/paper06/semantic_v2.json");p.add_argument("--output",default="docs/papers/paper0_6/results/v2");p.add_argument("--device");p.add_argument("--smoke",action="store_true");p.add_argument("--eval-examples",type=int);main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--stage",choices=("s2","s3"),required=True);p.add_argument("--config",default="configs/paper06/semantic_v2.json");p.add_argument("--output",default="docs/papers/paper0_6/results/v2");p.add_argument("--device");p.add_argument("--steps",type=int);p.add_argument("--smoke",action="store_true");p.add_argument("--eval-examples",type=int);main(p.parse_args())

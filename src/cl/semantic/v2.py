@@ -15,6 +15,7 @@ NAT_SUB=tuple(range(180,244));NAT_CAT=tuple(range(244,260));NAT_ROOT=tuple(range
 ARB_SUB=tuple(range(264,328));ARB_CAT=tuple(range(328,344));ARB_ROOT=tuple(range(344,348))
 REL_MARKERS=tuple(range(14,18));ATTR_MARKERS=tuple(range(14,20));VALUE_TOKENS=tuple(range(348,360))
 S2_NAT=(360,361);S2_ARB=(362,363);S3_TARGETS=((364,365),(366,367),(368,369))
+LABEL_MODE_TOKEN={"natural":370,"arbitrary":371}
 
 
 @dataclass(frozen=True)
@@ -115,10 +116,10 @@ def s1_validation(config:dict)->dict:
     return result
 
 
-def _rule_body(entity:int,markers:tuple[int,...],bits:tuple[int,...],template:int,query:int)->list[int]:
+def _rule_body(entity:int,markers:tuple[int,...],bits:tuple[int,...],template:int,query:int,regime_token:int|None=None)->list[int]:
     pairs=[[marker,VALUE_TOKENS[2*i+bit]] for i,(marker,bit) in enumerate(zip(markers,bits))]
     orders=(range(len(pairs)),reversed(range(len(pairs))),list(range(0,len(pairs),2))+list(range(1,len(pairs),2)),list(range(1,len(pairs),2))+list(range(0,len(pairs),2)))
-    order=list(orders[template]);body=[TEMPLATE[template],DEFINE,entity]
+    order=list(orders[template]);body=[TEMPLATE[template],*(() if regime_token is None else (regime_token,)),DEFINE,entity]
     for index in order:body.extend([SEP,*pairs[index]])
     return [*body,SEP,query,entity]
 
@@ -128,7 +129,7 @@ def s2_example(config:dict,label_mode:str,template:int,position_mode:str,index:i
     combo=combos[index%len(combos)];bits=tuple((combo>>i)&1 for i in range(4));pool=LEAF_TRAIN if split=="train" else LEAF_TEST
     entity=pool[index%len(pool)];target=(S2_NAT if label_mode=="natural" else S2_ARB)[sum(bits)%2]
     rng=random.Random(config["ontology_seed"]+2_000_000+index*31+(0 if split=="train" else 9_000_000))
-    tokens=_pad(_rule_body(entity,REL_MARKERS,bits,template,QUERY_PARENT),config["sequence_length"],position_mode,rng)
+    tokens=_pad(_rule_body(entity,REL_MARKERS,bits,template,QUERY_PARENT,LABEL_MODE_TOKEN[label_mode]),config["sequence_length"],position_mode,rng)
     return RuleExample(tokens,target,"s2",f"{split}:{label_mode}:t{template}:p{position_mode}:c{combo}:i{index}",label_mode,template,position_mode,f"{split}-entity-{entity}",f"parity-{sum(bits)%2}",bits,4,split=="train")
 
 
