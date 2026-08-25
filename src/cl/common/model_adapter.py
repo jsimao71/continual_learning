@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Literal
+import math
 
 import torch
 from torch import Tensor, nn
@@ -165,6 +166,7 @@ class TinyTransformerLM(nn.Module):
         heads: int = 2,
         mlp_ratio: int = 2,
         attention_window: int | None = None,
+        position_encoding: Literal["learned", "sinusoidal"] = "learned",
     ):
         super().__init__()
         if width % heads:
@@ -173,8 +175,14 @@ class TinyTransformerLM(nn.Module):
         self.max_length = max_length
         self.width = width
         self.attention_window = attention_window
+        self.position_encoding = position_encoding
         self.token_embedding = nn.Embedding(vocab_size, width)
-        self.position_embedding = nn.Embedding(max_length, width)
+        if position_encoding == "learned":
+            self.position_embedding = nn.Embedding(max_length, width)
+            self.register_buffer("sinusoidal_positions", None)
+        elif position_encoding == "sinusoidal":
+            position=torch.arange(max_length,dtype=torch.float32)[:,None];scale=torch.exp(torch.arange(0,width,2,dtype=torch.float32)*(-math.log(10000.0)/width));table=torch.zeros(max_length,width);table[:,0::2]=torch.sin(position*scale);table[:,1::2]=torch.cos(position*scale[:table[:,1::2].shape[1]]);self.position_embedding=None;self.register_buffer("sinusoidal_positions",table,persistent=True)
+        else:raise ValueError(f"unknown position encoding: {position_encoding}")
         self.blocks = nn.ModuleList(
             [InstrumentedBlock(width, heads, mlp_ratio) for _ in range(layers)]
         )
@@ -193,7 +201,8 @@ class TinyTransformerLM(nn.Module):
         if length > self.max_length:
             raise ValueError("sequence exceeds configured max_length")
         positions = torch.arange(length, device=input_ids.device)
-        state = self.token_embedding(input_ids) + self.position_embedding(positions)[None, :, :]
+        position_state=self.position_embedding(positions) if self.position_embedding is not None else self.sinusoidal_positions[:length]
+        state = self.token_embedding(input_ids) + position_state[None, :, :]
         mask = self.causal_mask(length, input_ids.device)
         trace = ModelTrace() if capture else None
         for layer_index, block in enumerate(self.blocks):
