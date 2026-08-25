@@ -1,0 +1,13 @@
+accuracy,label_mode,mean_margin,model_seed,n,position_mode,predictive_order
+1.0,arbitrary,14.135914370417595,11,128,aligned,1
+1.0,arbitrary,14.56722941994667,11,128,randomized,1
+1.0,arbitrary,13.670808896422386,11,128,aligned,2
+0.9921875,arbitrary,13.110239893198013,11,128,randomized,2
+1.0,arbitrary,10.09412507712841,11,128,aligned,3
+1.0,arbitrary,9.779750674962997,11,128,randomized,3
+1.0,arbitrary,19.307844936847687,23,128,aligned,1
+1.0,arbitrary,19.167394146323204,23,128,randomized,1
+1.0,arbitrary,12.243012547492981,23,128,aligned,2
+1.0,arbitrary,11.973830237984657,23,128,randomized,2
+1.0,arbitrary,12.578186631202698,23,128,aligned,3
+1.0,arbitrary,12.093698039650917,23,128,randomized,3
