@@ -1,0 +1,21 @@
+{
+  "schema_version": "paper05.rnn_comparison.v1",
+  "dataset_seed": 9107,
+  "model_seed": 23,
+  "model_types": ["transformer", "rnn", "gru", "lstm"],
+  "hidden_size": 64,
+  "transformer_width": 32,
+  "transformer_depth": 4,
+  "transformer_heads": 2,
+  "training_steps": 1200,
+  "batch_size": 128,
+  "learning_rate": 0.003,
+  "sequence_length": 80,
+  "vocab_size": 128,
+  "lengths": [2, 4, 8, 16, 32],
+  "spans": [1, 2, 4, 8, 16, 32, 64],
+  "predictive_orders": [1, 2, 3, 4, 6, 8],
+  "nuisance_counts": [0, 2, 4, 8, 16],
+  "evaluation_examples_per_cell": 128,
+  "device": "auto"
+}
