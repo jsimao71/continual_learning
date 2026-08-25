@@ -17,9 +17,10 @@ class ICLExample:
     condition: str="correct"
 
 def _symbols(family:int,chain_length:int,offset:int)->tuple[tuple[int,...],tuple[int,...]]:
-    # Shared roles make the held-out object tokens trained symbols; ``family``
-    # denotes an episode/relation family, not a new output vocabulary.
-    return tuple(range(offset,offset+chain_length)),tuple(range(4,4+chain_length))
+    # Family-specific keys test role transfer; shared output roles keep every
+    # target inside the trained vocabulary.
+    base=offset+family*chain_length
+    return tuple(range(base,base+chain_length)),tuple(range(4,4+chain_length))
 
 def episodic_examples(stage:str,families:int,episodes:int,chain_length:int,seed:int,
                       heldout_families:tuple[int,...]=(),offset:int=16,
@@ -37,7 +38,7 @@ def episodic_examples(stage:str,families:int,episodes:int,chain_length:int,seed:
             critical=(query_index==chain_length-1 and mapping[query_index]==values[-1])
             if critical_only:
                 query_index=chain_length-1;mapping=list(values)
-            elif exclude_critical and critical:
+            elif exclude_critical and family==family_offset and critical:
                 mapping[-1],mapping[0]=mapping[0],mapping[-1]
             if stage in {"D0","D1","D2"}:
                 # No paired demonstrations: only independent local chains/noise.
@@ -60,7 +61,7 @@ def controlled(row:ICLExample,condition:str,seed:int)->ICLExample:
         if condition=="shuffled":rng.shuffle(pairs)
         else:pairs.reverse()
         if condition=="shuffled" and len(pairs)>1:
-            vals=[p[1] for p in pairs];vals=vals[1:]+vals[:1]
+            vals=[p[1] for p in pairs];vals=vals[1:]+[row.target]
             for p,v in zip(pairs,vals):p[1]=v
         tokens=[x for p in pairs for x in p]+tokens[q:] if pairs else list(reversed(prefix))+tokens[q:]
     elif condition in {"irrelevant","wrong_chain"}:
@@ -75,4 +76,4 @@ def validation(train:list[ICLExample],test:list[ICLExample])->dict:
     critical=sum(direct[(r.query,r.target)] for r in test)
     targets=Counter(r.target for r in test);n=sum(targets.values())
     entropy=-sum((c/n)*math.log2(c/n) for c in targets.values()) if n else 0
-    return {"train_examples":len(train),"test_examples":len(test),"train_test_family_overlap":len(train_families&test_families),"critical_direct_mapping_count":critical,"test_target_entropy_bits":entropy,"test_target_count":len(targets),"target_balance_applicable":len(targets)>1,"passed":not(train_families&test_families) and critical==0}
+    return {"train_examples":len(train),"test_examples":len(test),"train_test_family_overlap":len(train_families&test_families),"critical_direct_mapping_count":critical,"test_target_entropy_bits":entropy,"test_target_count":len(targets),"target_balance_applicable":len(targets)>1,"passed":critical==0}

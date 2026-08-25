@@ -1,0 +1,21 @@
+{
+  "vocab_size": 2048,
+  "max_length": 8,
+  "chain_length": 3,
+  "train_families": 16,
+  "episodes_per_family": 24,
+  "test_families": 8,
+  "test_episodes_per_family": 8,
+  "updates": 600,
+  "batch_size": 128,
+  "learning_rate": 0.003,
+  "dataset_model": {"layers": 2, "width": 32, "heads": 2},
+  "dataset_stages": ["D0", "D1", "D2", "D3", "D4"],
+  "layers": [1, 2, 3, 4, 6],
+  "widths": [8, 16, 32, 64],
+  "heads": [1, 2],
+  "model_seeds": [11, 23, 37],
+  "device": "mps",
+  "competence_accuracy": 0.8,
+  "minimum_context_free_rank": 3
+}
