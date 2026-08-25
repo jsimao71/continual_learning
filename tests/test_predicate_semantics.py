@@ -7,7 +7,7 @@ from cl.semantic.predicates import evaluation_matrix,predicate_example,validate
 CONFIG=json.loads(Path("configs/paper06/predicate_v4.json").read_text())
 
 def test_predicate_generator_validation_and_replay():
-    result=validate(CONFIG);assert result["passed"] and result["train_test_node_overlap"]==0 and result["max_sequence_length"]<=CONFIG["max_length"]
+    result=validate(CONFIG);assert result["passed"] and result["train_test_query_identity_overlap"]==0 and result["unseen_test_target_labels"]==0 and result["max_sequence_length"]<=CONFIG["max_length"]
     kwargs=dict(split="test",predicate="ancestor_k",total_depth=12,required_path=6,branching=4,distractors=16,template=3,position_mode="randomized",index=7,tree_seed=101,model_seed=11)
     assert predicate_example(CONFIG,**kwargs)==predicate_example(CONFIG,**kwargs)
 

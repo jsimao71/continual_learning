@@ -8,7 +8,7 @@ from cl.common.artifacts import stable_hash
 PAD=0;PATH=7;DIST=8;QUERY=9
 TEMPLATE=tuple(range(10,14));PREDICATE={"parent":14,"grandparent":15,"ancestor_k":16,"isAncestor":17,"root":18}
 HOP=19;BRANCH=tuple(range(20,24));MODE={"arbitrary":24,"natural":25};BOOL_FALSE=26;BOOL_TRUE=27
-TRAIN_NODES=tuple(range(32,176));TEST_NODES=tuple(range(176,320));DISTRACTOR_POOL=tuple(range(320,376))
+TRAIN_LEAVES=tuple(range(32,104));TEST_LEAVES=tuple(range(104,176));RELATION_NODES=tuple(range(176,320));DISTRACTOR_POOL=tuple(range(320,376))
 
 @dataclass(frozen=True)
 class PredicateExample:
@@ -17,7 +17,7 @@ class PredicateExample:
     node_path:tuple[int,...];path_positions:tuple[int,...];query_node:int;candidate_node:int|None;positive:int|None
 
 def _nodes(split:str,seed:int,count:int)->tuple[int,...]:
-    pool=TRAIN_NODES if split=="train" else TEST_NODES;rng=random.Random(seed);return tuple(rng.sample(pool,count))
+    leaves=TRAIN_LEAVES if split=="train" else TEST_LEAVES;rng=random.Random(seed);return (rng.choice(leaves),*rng.sample(RELATION_NODES,count-1))
 
 def predicate_example(config:dict,*,split:str,predicate:str,total_depth:int,required_path:int|None,branching:int,distractors:int,template:int,position_mode:str,index:int,tree_seed:int,model_seed:int=0,label_mode:str="arbitrary",positive:int|None=None)->PredicateExample:
     if total_depth<1:raise ValueError("tree depth must be positive")
@@ -78,7 +78,7 @@ def evaluation_matrix(config:dict,model_seed:int,examples:int|None=None)->list[P
     return rows
 
 def validate(config:dict)->dict:
-    train=training_batch({**config,"batch_size":512},random.Random(71),11);test=evaluation_matrix(config,11,2);train_ids={x for r in train for x in r.node_path};test_ids={x for r in test for x in r.node_path};bools=Counter(r.target for r in test if r.predicate=="isAncestor")
+    rng=random.Random(71);train=[r for _ in range(200) for r in training_batch({**config,"batch_size":64},rng,11)];test=evaluation_matrix(config,11,2);train_queries={r.query_node for r in train};test_queries={r.query_node for r in test};train_targets={r.target for r in train if r.predicate!="isAncestor"};test_targets={r.target for r in test if r.predicate!="isAncestor"};bools=Counter(r.target for r in test if r.predicate=="isAncestor")
     target_entropy=-sum((n/sum(bools.values()))*math.log2(n/sum(bools.values())) for n in bools.values())
-    passed=not(train_ids&test_ids) and target_entropy>.95 and all(r.target in r.tokens or r.predicate=="isAncestor" for r in test) and max(max(r.tokens) for r in test)<config["vocab_size"]
-    return {"schema_version":"paper06.predicate_v4.validation.v1","passed":passed,"train_test_node_overlap":len(train_ids&test_ids),"isAncestor_target_entropy_bits":target_entropy,"max_sequence_length":max(len(r.tokens) for r in test),"predicates":sorted({r.predicate for r in test}),"tree_seeds":config["tree_seeds"],"example_hash":stable_hash([r.__dict__ for r in test])}
+    unseen_target_labels=test_targets-train_targets;passed=not(train_queries&test_queries) and not unseen_target_labels and target_entropy>.95 and all(r.target in r.tokens or r.predicate=="isAncestor" for r in test) and max(max(r.tokens) for r in test)<config["vocab_size"]
+    return {"schema_version":"paper06.predicate_v4.validation.v2","passed":passed,"train_test_query_identity_overlap":len(train_queries&test_queries),"unseen_test_target_labels":len(unseen_target_labels),"topology_split":"disjoint generated paths; shared internal label vocabulary","isAncestor_target_entropy_bits":target_entropy,"max_sequence_length":max(len(r.tokens) for r in test),"predicates":sorted({r.predicate for r in test}),"tree_seeds":config["tree_seeds"],"example_hash":stable_hash([r.__dict__ for r in test])}
