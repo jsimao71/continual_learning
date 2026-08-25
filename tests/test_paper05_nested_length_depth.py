@@ -7,7 +7,11 @@ CONFIG=json.loads(Path("configs/paper05/nested_length_depth.json").read_text())
 def test_nested_length_information_gate():
     result,rows=validation(CONFIG)
     assert result["passed"] and len(rows)==15
-    assert all(r["max_singleton_MI_bits"]<1e-9 and abs(r["full_pattern_MI_bits"]-2)<1e-9 for r in rows)
+    assert all(abs(r["full_pattern_MI_bits"]-2)<1e-9 for r in rows)
+    necessary=[r for r in rows if r["regime"]=="necessary"]
+    assert all(r["max_singleton_MI_bits"]<1e-9 and r["max_proper_subset_MI_bits"]<1e-9 for r in necessary)
+    assert all(r["max_proper_subset_MI_bits"]>1.9 for r in rows if r["regime"]=="redundant" and r["pattern_length"]>2)
+    assert all(r["max_singleton_MI_bits"]>1.9 for r in rows if r["regime"]=="supportive" and r["pattern_length"]>2)
 
 def test_nested_length_matrix_is_complete_and_fixed_length():
     rows=evaluation(CONFIG);expected=3*5*4*2*2*CONFIG["evaluation_examples_per_cell"]

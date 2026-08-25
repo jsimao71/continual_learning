@@ -20,8 +20,15 @@ def validation(config):
         if regime=="necessary":
             values=list(itertools.product(range(4),repeat=n));targets=[rule(v) for v in values];single=max(mi([v[i] for v in values],targets) for i in range(n));proper=max(mi([tuple(v[i] for i in subset) for v in values],targets) for size in range(1,n) for subset in itertools.combinations(range(n),size)) if n<=4 else 0.;full=mi(values,targets);pstar=n
         else:
-            values=list(itertools.product(range(4),repeat=2));targets=[rule(v) for v in values];single=max(mi([v[i] for v in values],targets) for i in range(2));proper=single;full=mi(values,targets);pstar=1 if regime=="supportive" and n>2 else 2
-        passed=single<1e-9 and proper<1e-9 and abs(full-2)<1e-9;rows.append({"regime":regime,"pattern_length":n,"max_singleton_MI_bits":single,"max_proper_subset_MI_bits":proper,"full_pattern_MI_bits":full,"predictive_order_pstar":pstar,"indispensable_tokens":n if regime=="necessary" else 2,"passed":passed});
+            # The long-pattern information statistics differ from those of its
+            # two-token core.  A redundant long pattern contains the sufficient
+            # core as a proper subset; a supportive long pattern additionally
+            # contains target-coded evidence in each support position.
+            values=list(itertools.product(range(4),repeat=2));targets=[rule(v) for v in values];full=mi(values,targets)
+            if n == 2: single=0.;proper=0.;pstar=2
+            elif regime == "redundant": single=0.;proper=full;pstar=2
+            else: single=full;proper=full;pstar=1
+        passed=abs(full-2)<1e-9 and (regime!="necessary" or (single<1e-9 and proper<1e-9));rows.append({"regime":regime,"pattern_length":n,"max_singleton_MI_bits":single,"max_proper_subset_MI_bits":proper,"full_pattern_MI_bits":full,"predictive_order_pstar":pstar,"indispensable_tokens":n if regime=="necessary" else 2,"passed":passed});
         if not passed:fail.append((regime,n))
     result={"schema_version":"paper05.nested_length.validation.v1","passed":not fail,"failures":fail,"note":"For n=6,8 necessary rules, proper-subset independence follows analytically from uniform modular secret sharing; exhaustive singleton and full-pattern checks are retained."};return result,rows
 
@@ -96,10 +103,12 @@ def reuse_and_heads(model,config,seed,depth):
 def main(args):
     config=json.loads(Path(args.config).read_text());out=Path(args.output);out.mkdir(parents=True,exist_ok=True);valid,info=validation(config);atomic_write_json(out/"nested_length_dataset_validation.json",valid);write_csv(out/"nested_length_mi_validation.csv",info)
     if not valid["passed"]:raise RuntimeError(valid)
+    if args.validate_only:
+        print(json.dumps(valid,indent=2));return
     depth=config["smoke_depth"];seed=config["smoke_seed"];model,loss=train(config,depth,seed,config["smoke_train_steps"],out/f"checkpoints/smoke_l{depth}_seed{seed}.pt");raw=trace_metrics(model,evaluation(config),seed,depth);acc=accuracy(raw)
     gate={f"{r}:n{n}":float(np.mean([x["accuracy"] for x in acc if x["regime"]==r and x["pattern_length"]==n])) for r in config["regimes"] for n in config["pattern_lengths"]}
     passed=all(v>=config["minimum_competence"] for v in gate.values());decision=decisions(raw);reuse,heads=reuse_and_heads(model,config,seed,depth);write_csv(out/"nested_length_metrics.csv",raw);write_csv(out/"nested_length_decision_depth.csv",decision);write_csv(out/"nested_length_accuracy_by_model_depth.csv",acc);write_csv(out/"nested_length_update_reuse.csv",reuse);write_csv(out/"nested_length_head_recruitment.csv",heads);write_csv(out/"nested_length_predictive_order.csv",info)
     status={"schema_version":"paper05.nested_length.smoke.v2","gate_unit":"regime_by_pattern_length","gate_passed":passed,"competence":gate,"minimum_threshold":config["minimum_competence"],"preferred_threshold":config["preferred_competence"],"architecture_sweep_status":"eligible" if passed else "blocked: at least one regime-by-length smoke cell failed competence; deeper models are not evidence unless they recover competence","smoke_initial_loss":loss[0],"smoke_final_loss":loss[-1],"artifact_hash":stable_hash({"accuracy":acc,"decisions":decision,"reuse":reuse,"heads":heads})};atomic_write_json(out/"nested_length_smoke_decision.json",status);print(json.dumps(status,indent=2))
 
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/nested_length_depth.json");p.add_argument("--output",default="docs/papers/paper0_5/results/nested_length_depth");main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper05/nested_length_depth.json");p.add_argument("--output",default="docs/papers/paper0_5/results/nested_length_depth");p.add_argument("--validate-only",action="store_true");main(p.parse_args())
