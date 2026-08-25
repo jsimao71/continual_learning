@@ -125,7 +125,10 @@ def _rule_body(entity:int,markers:tuple[int,...],bits:tuple[int,...],template:in
 
 
 def s2_example(config:dict,label_mode:str,template:int,position_mode:str,index:int,split:str)->RuleExample:
-    combos=[i for i in range(16) if (i%5!=0)==(split=="train")]
+    # Four unseen combinations, balanced by parity; the remaining twelve are
+    # likewise balanced.  This prevents target support from identifying split.
+    heldout={1,6,11,12}
+    combos=[i for i in range(16) if (i not in heldout)==(split=="train")]
     combo=combos[index%len(combos)];bits=tuple((combo>>i)&1 for i in range(4));pool=LEAF_TRAIN if split=="train" else LEAF_TEST
     entity=pool[index%len(pool)];target=(S2_NAT if label_mode=="natural" else S2_ARB)[sum(bits)%2]
     rng=random.Random(config["ontology_seed"]+2_000_000+index*31+(0 if split=="train" else 9_000_000))
@@ -161,7 +164,11 @@ def rule_validation(config:dict,stage:str)->dict:
     overlap={r.entity_id for r in train}&{r.entity_id for r in test};counts=Counter(r.class_id for r in test)
     # The construction uses parity rules: every strict feature subset is independent of the target.
     proper_subset_mi=0.0;full_structure_mi=1.0;entropy=-sum((n/len(test))*math.log2(n/len(test)) for n in counts.values())
-    return {"schema_version":f"paper06.{stage}.validation.v1","passed":not overlap and min(counts.values())>0,
+    if stage=="s2":balance_groups={"all":test}
+    else:balance_groups={f"order-{order}":[r for r in test if r.predictive_order==order] for order in (1,2,3)}
+    group_entropies={name:-sum((n/len(rows))*math.log2(n/len(rows)) for n in Counter(r.class_id for r in rows).values()) for name,rows in balance_groups.items()}
+    passed=not overlap and min(counts.values())>0 and min(group_entropies.values())>=0.95
+    return {"schema_version":f"paper06.{stage}.validation.v1","passed":passed,
             "ontology_seed":config["ontology_seed"],"train_test_identity_overlap":len(overlap),"target_entropy_bits":entropy,
             "singleton_mi_bits":0.0,"proper_subset_mi_bits":proper_subset_mi,"full_structure_mi_bits":full_structure_mi,
-            "heldout_combination_rule":"integer pattern modulo 5 equals zero","example_hash":stable_hash([r.__dict__ for r in test])}
+            "heldout_target_entropy_bits":group_entropies,"heldout_combination_rule":"S2 balanced explicit set {1,6,11,12}; S3 integer pattern modulo 5 equals zero","example_hash":stable_hash([r.__dict__ for r in test])}

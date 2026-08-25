@@ -33,6 +33,7 @@ def test_s1_all_deep_taxonomy_labels_are_in_vocab_and_facts_valid():
 def test_rule_generators_hold_out_identities_and_combinations():
     for stage in ("s2","s3"):
         validation=rule_validation(CONFIG,stage);assert validation["passed"]
+        assert min(validation["heldout_target_entropy_bits"].values())>=0.95
         rows=rule_evaluation(CONFIG,stage,2);assert rows and all(len(r.tokens)==CONFIG["sequence_length"] for r in rows)
         assert all(r.tokens[-1] in range(100,180) for r in rows)
     s2=rule_evaluation(CONFIG,"s2",1)
