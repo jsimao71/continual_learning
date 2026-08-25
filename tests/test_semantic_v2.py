@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from cl.semantic.v2 import s1_evaluation,s1_example,s1_validation
+from cl.semantic.v2 import rule_evaluation,rule_validation,s1_evaluation,s1_example,s1_validation
 
 CONFIG=json.loads(Path("configs/paper06/semantic_v2.json").read_text())
 
@@ -28,3 +28,10 @@ def test_s1_all_deep_taxonomy_labels_are_in_vocab_and_facts_valid():
             compact=[token for token in row.tokens if token]
             assert compact[-2:]==[6,compact[-1]]
             assert compact.count(2)==3
+
+
+def test_rule_generators_hold_out_identities_and_combinations():
+    for stage in ("s2","s3"):
+        validation=rule_validation(CONFIG,stage);assert validation["passed"]
+        rows=rule_evaluation(CONFIG,stage,2);assert rows and all(len(r.tokens)==CONFIG["sequence_length"] for r in rows)
+        assert all(r.tokens[-1] in range(100,180) for r in rows)

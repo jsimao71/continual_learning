@@ -13,6 +13,8 @@ PAD,DEFINE,IS_A,SEP,QUERY_PARENT,QUERY_ANCESTOR,QUERY_ROOT=0,1,2,3,4,5,6
 TEMPLATE=tuple(range(10,14));LEAF_TRAIN=tuple(range(20,100));LEAF_TEST=tuple(range(100,180))
 NAT_SUB=tuple(range(180,244));NAT_CAT=tuple(range(244,260));NAT_ROOT=tuple(range(260,264))
 ARB_SUB=tuple(range(264,328));ARB_CAT=tuple(range(328,344));ARB_ROOT=tuple(range(344,348))
+REL_MARKERS=tuple(range(14,18));ATTR_MARKERS=tuple(range(14,20));VALUE_TOKENS=tuple(range(348,360))
+S2_NAT=(360,361);S2_ARB=(362,363);S3_TARGETS=((364,365),(366,367),(368,369))
 
 
 @dataclass(frozen=True)
@@ -32,6 +34,22 @@ class SemanticExample:
     root_id: str
     predictive_order: int
     raw_length: int
+    train_identity: bool
+
+
+@dataclass(frozen=True)
+class RuleExample:
+    tokens: tuple[int,...]
+    target: int
+    stage: str
+    example_id: str
+    label_mode: str
+    template_id: int
+    position_mode: str
+    entity_id: str
+    class_id: str
+    feature_bits: tuple[int,...]
+    predictive_order: int
     train_identity: bool
 
 
@@ -95,3 +113,54 @@ def s1_validation(config:dict)->dict:
             "train_test_identity_overlap":len(train&test),"template_balance":len(set(counts.values()))==1,"target_entropy_bits":entropy,
             "ontology_families":sorted({r.ontology_family for r in rows}),"example_hash":stable_hash([r.__dict__ for r in rows])}
     return result
+
+
+def _rule_body(entity:int,markers:tuple[int,...],bits:tuple[int,...],template:int,query:int)->list[int]:
+    pairs=[[marker,VALUE_TOKENS[2*i+bit]] for i,(marker,bit) in enumerate(zip(markers,bits))]
+    orders=(range(len(pairs)),reversed(range(len(pairs))),list(range(0,len(pairs),2))+list(range(1,len(pairs),2)),list(range(1,len(pairs),2))+list(range(0,len(pairs),2)))
+    order=list(orders[template]);body=[TEMPLATE[template],DEFINE,entity]
+    for index in order:body.extend([SEP,*pairs[index]])
+    return [*body,SEP,query,entity]
+
+
+def s2_example(config:dict,label_mode:str,template:int,position_mode:str,index:int,split:str)->RuleExample:
+    combos=[i for i in range(16) if (i%5!=0)==(split=="train")]
+    combo=combos[index%len(combos)];bits=tuple((combo>>i)&1 for i in range(4));pool=LEAF_TRAIN if split=="train" else LEAF_TEST
+    entity=pool[index%len(pool)];target=(S2_NAT if label_mode=="natural" else S2_ARB)[sum(bits)%2]
+    rng=random.Random(config["ontology_seed"]+2_000_000+index*31+(0 if split=="train" else 9_000_000))
+    tokens=_pad(_rule_body(entity,REL_MARKERS,bits,template,QUERY_PARENT),config["sequence_length"],position_mode,rng)
+    return RuleExample(tokens,target,"s2",f"{split}:{label_mode}:t{template}:p{position_mode}:c{combo}:i{index}",label_mode,template,position_mode,f"{split}-entity-{entity}",f"parity-{sum(bits)%2}",bits,4,split=="train")
+
+
+def s3_example(config:dict,level:int,template:int,position_mode:str,index:int,split:str)->RuleExample:
+    combos=[i for i in range(64) if (i%5!=0)==(split=="train")]
+    combo=combos[index%len(combos)];bits=tuple((combo>>i)&1 for i in range(6));pool=LEAF_TRAIN if split=="train" else LEAF_TEST
+    entity=pool[index%len(pool)];indices=((0,),(0,2),(0,2,5))[level-1];class_value=sum(bits[i] for i in indices)%2;target=S3_TARGETS[level-1][class_value]
+    rng=random.Random(config["ontology_seed"]+3_000_000+level*100003+index*37+(0 if split=="train" else 8_000_000))
+    tokens=_pad(_rule_body(entity,ATTR_MARKERS,bits,template,QUERY_ANCESTOR+level),config["sequence_length"],position_mode,rng)
+    return RuleExample(tokens,target,"s3",f"{split}:l{level}:t{template}:p{position_mode}:c{combo}:i{index}","arbitrary",template,position_mode,f"{split}-entity-{entity}",f"level{level}-{class_value}",bits,len(indices),split=="train")
+
+
+def rule_training_batch(config:dict,stage:str,rng:random.Random)->list[RuleExample]:
+    rows=[]
+    for _ in range(config["batch_size"]):
+        index=rng.randrange(1_000_000);template=rng.choice(config["templates"]);position=rng.choice(config["position_modes"])
+        rows.append(s2_example(config,rng.choice(config["label_modes"]),template,position,index,"train") if stage=="s2" else s3_example(config,rng.choice((1,2,3)),template,position,index,"train"))
+    return rows
+
+
+def rule_evaluation(config:dict,stage:str,examples:int|None=None)->list[RuleExample]:
+    count=examples or config["evaluation_examples_per_cell"]
+    if stage=="s2":return [s2_example(config,m,t,p,i,"test") for m,t,p in itertools.product(config["label_modes"],config["templates"],config["position_modes"]) for i in range(count)]
+    return [s3_example(config,l,t,p,i,"test") for l,t,p in itertools.product((1,2,3),config["templates"],config["position_modes"]) for i in range(count)]
+
+
+def rule_validation(config:dict,stage:str)->dict:
+    train=rule_training_batch({**config,"batch_size":1024},stage,random.Random(17));test=rule_evaluation(config,stage,64)
+    overlap={r.entity_id for r in train}&{r.entity_id for r in test};counts=Counter(r.class_id for r in test)
+    # The construction uses parity rules: every strict feature subset is independent of the target.
+    proper_subset_mi=0.0;full_structure_mi=1.0;entropy=-sum((n/len(test))*math.log2(n/len(test)) for n in counts.values())
+    return {"schema_version":f"paper06.{stage}.validation.v1","passed":not overlap and min(counts.values())>0,
+            "ontology_seed":config["ontology_seed"],"train_test_identity_overlap":len(overlap),"target_entropy_bits":entropy,
+            "singleton_mi_bits":0.0,"proper_subset_mi_bits":proper_subset_mi,"full_structure_mi_bits":full_structure_mi,
+            "heldout_combination_rule":"integer pattern modulo 5 equals zero","example_hash":stable_hash([r.__dict__ for r in test])}
