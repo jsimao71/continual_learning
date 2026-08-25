@@ -1,0 +1,65 @@
+{
+  "artifact_hash": "fa73bc99243755c61954c67cffbbba7f945d4fac8ca4eb4bea26e07ec7ee91a5",
+  "config": {
+    "batch_size": 128,
+    "dataset_seed": 9107,
+    "device": "auto",
+    "evaluation_examples_per_cell": 128,
+    "hidden_size": 64,
+    "learning_rate": 0.003,
+    "lengths": [
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "model_seed": 23,
+    "model_types": [
+      "transformer",
+      "rnn",
+      "gru",
+      "lstm"
+    ],
+    "nuisance_counts": [
+      0,
+      2,
+      4,
+      8,
+      16
+    ],
+    "predictive_orders": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8
+    ],
+    "schema_version": "paper05.rnn_comparison.v1",
+    "sequence_length": 80,
+    "spans": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32,
+      64
+    ],
+    "training_steps": 1200,
+    "transformer_depth": 4,
+    "transformer_heads": 2,
+    "transformer_width": 32,
+    "vocab_size": 128
+  },
+  "device": "mps",
+  "evaluation_examples": 2944,
+  "models": [
+    "transformer",
+    "rnn",
+    "gru",
+    "lstm"
+  ],
+  "schema_version": "paper05.rnn_comparison.run.v1"
+}

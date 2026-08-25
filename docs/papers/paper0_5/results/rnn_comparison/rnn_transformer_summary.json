@@ -1,0 +1,43 @@
+{
+  "accuracy_slopes": {
+    "gru": {
+      "length": 3.020165839882455e-18,
+      "nuisance": -3.832823584814715e-18,
+      "predictive_order": -3.160326121851502e-17,
+      "span": -7.92241687940044e-18
+    },
+    "lstm": {
+      "length": -0.003344464045698918,
+      "nuisance": -3.832823584814715e-18,
+      "predictive_order": -0.02987132352941184,
+      "span": -7.92241687940044e-18
+    },
+    "rnn": {
+      "length": -0.011162214381720423,
+      "nuisance": -3.832823584814715e-18,
+      "predictive_order": -0.13189338235294124,
+      "span": -0.007120271065254779
+    },
+    "transformer": {
+      "length": 3.020165839882455e-18,
+      "nuisance": -0.0004882812500000093,
+      "predictive_order": -0.11833639705882357,
+      "span": -7.92241687940044e-18
+    }
+  },
+  "artifact_hash": "b5f7324ee1cd1f67f3a3bff289f8ce476f512e2193f946d60c4a6211092d6353",
+  "interpretation": "The vanilla RNN is more length/span sensitive than the Transformer, but GRU is perfect and LSTM nearly perfect. Gated recurrence also exceeds the Transformer on high predictive order. Thus a recurrent-family disadvantage is falsified; only a vanilla-RNN transport contrast is supported. Recurrent time and Transformer depth are not equated.",
+  "mean_accuracy": {
+    "gru": 1.0,
+    "lstm": 0.984375,
+    "rnn": 0.8247282608695652,
+    "transformer": 0.8875679347826086
+  },
+  "parameter_counts": {
+    "gru": 33280,
+    "lstm": 41600,
+    "rnn": 16640,
+    "transformer": 40896
+  },
+  "schema_version": "paper05.rnn_comparison.summary.v1"
+}

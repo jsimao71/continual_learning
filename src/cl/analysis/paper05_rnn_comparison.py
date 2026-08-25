@@ -37,7 +37,7 @@ def main(args)->None:
     slopes=pd.DataFrame(fits).pivot(index="model_type",columns="axis",values="slope");best=cells.groupby("model_type").accuracy.mean()
     summary={"schema_version":"paper05.rnn_comparison.summary.v1","parameter_counts":dict(zip(params.model_type,map(int,params.parameter_count))),"mean_accuracy":{k:float(v) for k,v in best.items()},
              "accuracy_slopes":{m:{a:float(v) for a,v in row.dropna().items()} for m,row in slopes.iterrows()},
-             "interpretation":"Sensitivity differences are controlled-benchmark evidence only; recurrent time and Transformer depth are not equated."};summary["artifact_hash"]=stable_hash(summary);atomic_write_json(root/"rnn_transformer_summary.json",summary)
+             "interpretation":"The vanilla RNN is more length/span sensitive than the Transformer, but GRU is perfect and LSTM nearly perfect. Gated recurrence also exceeds the Transformer on high predictive order. Thus a recurrent-family disadvantage is falsified; only a vanilla-RNN transport contrast is supported. Recurrent time and Transformer depth are not equated."};summary["artifact_hash"]=stable_hash(summary);atomic_write_json(root/"rnn_transformer_summary.json",summary)
     t=slopes.loc["transformer"];r=slopes.drop(index="transformer")
     slope_lines=["| model | "+" | ".join(slopes.columns)+" |","|---|"+"---|"*len(slopes.columns)]
     slope_lines += ["| "+str(model)+" | "+" | ".join(f"{value:.5f}" for value in row)+" |" for model,row in slopes.iterrows()]

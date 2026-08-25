@@ -1,0 +1,5 @@
+model_type,parameter_count,training_steps,training_tokens
+transformer,40896,1200,12288000
+rnn,16640,1200,12288000
+gru,33280,1200,12288000
+lstm,41600,1200,12288000
