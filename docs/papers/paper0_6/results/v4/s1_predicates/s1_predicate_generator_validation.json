@@ -1,0 +1,22 @@
+{
+  "example_hash": "4d6b221e503281a2629b753afd56746e57e239df27fca5ff8c6db48e952997fb",
+  "isAncestor_target_entropy_bits": 1.0,
+  "max_sequence_length": 84,
+  "passed": true,
+  "predicates": [
+    "ancestor_k",
+    "grandparent",
+    "isAncestor",
+    "parent",
+    "root"
+  ],
+  "schema_version": "paper06.predicate_v4.validation.v2",
+  "topology_split": "disjoint generated paths; shared internal label vocabulary",
+  "train_test_query_identity_overlap": 0,
+  "tree_seeds": [
+    101,
+    211,
+    307
+  ],
+  "unseen_test_target_labels": 0
+}
