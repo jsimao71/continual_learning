@@ -53,6 +53,7 @@ def main(args):
     depths=[int(x) for x in args.depths.split(",")] if args.depths else config["model_depths"];seeds=[int(x) for x in args.seeds.split(",")] if args.seeds else config["model_seeds"]
     steps=args.steps or config["training_steps"]
     if args.smoke:depths=[2];seeds=[11];steps=4;config={**config,"batch_size":8}
+    config={**config,"effective_training_steps":steps}
     device=resolve_device(args.device or config["device"]);raw_path=out/"s1_predicate_competence_raw.csv";loss_path=out/"s1_predicate_training_loss.csv";raw=[] if args.fresh or args.smoke else existing(raw_path);losses=[] if args.fresh or args.smoke else existing(loss_path);done={(int(r["model_depth"]),int(r["model_seed"])) for r in raw}
     for depth in depths:
         for seed in seeds:

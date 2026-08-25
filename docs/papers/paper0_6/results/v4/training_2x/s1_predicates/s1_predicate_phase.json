@@ -1,0 +1,152 @@
+{
+  "artifact_hash": "801c03a4138103dd1dfabd3ccb75b4321128b811d85a19d58c98955daccecca1",
+  "config": {
+    "batch_size": 64,
+    "branching_factors": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "competence_threshold": 0.8,
+    "device": "auto",
+    "distractor_counts": [
+      0,
+      4,
+      16,
+      64
+    ],
+    "effective_training_steps": 1000,
+    "evaluation_examples_per_cell": 16,
+    "heads": 4,
+    "label_modes": [
+      "arbitrary"
+    ],
+    "learning_rate": 0.003,
+    "max_length": 128,
+    "model_depths": [
+      2,
+      4,
+      6,
+      8,
+      12
+    ],
+    "model_seeds": [
+      11,
+      23,
+      37
+    ],
+    "ontology_seed": 6407,
+    "position_encoding": "sinusoidal",
+    "position_modes": [
+      "aligned",
+      "randomized"
+    ],
+    "predicates": [
+      "parent",
+      "grandparent",
+      "ancestor_k",
+      "isAncestor",
+      "root"
+    ],
+    "preferred_threshold": 0.9,
+    "schema_version": "paper06.predicate_v4.v1",
+    "templates": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "test_hops": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      12
+    ],
+    "test_tree_depths": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      12,
+      16,
+      24,
+      32
+    ],
+    "train_hops": [
+      1,
+      2,
+      3
+    ],
+    "train_tree_depths": [
+      2,
+      3,
+      4
+    ],
+    "training_budgets": [
+      1,
+      2,
+      4
+    ],
+    "training_steps": 500,
+    "tree_seeds": [
+      101,
+      211,
+      307
+    ],
+    "vocab_size": 384,
+    "width": 64
+  },
+  "mechanism_eligibility": {
+    "ancestor_k": false,
+    "grandparent": false,
+    "isAncestor": true,
+    "parent": false,
+    "root": false
+  },
+  "predicate_score": {
+    "ancestor_k": {
+      "deep_accuracy": 0.06851851851851853,
+      "mean_accuracy": 0.120409604519774,
+      "minimum_cell_accuracy": 0.0,
+      "training_depth_accuracy": 0.33333333333333337
+    },
+    "grandparent": {
+      "deep_accuracy": 0.08333333333333334,
+      "mean_accuracy": 0.15000000000000002,
+      "minimum_cell_accuracy": 0.0,
+      "training_depth_accuracy": 0.2638888888888889
+    },
+    "isAncestor": {
+      "deep_accuracy": 0.9824074074074073,
+      "mean_accuracy": 0.9855225988700564,
+      "minimum_cell_accuracy": 0.9375,
+      "training_depth_accuracy": 0.9947916666666666
+    },
+    "parent": {
+      "deep_accuracy": 0.17916666666666667,
+      "mean_accuracy": 0.3041666666666667,
+      "minimum_cell_accuracy": 0.08333333333333333,
+      "training_depth_accuracy": 0.5347222222222222
+    },
+    "root": {
+      "deep_accuracy": 0.07291666666666666,
+      "mean_accuracy": 0.11249999999999998,
+      "minimum_cell_accuracy": 0.0,
+      "training_depth_accuracy": 0.2708333333333333
+    }
+  },
+  "schema_version": "paper06.predicate_v4.phase.v1",
+  "trained_cells": [
+    {
+      "model_depth": 6,
+      "model_seed": 11
+    }
+  ]
+}
