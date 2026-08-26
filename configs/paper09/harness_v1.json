@@ -1,0 +1,12 @@
+{
+  "schema_version": "paper09.harness_v1.v1",
+  "tree_seeds": [11, 23, 37],
+  "tree_depths": [2, 3, 4, 6, 8, 12, 16, 24, 32, 64],
+  "branching_factors": [1, 2, 4, 8],
+  "required_steps": [1, 2, 3, 4, 6, 8, 12, 16, 24, 32],
+  "distractor_counts": [0, 4, 16, 64, 256],
+  "max_steps": 65,
+  "max_steps_grid": [2, 4, 8, 16, 32, 64],
+  "smoke_depths": [2, 4],
+  "smoke_branching": [1, 2]
+}
