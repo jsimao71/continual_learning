@@ -10,7 +10,7 @@
 \graphicspath{{figures/}{docs/papers/paper0_8/figures/}}
 \begin{document}\maketitle
 \begin{abstract}
-We ask for the smallest training structure and Transformer in which context promotes a target that is low-ranked without demonstrations to rank one. A leakage-audited D0--D4 ladder excludes the critical \(C\!\to\!3\) mapping and compares correct demonstrations with shuffled, wrong-chain, irrelevant, reversal, and no-context controls. A 54-cell coarse sweep finds 16 individual positives, including a one-layer, width-16, one-head model, but none of five Pareto-small candidates passes all three seeds. The closest D4 cells pass two of three seeds; failures arise either because the target is not promoted or because controls also solve the task. Thus D4 identifies a seed-sensitive acquisition frontier, not yet a stable general ICL mechanism. In parallel, contextual-copy calibration recovers a known microscopic circuit in one competent two-layer checkpoint: early pair binding, later associated-value transport, and rank-one promotion principally in second-layer attention. Value patching from shuffled context reduces accuracy from 100\% to 20.8\%, while demonstration-value ablation reduces it to 37.5\%. Fresh replications of the same copy architecture fail the 95\% three-seed gate, so this circuit is a validated local calibration rather than a stable minimality claim. The combined result separates the physical mechanism available after acquisition from the unstable conditions under which it appears.
+We ask for the smallest training structure and Transformer in which context promotes a target that is low-ranked without demonstrations to rank one. A leakage-audited D0--D4 ladder excludes the critical \(C\!\to\!3\) mapping and compares correct demonstrations with shuffled, wrong-chain, irrelevant, reversal, and no-context controls. We first classify the computational tasks: the present D4 is finite permutation constraint completion (T3), not rule induction. Under its uniform \(k\)-symbol permutation prior, all-but-one demonstrations reduce \(H(Y\mid X)=\log_2 k\) to \(H(Y\mid X,D_{\rm ctx})=0\), so the context supplies \(\log_2 k\) bits and the oracle ceiling is one. A 54-cell coarse sweep finds 16 individual positives, including a one-layer, width-16, one-head model, but none of five Pareto-small candidates passes all three seeds. Thus D4 identifies a seed-sensitive acquisition frontier, not yet a stable general ICL mechanism. In parallel, contextual-copy calibration recovers a known microscopic circuit in one competent two-layer checkpoint: early pair binding, later associated-value transport, and rank-one promotion principally in second-layer attention. Value patching from shuffled context reduces accuracy from 100\% to 20.8\%, while demonstration-value ablation reduces it to 37.5\%. Fresh replications fail the 95\% three-seed gate, so this circuit is a validated local calibration rather than a stable minimality claim. The combined result separates information sufficiency, behavioral acquisition, and the physical mechanism available after acquisition.
 \end{abstract}
 \section{Question}
 Let \(Y\) be a candidate with low context-free rank, \(\operatorname{rank}(Y\mid X)\gg1\). We seek the smallest training distribution \(\mathcal D^\star\) and smallest model \(M^\star\) for which \(\operatorname{rank}(Y\mid D_{\rm ctx},X)=1\), while \(Y\) remains low-ranked without \(D_{\rm ctx}\).
@@ -32,11 +32,41 @@ and ask whether context aligns the two local chains strongly enough to promote \
 D0: random/no useful structure.\\
 D1: isolated local successor chains only.\\
 D2: many isomorphic independent chains.\\
-D3: minimal paired/alignment exposure if D1--D2 fail.\\
-D4: episode-specific random permutations preventing global mapping memorization.\\
-D5: richer arbitrary/compositional relations only after the minimal mechanism is understood.
+D3: paired alignment or selection from a finite transformation family.\\
+D4: episode-specific permutation completion preventing global mapping memorization.\\
+D5: identifiable parametric or structured rules, introduced only after the simpler regimes are separated.
 
 At each stage add exactly one structural ingredient.
+
+\subsection{Computational taxonomy and information sufficiency}
+We distinguish in-weight association (T0), direct copy (T1), associative/induction copy (T2), finite constraint completion (T3), finite task selection (T4), parametric rule induction (T5), compositional rule induction (T6), and procedural or recursive induction (T7). These labels describe the computation licensed by the generator, not what a trained network necessarily implements. Table~\ref{tab:taxonomy} locates the present ladder. D1--D2 test whether local relational exposure creates contextual alignment pressure; the current paired D3 is a finite alignment/completion test. Proposed D3-B/C variants would instead select among a known finite mapping or transformation set and must separate seen from unseen mappings.
+
+\begin{table}[H]\centering\small
+\caption{Dataset taxonomy. ``Determined'' means that context plus the declared prior fixes the answer; it does not imply that a model learned the computation.}\label{tab:taxonomy}
+\begin{tabular}{llllll}\toprule
+Regime & Type & Computational task & Target shown & Determined & Iterative\\\midrule
+D0--D2 & T0 & association/local structure & no & no & no\\
+D3-A & T3 & partial alignment completion & no & yes & no\\
+D3-B/C & T4 & finite task selection & no & yes & no\\
+D4 & T3 & permutation constraint completion & no & yes & no\\
+D5 unary & T5 & parametric modular rule & no & gated & no\\
+D5 composed & T6/T7 & compositional/procedural rule & no & gated & possibly\\\bottomrule
+\end{tabular}
+\end{table}
+
+For D4, let \(\pi\) be uniform over the \(k!\) permutations and let the query identify one key. Before demonstrations, its value is uniform, hence
+\[
+H(Y\mid X)=\log_2 k.
+\]
+The prompt shows \(k-1\) key--value pairs. The omitted value---which is not explicitly present in the context---is uniquely fixed by permutation complement, giving
+\[
+H(Y\mid X,D_{\rm ctx})=0,\qquad
+I(Y;D_{\rm ctx}\mid X)=\log_2 k,
+\]
+and Bayes/oracle accuracy one. In the experiments \(k=3\): the mapping space has \(3!=6\) members, each prompt contains two demonstrations, and the context contributes \(\log_2 3\simeq1.585\) bits. Consequently, a selective D4 positive establishes genuine contextual dependence, but specifically for T3 elimination/completion; it is not evidence of a newly inferred function.
+
+\subsection{D5 validity gate}
+We implemented a CPU-only exact-posterior validator for successor, add-\(n\), multiply-by-\(a\), affine, and square functions on \(\mathbb Z_k\), for \(k\in\{5,7,11\}\). Each episode enumerates the declared finite hypothesis family, filters parameters consistent with the demonstrations, computes the induced answer distribution at the query, and rejects the episode unless that answer has zero entropy. It also stores the number of consistent hypotheses and the minimum identifying prefix. Across 360 validation episodes (24 per family/modulus cell), all passed with posterior answer entropy zero; 284 required one demonstration and 76 affine episodes required two. This verifies generator admissibility only. No D5 Transformer has been trained, so the paper offers no behavioral or mechanistic evidence for T5--T7 rule induction.
 
 \section{Dataset and model phase diagrams}
 Search over number of relation families, examples per family, task/mapping entropy, chain length, symbol reuse, template variation, and position variation. Start with
@@ -111,10 +141,10 @@ This is a local instrumentation calibration. Fresh L2/W64/H2 replications at 256
 \end{figure}
 
 \section{Answers and limitations}
-Local order alone is not sufficient. Partial/fresh mapping pressure creates local positives, but no tested D4 architecture is seed-stable. Where contextual copy is acquired, the smallest measured mechanism is \emph{bind pairs, match the query role, transport the associated value, promote its logit}; second-layer SA is decisive and FF is supportive rather than the final promoter. Increasing copy diversity rescues two seeds, but update-budget scaling is non-monotonic for the remaining seed and does not close the replication gate. We find no need for regression, Bayesian, or implicit-gradient metaphors. We do not yet claim a stable smallest copy or D4 model, nor trace D4 from a selectively chosen seed. The next experiment should alter acquisition reliability---optimizer or curriculum, rather than update count alone---while keeping the leakage and control gates fixed.
+Local order alone is not sufficient. Partial/fresh mapping pressure creates local positives, but no tested D4 architecture is seed-stable. D4 is nevertheless information-sufficient: its context determines the held-out value exactly. The failure is therefore acquisition instability rather than dataset ambiguity. Conversely, exact D5 validation makes those proposed episodes admissible but supplies no model evidence that parametric, compositional, or procedural induction has been learned. Where contextual copy is acquired, the smallest measured mechanism is \emph{bind pairs, match the query role, transport the associated value, promote its logit}; second-layer SA is decisive and FF is supportive rather than the final promoter. Increasing copy diversity rescues two seeds, but update-budget scaling is non-monotonic for the remaining seed and does not close the replication gate. We find no need for regression, Bayesian, or implicit-gradient metaphors. We do not yet claim a stable smallest copy or D4 model, nor trace D4 from a selectively chosen seed. The next experiment should alter acquisition reliability---optimizer or curriculum, rather than update count alone---while keeping the leakage, information-sufficiency, and control gates fixed.
 
 \section{Reproducibility}
-Generators and phase runners are under \path{src/cl/semantic/} and \path{src/cl/experiments/}. The shared tracer and analysis modules use the \path{paper08_*} prefix. Configurations are under \path{configs/paper08/}. Tracked artifacts include raw phase/control rows, five three-seed D4 replications, copy replication and exact trace tables, the (E=1024) training-budget diagnostic, compressed Q/K/V matrices, 18 figures, and summaries. Dense checkpoints remain locally reproducible and git-ignored.
+Generators and phase runners are under \path{src/cl/semantic/} and \path{src/cl/experiments/}. The shared tracer and analysis modules use the \path{paper08_*} prefix. Configurations are under \path{configs/paper08/}. The taxonomy audit is configured by \path{taxonomy_v1.json}; its exact D5 posterior rows and machine-readable D0--D5 classification are under \path{results/taxonomy/}. Tracked artifacts include raw phase/control rows, five three-seed D4 replications, copy replication and exact trace tables, the (E=1024) training-budget diagnostic, compressed Q/K/V matrices, 18 figures, and summaries. Dense checkpoints remain locally reproducible and git-ignored.
 
 \section{Relation to Papers 0.5--0.7}
 Paper 0.5 studies predictive refinement once evidence is accessible. Paper 0.6 studies learned semantic/compositional relations. Paper 0.8 asks how context combines learned relations to create a new prediction without weight updates. Paper 0.7 remains deferred until these mechanisms justify synthesis.
