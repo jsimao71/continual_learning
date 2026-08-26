@@ -1,0 +1,32 @@
+{
+  "checkpoint_resume": true,
+  "dataset_audit": {
+    "all_symbols_input_covered": true,
+    "all_symbols_positive_target_covered": true,
+    "exact_test_targets": true,
+    "observed_pair_leakage": 0,
+    "pair_partition_disjoint": true,
+    "test_pairs_within_holdout": true,
+    "train_pairs_within_train": true,
+    "valid": true
+  },
+  "device": "mps",
+  "heldout_pairs": 806,
+  "required_seeds": [
+    11,
+    23,
+    37
+  ],
+  "schema_version": "paper085.r0_gate_v2.v1",
+  "seeds_completed": [
+    11,
+    23,
+    37
+  ],
+  "shared_symbol_vocabulary": true,
+  "smoke": false,
+  "three_seed_gate_passed": true,
+  "train_pairs": 3226,
+  "updates": 2000,
+  "v1_interpretation": "lexical_transfer_stress"
+}

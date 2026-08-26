@@ -1,0 +1,25 @@
+{
+  "checkpoint_resume": true,
+  "dataset_audit": {
+    "conditions_balanced": true,
+    "exact_targets": true,
+    "train_test_symbol_identities_disjoint": true,
+    "valid": true
+  },
+  "device": "mps",
+  "heldout_symbol_identities": true,
+  "required_seeds": [
+    11,
+    23,
+    37
+  ],
+  "schema_version": "paper085.r0_gate_v1.v1",
+  "seeds_completed": [
+    11,
+    23,
+    37
+  ],
+  "smoke": false,
+  "three_seed_gate_passed": false,
+  "updates": 2000
+}

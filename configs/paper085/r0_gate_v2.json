@@ -1,0 +1,20 @@
+{
+  "schema_version": "paper085.r0_gate_v2.v1",
+  "device": "mps",
+  "model_seeds": [11, 23, 37],
+  "symbol_count": 64,
+  "pair_split_seed": 8502,
+  "test_pair_fraction": 0.2,
+  "model": {"layers": 2, "width": 64, "heads": 4, "mlp_ratio": 2},
+  "learning_rate": 0.001,
+  "updates": 2000,
+  "batch_size": 128,
+  "eval_examples": 1024,
+  "competence_accuracy": 0.95,
+  "control_accuracy": 0.95,
+  "checkpoint_every": 100,
+  "log_every": 50,
+  "smoke_updates": 8,
+  "smoke_batch_size": 8,
+  "smoke_eval_examples": 32
+}

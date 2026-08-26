@@ -1,0 +1,4 @@
+checkpoint,competent,eval_examples,heads,heldout_accuracy,heldout_consequent_swap_accuracy,heldout_entailed_accuracy,heldout_fact_mismatch_accuracy,heldout_negative_control_accuracy,heldout_rule_lhs_mismatch_accuracy,layers,mlp_ratio,seed,updates,width
+docs/papers/paper0_85/results/r0_gate_v2/checkpoints/r0v2_L2_W64_H4_seed11.pt,1,1024,4,1.0,1.0,1.0,1.0,1.0,1.0,2,2,11,2000,64
+docs/papers/paper0_85/results/r0_gate_v2/checkpoints/r0v2_L2_W64_H4_seed23.pt,1,1024,4,0.9990234375,1.0,1.0,1.0,0.99609375,0.99609375,2,2,23,2000,64
+docs/papers/paper0_85/results/r0_gate_v2/checkpoints/r0v2_L2_W64_H4_seed37.pt,1,1024,4,0.9931640625,0.98828125,0.98828125,0.99609375,0.99609375,1.0,2,2,37,2000,64
