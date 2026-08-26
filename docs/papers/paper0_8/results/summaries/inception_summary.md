@@ -1,0 +1,3 @@
+# Inception summary
+
+Local orders D1/D2 are insufficient: high correct-context scores are not selective over controls. D3 and D4 create individual positive cells, but no tested D4 architecture passes three seeds. Five Pareto-small candidates pass only one or two seeds. The smallest local positive is L1/W16/H1, but it fails replication. D4 mechanism interpretation therefore remains blocked. Copy calibration independently recovers match-key, transport-associated-value, promote-target behavior in one competent checkpoint, validating the tracer while revealing its own acquisition instability. The evidence supports a sharp, seed-sensitive circuit-acquisition frontier rather than a stable minimal model.
