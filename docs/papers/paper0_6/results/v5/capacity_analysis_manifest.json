@@ -1,0 +1,48 @@
+{
+  "central_result": "depth8_isAncestor_easy_medium_only",
+  "hard_tier_status": "threshold_failure_worst_seed_0.759",
+  "next_run": "baseline,depth8 at 2x across seeds 11,23,37",
+  "observed_architectures": [
+    "baseline",
+    "depth8",
+    "width128",
+    "heads2",
+    "heads8",
+    "deep_narrow_match",
+    "shallow_wide_match"
+  ],
+  "observed_budget_multiplier": 1,
+  "observed_competent_cells": [
+    {
+      "architecture": "depth8",
+      "diagnostic_tier": "easy",
+      "mean_accuracy": 0.9351851851851851,
+      "passes_0_80_worst_seed": true,
+      "passes_0_90_worst_seed": false,
+      "predicate": "isAncestor",
+      "seed_count": 3,
+      "seed_variance": 0.0022290809327846386,
+      "status": "observed_1x",
+      "worst_seed_accuracy": 0.8888888888888888
+    },
+    {
+      "architecture": "depth8",
+      "diagnostic_tier": "medium",
+      "mean_accuracy": 0.9282407407407408,
+      "passes_0_80_worst_seed": true,
+      "passes_0_90_worst_seed": false,
+      "predicate": "isAncestor",
+      "seed_count": 3,
+      "seed_variance": 0.0022290809327846386,
+      "status": "observed_1x",
+      "worst_seed_accuracy": 0.8819444444444444
+    }
+  ],
+  "observed_seeds": [
+    11,
+    23,
+    37
+  ],
+  "schema_version": "paper06.capacity_v5.stage_a_analysis.v1",
+  "training_budget_status": "planned_not_run"
+}

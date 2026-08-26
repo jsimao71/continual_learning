@@ -1,0 +1,5 @@
+architecture,budget_multiplier,rationale,seeds,status,wave
+baseline,2,training-only control for the unstable 1x reference,11;23;37,planned_not_run,1
+depth8,2,test whether the hard-tier worst seed 0.759 crosses the 0.80 gate,11;23;37,planned_not_run,1
+baseline,4,run only if 2x approaches/crosses a gate or changes the easy-hard gap materially,11;23;37,conditional_not_run,2
+depth8,4,run only if 2x approaches/crosses a gate or changes the easy-hard gap materially,11;23;37,conditional_not_run,2

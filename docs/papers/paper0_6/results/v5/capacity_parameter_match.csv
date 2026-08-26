@@ -1,0 +1,76 @@
+design_note,diagnostic_tier,left_architecture,left_parameters,predicate,right_architecture,right_minus_left_mean_accuracy,right_minus_left_worst_seed_accuracy,right_parameters,status
+depth allocation; parameter count not matched,easy,baseline,158592,ancestor_k,depth8,0.02546296296296291,0.04861111111111113,292480,observed_1x
+depth allocation; parameter count not matched,medium,baseline,158592,ancestor_k,depth8,0.01157407407407407,0.020833333333333343,292480,observed_1x
+depth allocation; parameter count not matched,hard,baseline,158592,ancestor_k,depth8,-0.003858024691358028,-0.004629629629629629,292480,observed_1x
+depth allocation; parameter count not matched,easy,baseline,158592,grandparent,depth8,0.020833333333333343,0.03125,292480,observed_1x
+depth allocation; parameter count not matched,medium,baseline,158592,grandparent,depth8,0.046296296296296266,0.0,292480,observed_1x
+depth allocation; parameter count not matched,hard,baseline,158592,grandparent,depth8,-0.010416666666666671,-0.020833333333333336,292480,observed_1x
+depth allocation; parameter count not matched,easy,baseline,158592,isAncestor,depth8,0.2129629629629629,0.38888888888888884,292480,observed_1x
+depth allocation; parameter count not matched,medium,baseline,158592,isAncestor,depth8,0.21064814814814825,0.3819444444444444,292480,observed_1x
+depth allocation; parameter count not matched,hard,baseline,158592,isAncestor,depth8,0.1929012345679012,0.26388888888888895,292480,observed_1x
+depth allocation; parameter count not matched,easy,baseline,158592,parent,depth8,0.00694444444444442,0.010416666666666685,292480,observed_1x
+depth allocation; parameter count not matched,medium,baseline,158592,parent,depth8,0.06944444444444448,0.06944444444444446,292480,observed_1x
+depth allocation; parameter count not matched,hard,baseline,158592,parent,depth8,0.03125000000000003,0.03125,292480,observed_1x
+depth allocation; parameter count not matched,easy,baseline,158592,root,depth8,-0.037037037037037035,-0.04166666666666666,292480,observed_1x
+depth allocation; parameter count not matched,medium,baseline,158592,root,depth8,-0.06944444444444445,-0.020833333333333332,292480,observed_1x
+depth allocation; parameter count not matched,hard,baseline,158592,root,depth8,-0.027777777777777783,-0.013888888888888888,292480,observed_1x
+width allocation; parameter count not matched,easy,baseline,158592,ancestor_k,width128,0.020833333333333315,0.03472222222222224,579328,observed_1x
+width allocation; parameter count not matched,medium,baseline,158592,ancestor_k,width128,0.009259259259259245,0.0069444444444444475,579328,observed_1x
+width allocation; parameter count not matched,hard,baseline,158592,ancestor_k,width128,0.014660493827160496,0.0069444444444444475,579328,observed_1x
+width allocation; parameter count not matched,easy,baseline,158592,grandparent,width128,0.00347222222222221,0.020833333333333343,579328,observed_1x
+width allocation; parameter count not matched,medium,baseline,158592,grandparent,width128,0.03703703703703702,0.027777777777777776,579328,observed_1x
+width allocation; parameter count not matched,hard,baseline,158592,grandparent,width128,0.0034722222222222238,0.0,579328,observed_1x
+width allocation; parameter count not matched,easy,baseline,158592,isAncestor,width128,0.04861111111111116,0.0,579328,observed_1x
+width allocation; parameter count not matched,medium,baseline,158592,isAncestor,width128,-0.0023148148148147696,0.0,579328,observed_1x
+width allocation; parameter count not matched,hard,baseline,158592,isAncestor,width128,0.022376543209876587,0.00462962962962965,579328,observed_1x
+width allocation; parameter count not matched,easy,baseline,158592,parent,width128,-0.013888888888888895,0.03125,579328,observed_1x
+width allocation; parameter count not matched,medium,baseline,158592,parent,width128,0.02314814814814814,0.04166666666666667,579328,observed_1x
+width allocation; parameter count not matched,hard,baseline,158592,parent,width128,-0.010416666666666644,-0.010416666666666664,579328,observed_1x
+width allocation; parameter count not matched,easy,baseline,158592,root,width128,-0.00462962962962965,0.0,579328,observed_1x
+width allocation; parameter count not matched,medium,baseline,158592,root,width128,0.013888888888888895,0.0,579328,observed_1x
+width allocation; parameter count not matched,hard,baseline,158592,root,width128,0.013888888888888881,-0.027777777777777776,579328,observed_1x
+same L/W/parameter count; 2 vs 4 heads,easy,heads2,158592,ancestor_k,baseline,-0.043981481481481455,-0.06250000000000003,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,medium,heads2,158592,ancestor_k,baseline,-0.009259259259259245,0.013888888888888881,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,hard,heads2,158592,ancestor_k,baseline,-0.0030864197530864126,0.004629629629629629,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,easy,heads2,158592,grandparent,baseline,-0.03819444444444445,-0.03125,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,medium,heads2,158592,grandparent,baseline,-0.046296296296296266,-0.027777777777777776,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,hard,heads2,158592,grandparent,baseline,-0.010416666666666685,0.0,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,easy,heads2,158592,isAncestor,baseline,0.22916666666666663,0.020833333333333315,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,medium,heads2,158592,isAncestor,baseline,0.21064814814814803,0.0,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,hard,heads2,158592,isAncestor,baseline,0.17978395061728397,0.0,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,easy,heads2,158592,parent,baseline,-0.010416666666666685,-0.05208333333333334,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,medium,heads2,158592,parent,baseline,-0.06018518518518523,-0.06944444444444446,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,hard,heads2,158592,parent,baseline,0.00694444444444442,0.010416666666666664,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,easy,heads2,158592,root,baseline,-0.018518518518518517,-0.027777777777777762,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,medium,heads2,158592,root,baseline,-0.006944444444444461,0.0,158592,observed_1x
+same L/W/parameter count; 2 vs 4 heads,hard,heads2,158592,root,baseline,-0.018518518518518517,-0.027777777777777783,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,easy,baseline,158592,ancestor_k,heads8,0.01620370370370372,0.04861111111111113,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,medium,baseline,158592,ancestor_k,heads8,-0.00462962962962965,-0.0069444444444444475,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,hard,baseline,158592,ancestor_k,heads8,-0.00848765432098765,-0.009259259259259259,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,easy,baseline,158592,grandparent,heads8,0.017361111111111105,0.0,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,medium,baseline,158592,grandparent,heads8,0.018518518518518504,0.013888888888888895,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,hard,baseline,158592,grandparent,heads8,1.3877787807814457e-17,0.0,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,easy,baseline,158592,isAncestor,heads8,0.15740740740740744,0.17361111111111116,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,medium,baseline,158592,isAncestor,heads8,0.125,0.09722222222222221,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,hard,baseline,158592,isAncestor,heads8,0.15123456790123457,0.11574074074074081,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,easy,baseline,158592,parent,heads8,-0.024305555555555552,0.0,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,medium,baseline,158592,parent,heads8,-0.03703703703703702,0.0,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,hard,baseline,158592,parent,heads8,-0.017361111111111105,-0.020833333333333336,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,easy,baseline,158592,root,heads8,0.04166666666666666,0.06944444444444445,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,medium,baseline,158592,root,heads8,1.3877787807814457e-17,0.041666666666666664,158592,observed_1x
+same L/W/parameter count; 4 vs 8 heads,hard,baseline,158592,root,heads8,0.03240740740740741,0.027777777777777783,158592,observed_1x
+approximate allocation control; parameter count differs 37%,easy,deep_narrow_match,246048,ancestor_k,shallow_wide_match,0.009259259259259245,0.013888888888888895,336192,observed_1x
+approximate allocation control; parameter count differs 37%,medium,deep_narrow_match,246048,ancestor_k,shallow_wide_match,0.0324074074074074,0.013888888888888881,336192,observed_1x
+approximate allocation control; parameter count differs 37%,hard,deep_narrow_match,246048,ancestor_k,shallow_wide_match,0.012345679012345685,0.027777777777777776,336192,observed_1x
+approximate allocation control; parameter count differs 37%,easy,deep_narrow_match,246048,grandparent,shallow_wide_match,0.07291666666666663,0.052083333333333315,336192,observed_1x
+approximate allocation control; parameter count differs 37%,medium,deep_narrow_match,246048,grandparent,shallow_wide_match,0.03703703703703703,0.041666666666666664,336192,observed_1x
+approximate allocation control; parameter count differs 37%,hard,deep_narrow_match,246048,grandparent,shallow_wide_match,0.024305555555555546,0.010416666666666671,336192,observed_1x
+approximate allocation control; parameter count differs 37%,easy,deep_narrow_match,246048,isAncestor,shallow_wide_match,-0.08564814814814814,0.0,336192,observed_1x
+approximate allocation control; parameter count differs 37%,medium,deep_narrow_match,246048,isAncestor,shallow_wide_match,-0.05787037037037035,0.0,336192,observed_1x
+approximate allocation control; parameter count differs 37%,hard,deep_narrow_match,246048,isAncestor,shallow_wide_match,0.005401234567901092,-0.002314814814814825,336192,observed_1x
+approximate allocation control; parameter count differs 37%,easy,deep_narrow_match,246048,parent,shallow_wide_match,-0.06597222222222221,-0.010416666666666685,336192,observed_1x
+approximate allocation control; parameter count differs 37%,medium,deep_narrow_match,246048,parent,shallow_wide_match,-0.041666666666666685,0.0,336192,observed_1x
+approximate allocation control; parameter count differs 37%,hard,deep_narrow_match,246048,parent,shallow_wide_match,-0.04861111111111109,0.020833333333333336,336192,observed_1x
+approximate allocation control; parameter count differs 37%,easy,deep_narrow_match,246048,root,shallow_wide_match,0.10648148148148148,0.11111111111111112,336192,observed_1x
+approximate allocation control; parameter count differs 37%,medium,deep_narrow_match,246048,root,shallow_wide_match,0.06250000000000001,0.0625,336192,observed_1x
+approximate allocation control; parameter count differs 37%,hard,deep_narrow_match,246048,root,shallow_wide_match,0.07870370370370369,0.05555555555555555,336192,observed_1x

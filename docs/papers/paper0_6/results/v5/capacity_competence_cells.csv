@@ -1,0 +1,3 @@
+architecture,diagnostic_tier,mean_accuracy,passes_0_80_worst_seed,passes_0_90_worst_seed,predicate,seed_count,seed_variance,status,worst_seed_accuracy
+depth8,easy,0.9351851851851851,True,False,isAncestor,3,0.0022290809327846386,observed_1x,0.8888888888888888
+depth8,medium,0.9282407407407408,True,False,isAncestor,3,0.0022290809327846386,observed_1x,0.8819444444444444
