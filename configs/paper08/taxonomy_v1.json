@@ -1,0 +1,7 @@
+{
+  "moduli": [5, 7, 11],
+  "families": ["successor", "add_n", "multiply_a", "affine", "square"],
+  "episodes_per_cell": 24,
+  "seed": 808,
+  "output": "docs/papers/paper0_8/results/taxonomy"
+}

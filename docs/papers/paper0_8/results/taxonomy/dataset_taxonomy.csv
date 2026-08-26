@@ -1,0 +1,11 @@
+admissible_as_rule_induction,bayes_oracle_ceiling,dataset,demonstrations_per_episode,description,finite_known_task_selection,h_y_given_x_bits,h_y_given_x_context_bits,i_y_context_given_x_bits,iterative_execution_required,mapping_space_size,new_structured_function_inferred,target_explicitly_present,taxonomy,uniquely_determined_by_constraints
+False,,D0,,random/no aligned task,False,,,,False,,False,False,T0,False
+False,,D1,,local unary relation exposure,False,,,,False,,False,False,T0,False
+False,,D2,,isomorphic local relation families,False,,,,False,,False,False,T0,False
+False,1.0,D3-A,,partial fixed alignment,True,,0.0,,False,,False,False,T3,True
+False,1.0,D3-B,,finite mapping selection,True,,0.0,,False,,False,False,T4,True
+False,1.0,D3-C,,low-entropy transformation selection,True,,0.0,,False,,False,False,T4,True
+False,1.0,D4,2,all-but-one permutation completion,False,1.584962500721156,0.0,1.584962500721156,False,6,False,False,T3,True
+True,1.0,D5-unary,,parameterized modular rule induction,False,,0.0,,False,,True,False,T5,True
+True,1.0,D5-compositional,,composed structured rules,False,,0.0,,True,,True,False,T6,True
+True,1.0,D5-procedural,,recursive/iterative execution,False,,0.0,,True,,True,False,T7,True

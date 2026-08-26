@@ -1,0 +1,7 @@
+{
+  "all_d5_admissible": true,
+  "d5_episodes": 360,
+  "device": "cpu/no-model",
+  "maximum_answer_entropy_bits": -0.0,
+  "taxonomy_rows": 10
+}
