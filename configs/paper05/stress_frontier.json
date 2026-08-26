@@ -12,6 +12,8 @@
   "heads": [1, 2, 4, 8],
   "training_budgets": [1, 2, 4],
   "base_steps": 400,
+  "batch_size": 64,
+  "learning_rate": 0.003,
   "sequence_length": 96,
   "vocab_size": 192,
   "evaluation_examples_per_cell": 32,

@@ -105,7 +105,10 @@ def designed_cells(config: dict) -> tuple[list[dict], list[dict]]:
         candidates.append(("generator_family", d["baseline_order"], d["baseline_raw_length"], d["baseline_nuisance"], matched_span, family))
     cells, excluded, seen = [], [], set()
     for axis, p, n, k, s, family in candidates:
-        key = (p, n, k, s, family)
+        # The same physical baseline belongs to several one-factor contrasts.
+        # Keep one row per axis so every frontier contains its reference point;
+        # learned-model runners deduplicate physical cells for training.
+        key = (axis, p, n, k, s, family)
         ok, reason = feasible(p, n, s, family)
         row = {"axis": axis, "predictive_order": p, "raw_length": n, "nuisance_count": k,
                "requested_dependency_span": s, "generator_family": family}
