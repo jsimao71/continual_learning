@@ -1,0 +1,2 @@
+cell_id,competent,context_free_accuracy,context_free_mean_rank,copy_margin_gain,correct_accuracy,correct_mean_rank,episodes,family,heads,layers,mappings,max_association_control_accuracy,mlp_ratio,order_control_accuracy,pairs,regime,seed,vocabulary,width
+C2_sa_ff_L2_W64_H2_S37,0,0.3333333333333333,2.4166666666666665,3.1151291728019714,0.6041666666666666,1.5208333333333333,1024,sa_ff,2,2,fresh-random,0.22916666666666666,2,0.6458333333333334,3,C2,37,4,64

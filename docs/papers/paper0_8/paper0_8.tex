@@ -103,13 +103,18 @@ Causal tests agree. Layer-1 demonstration-value ablation lowers top-1 accuracy f
 \caption{Target trajectory (left) and causal Q/K/V patch damage (right). The target becomes rank one principally in second-layer attention, and shuffled value transport is most destructive.}
 \end{figure}
 
-This is a local instrumentation calibration. Fresh L2/W64/H2 replications reach 89.6\%, 70.8\%, and 66.7\%, all below the 95\% gate; L2/W128/H2 reaches only 41.7\%, 54.2\%, and 33.3\%. Even nominally identical seed-11 runs differ, consistent with backend/optimization sensitivity. Hence the circuit is physically validated where acquired, while its acquisition boundary remains unstable.
+This is a local instrumentation calibration. Fresh L2/W64/H2 replications at 256 episodes reach 89.6\%, 70.8\%, and 66.7\%, all below the 95\% gate; L2/W128/H2 reaches only 41.7\%, 54.2\%, and 33.3\%. Increasing episode diversity to (E=1024) makes seeds 11 and 23 competent at both the nominal and doubled update budgets (100\% each), but seed 37 reaches only 52.1\% and 81.2\%, respectively. A targeted fourfold-budget run does not rescue seed 37: accuracy falls to 60.4\%. The non-monotonic trajectory rules out the simple explanation that this failure merely needed more updates. It instead supports an initialization- and optimization-sensitive acquisition boundary. Hence the circuit is physically validated where acquired, while reliable three-seed acquisition remains unestablished.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.62\linewidth]{copy_before_after_acquisition.png}
+\caption{Copy acquisition at (E=1024) versus update budget. Seeds 11 and 23 pass at the measured 1x and 2x budgets; seed 37 improves at 2x but regresses at 4x. The isolated 4x point is a targeted failure diagnostic, not a matched three-seed estimate.}
+\end{figure}
 
 \section{Answers and limitations}
-Local order alone is not sufficient. Partial/fresh mapping pressure creates local positives, but no tested D4 architecture is seed-stable. Where contextual copy is acquired, the smallest measured mechanism is \emph{bind pairs, match the query role, transport the associated value, promote its logit}; second-layer SA is decisive and FF is supportive rather than the final promoter. We find no need for regression, Bayesian, or implicit-gradient metaphors. We do not yet claim a stable smallest copy or D4 model, nor trace D4 from a selectively chosen seed. The next experiment should alter acquisition reliability---optimizer, episode diversity, or curriculum---while keeping the leakage and control gates fixed.
+Local order alone is not sufficient. Partial/fresh mapping pressure creates local positives, but no tested D4 architecture is seed-stable. Where contextual copy is acquired, the smallest measured mechanism is \emph{bind pairs, match the query role, transport the associated value, promote its logit}; second-layer SA is decisive and FF is supportive rather than the final promoter. Increasing copy diversity rescues two seeds, but update-budget scaling is non-monotonic for the remaining seed and does not close the replication gate. We find no need for regression, Bayesian, or implicit-gradient metaphors. We do not yet claim a stable smallest copy or D4 model, nor trace D4 from a selectively chosen seed. The next experiment should alter acquisition reliability---optimizer or curriculum, rather than update count alone---while keeping the leakage and control gates fixed.
 
 \section{Reproducibility}
-Generators and phase runners are under \path{src/cl/semantic/} and \path{src/cl/experiments/}. The shared tracer and analysis modules use the \path{paper08_*} prefix. Configurations are under \path{configs/paper08/}. Tracked artifacts include raw phase/control rows, five three-seed D4 replications, copy replication and exact trace tables, compressed Q/K/V matrices, 18 figures, and summaries. Dense checkpoints remain locally reproducible and git-ignored.
+Generators and phase runners are under \path{src/cl/semantic/} and \path{src/cl/experiments/}. The shared tracer and analysis modules use the \path{paper08_*} prefix. Configurations are under \path{configs/paper08/}. Tracked artifacts include raw phase/control rows, five three-seed D4 replications, copy replication and exact trace tables, the (E=1024) training-budget diagnostic, compressed Q/K/V matrices, 18 figures, and summaries. Dense checkpoints remain locally reproducible and git-ignored.
 
 \section{Relation to Papers 0.5--0.7}
 Paper 0.5 studies predictive refinement once evidence is accessible. Paper 0.6 studies learned semantic/compositional relations. Paper 0.8 asks how context combines learned relations to create a new prediction without weight updates. Paper 0.7 remains deferred until these mechanisms justify synthesis.
@@ -118,5 +123,6 @@ Paper 0.5 studies predictive refinement once evidence is accessible. Paper 0.6 s
 Do not scale merely to improve performance. Scale only if the minimal model cannot express the capability, a mechanistic hypothesis requires additional components, or external validity becomes the explicit question.
 
 \section{Expected contribution}
+\enlargethispage{2\baselineskip}
 The target contribution is not another demonstration that Transformers perform ICL. It is an account of the \emph{inception} of ICL: the smallest statistical environment and neural architecture in which a frozen Transformer uses context to promote a prediction that its weights alone do not support, together with a causal account of where that probability mass comes from.
 \end{document}

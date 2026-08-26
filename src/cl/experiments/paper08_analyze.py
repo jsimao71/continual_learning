@@ -39,9 +39,26 @@ def main():
     bars([f"L{r['layer']}-{r['boundary']}" for r in order],[float(r["margin"]) for r in order],"copy_sa_ff_support_vs_depth.png","target margin",0)
     heads=read(RESULTS/"copy/copy_head_utility.csv");bars([f"L{r['layer']}-{r['intervention']}" for r in heads],[float(r["margin_damage"]) for r in heads],"copy_head_utility.png","margin damage")
     patch=read(RESULTS/"copy/copy_qkv_patching.csv");bars([f"L{r['layer']}-{r['intervention']}" for r in patch],[float(r["margin_damage"]) for r in patch],"copy_qkv_patch_damage.png","margin damage")
-    bars(["local competent","fresh S11","S23","S37"],[1.0]+[float(r["correct_accuracy"]) for r in cgrid],"copy_before_after_acquisition.png","copy accuracy",.95)
+    # Training-budget follow-up at the E=1024 acquisition boundary.  Keep the
+    # missing seed/budget combinations explicit rather than imputing them.
+    budget_dirs=[("1x","replication_E1024"),("2x","replication_E1024_T2x"),("4x","replication_E1024_T4x_seed37")]
+    boundary=[]
+    for budget,directory in budget_dirs:
+        for r in read(RESULTS/f"copy/{directory}/copy_phase_grid.csv"):
+            boundary.append({"training_budget":budget,**r})
+    fields=list(boundary[0])
+    with open(RESULTS/"copy/copy_acquisition_boundary.csv","w",newline="") as h:
+        w=csv.DictWriter(h,fieldnames=fields);w.writeheader();w.writerows(boundary)
+    plt.figure(figsize=(6,3.5))
+    for seed in ("11","23","37"):
+        rows=[r for r in boundary if r["seed"]==seed]
+        xs=[{"1x":1,"2x":2,"4x":4}[r["training_budget"]] for r in rows]
+        plt.plot(xs,[float(r["correct_accuracy"]) for r in rows],marker="o",label=f"seed {seed}")
+    plt.axhline(.95,color="black",ls="--",lw=.8,label="competence gate")
+    plt.xticks([1,2,4],["1x","2x","4x"]);plt.ylim(0,1.05);plt.xlabel("training-update budget");plt.ylabel("copy accuracy");plt.legend(ncol=2,fontsize=8)
+    save("copy_before_after_acquisition.png")
     # Required table alias: the detailed trace table already supplies the data.
     (RESULTS/"summaries").mkdir(exist_ok=True)
-    (RESULTS/"summaries/copy_summary.md").write_text("# Contextual copy calibration\n\nA local L2/W64/H2 checkpoint passes at 100% and yields a causally validated pair-binding/value-routing circuit. A nominally identical fresh seed-11 run reaches 89.6%, while seeds 23 and 37 reach 70.8% and 66.7%. Width 128 scores 41.7%, 54.2%, and 33.3%. Thus instrumentation is calibrated, but copy acquisition is not a stable monotonic capacity boundary under the tested optimizer.\n\nIn the competent local checkpoint, layer-0 head 0 binds adjacent pairs; layer-1 heads route associated values. Layer-1 value patching from shuffled controls drops accuracy to 20.8%, and demonstration-value ablation drops it to 37.5%. The target becomes rank one in layer-1 attention; the final FF preserves the answer while slightly reducing margin.\n")
+    (RESULTS/"summaries/copy_summary.md").write_text("# Contextual copy calibration\n\nA local L2/W64/H2 checkpoint passes at 100% and yields a causally validated pair-binding/value-routing circuit. Fresh replication at 256 episodes reaches 89.6%, 70.8%, and 66.7% for seeds 11, 23, and 37; width 128 does not rescue this instability. Raising episode diversity to E=1024 makes seeds 11 and 23 competent at both 1x and 2x update budgets, but seed 37 reaches only 52.1% at 1x and 81.2% at 2x. A targeted 4x seed-37 run falls to 60.4%. More updates therefore improve that seed initially but do not monotonically rescue acquisition, and the three-seed gate remains closed.\n\nIn the competent local checkpoint, layer-0 head 0 binds adjacent pairs; layer-1 heads route associated values. Layer-1 value patching from shuffled controls drops accuracy to 20.8%, and demonstration-value ablation drops it to 37.5%. The target becomes rank one in layer-1 attention; the final FF preserves the answer while slightly reducing margin. The mechanism is validated conditional on acquisition; its reliable acquisition boundary is not.\n")
     (RESULTS/"summaries/inception_summary.md").write_text("# Inception summary\n\nLocal orders D1/D2 are insufficient: high correct-context scores are not selective over controls. D3 and D4 create individual positive cells, but no tested D4 architecture passes three seeds. Five Pareto-small candidates pass only one or two seeds. The smallest local positive is L1/W16/H1, but it fails replication. D4 mechanism interpretation therefore remains blocked. Copy calibration independently recovers match-key, transport-associated-value, promote-target behavior in one competent checkpoint, validating the tracer while revealing its own acquisition instability. The evidence supports a sharp, seed-sensitive circuit-acquisition frontier rather than a stable minimal model.\n")
 if __name__=="__main__":main()
