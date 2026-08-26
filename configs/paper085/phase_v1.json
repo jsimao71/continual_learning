@@ -1,0 +1,15 @@
+{
+  "schema_version": "paper085.phase_v1.v1",
+  "generator_seeds": {"train": 11, "validation": 23, "test": 37},
+  "model_seeds": [11, 23, 37],
+  "train_depths": [1, 2, 3],
+  "test_depths": [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 64],
+  "distractors": [0, 2, 4, 8, 16, 32, 64],
+  "examples_per_cell": 4,
+  "output_conditions": ["O0", "O1", "O2", "O3"],
+  "architecture_grid": {"layers": [1, 2, 3, 4], "widths": [16, 32, 64], "heads": [1, 2, 4], "budgets": [1, 2, 4]},
+  "smoke_depths": [1, 2, 4],
+  "smoke_distractors": [0, 2],
+  "smoke_examples_per_cell": 2,
+  "smoke_grid": {"layers": [1, 2], "widths": [16, 32], "heads": [1, 2], "budgets": [1]}
+}

@@ -1,0 +1,29 @@
+{
+  "all_reference_traces_exact": true,
+  "all_symbolic_rows_valid": true,
+  "dataset_hash": "35fbe7b597d2f31aadb322ca97dd83d8a4b0f6fdf501707abf858e1f59590ca6",
+  "evaluation_depths": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24,
+    32,
+    64
+  ],
+  "examples": 2800,
+  "learned_model_results": false,
+  "oracle_rows": 11200,
+  "planned_accelerator_runs": 1296,
+  "schema_version": "paper085.phase_v1.v1",
+  "smoke": false,
+  "train_depths": [
+    1,
+    2,
+    3
+  ]
+}

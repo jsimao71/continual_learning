@@ -1,0 +1,20 @@
+{
+  "analysis_type": "dataset_serialization_only",
+  "depths": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24,
+    32,
+    64
+  ],
+  "figure": "figures/context_budget_frontier.png",
+  "rows": 2800,
+  "schema_version": "paper085.analysis_v1",
+  "source_model_results": false
+}
