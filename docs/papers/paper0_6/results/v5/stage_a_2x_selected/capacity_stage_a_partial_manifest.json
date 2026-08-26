@@ -1,0 +1,41 @@
+{
+  "budget_multiplier": 2,
+  "cells": 75,
+  "central_three_seed_gate": "not_evaluable",
+  "completed": [
+    {
+      "architecture": "baseline",
+      "checkpoint": "baseline_seed11_T2x.pt",
+      "model_seed": 11
+    },
+    {
+      "architecture": "baseline",
+      "checkpoint": "baseline_seed23_T2x.pt",
+      "model_seed": 23
+    },
+    {
+      "architecture": "baseline",
+      "checkpoint": "baseline_seed37_T2x.pt",
+      "model_seed": 37
+    },
+    {
+      "architecture": "depth8",
+      "checkpoint": "depth8_seed11_T2x.pt",
+      "model_seed": 11
+    },
+    {
+      "architecture": "depth8",
+      "checkpoint": "depth8_seed23_T2x.pt",
+      "model_seed": 23
+    }
+  ],
+  "missing": [
+    {
+      "architecture": "depth8",
+      "model_seed": 37
+    }
+  ],
+  "raw_rows": 10800,
+  "schema_version": "paper06.capacity_v5.stage_a_partial.v1",
+  "status": "incomplete_5_of_6"
+}

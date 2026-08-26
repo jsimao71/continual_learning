@@ -25,7 +25,10 @@ def main(args):
     architectures=design["architectures"][:1] if args.smoke else design["architectures"]
     if args.architectures:
         selected=set(args.architectures.split(","));architectures=[a for a in architectures if a["name"] in selected]
-    seeds=design["model_seeds"][:1] if args.smoke else design["model_seeds"];raw=[];curves=[];meta=[];device=resolve_device(args.device or base["device"])
+    seeds=design["model_seeds"][:1] if args.smoke else design["model_seeds"]
+    if args.seeds:
+        selected_seeds={int(x) for x in args.seeds.split(",")};seeds=[s for s in seeds if s in selected_seeds]
+    raw=[];curves=[];meta=[];device=resolve_device(args.device or base["device"])
     for arch in architectures:
       for seed in seeds:
         cfg={**base,"width":arch["width"],"heads":arch["heads"]};steps=4 if args.smoke else base["training_steps"]*args.budget
@@ -45,4 +48,4 @@ def main(args):
     write_csv(out/"capacity_diagnostic_grid.csv",cells);write_csv(out/"capacity_learning_curves.csv",curves);write_csv(out/"capacity_architecture_metadata.csv",meta);write_csv(out/"capacity_diagnostic_raw.csv",raw)
     atomic_write_json(out/"capacity_stage_a_manifest.json",{"architectures":len(architectures),"seeds":len(seeds),"budget_multiplier":args.budget,"cells":len(cells),"full_grid_expanded":False})
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper06/capacity_v5.json");p.add_argument("--output",default="docs/papers/paper0_6/results/v5/stage_a_1x");p.add_argument("--device");p.add_argument("--budget",type=int,default=1);p.add_argument("--architectures");p.add_argument("--smoke",action="store_true");main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper06/capacity_v5.json");p.add_argument("--output",default="docs/papers/paper0_6/results/v5/stage_a_1x");p.add_argument("--device");p.add_argument("--budget",type=int,default=1);p.add_argument("--architectures");p.add_argument("--seeds",help="comma-separated subset of configured model seeds");p.add_argument("--smoke",action="store_true");main(p.parse_args())

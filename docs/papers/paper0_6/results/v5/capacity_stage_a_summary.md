@@ -10,20 +10,22 @@ This improvement is allocation-specific rather than a monotone parameter-count e
 
 The result is predicate-specific. No architecture brings `parent`, `grandparent`, `ancestor_k`, or `root` close to competence. Their best easy-tier three-seed means are 0.330, 0.267, 0.312, and 0.287, respectively, and performance generally declines further on medium and hard tiers. Consequently the observed depth-8 result is finite stabilization of binary contextual membership, not evidence that capacity has produced a general predicate-composition procedure. It does not reopen an `L_min(d)` fit.
 
-## Planned training-budget control (not yet run)
+## Partial 2x training-budget control
 
-The next run should be limited to `baseline` and `depth8` at 2x training over seeds 11, 23, and 37. This six-checkpoint comparison tests whether the depth-8 advantage persists under a matched optimization control and whether its hard-tier worst seed crosses 0.80. It also distinguishes a generic training rescue of the baseline from a depth-specific competence transition.
+Five of the six selected 2x checkpoints are observed. The baseline is complete over seeds 11, 23, and 37. Its `isAncestor` mean/worst-seed accuracies become 0.944/0.833, 0.935/0.840, and 0.900/0.725 on easy, medium, and hard. Training alone therefore rescues the baseline on easy and medium, while the hard tier remains below the seed-stable gate. Its easy-minus-hard mean gap is 0.045, essentially unchanged from 0.046 at 1x. This is direct evidence that optimization budget moves finite-regime competence and weakens a depth-only account.
 
-Do not run a broad 4x grid. Run 4x for these architectures only if the 2x result either approaches/crosses a gate or materially changes the easy-to-hard diagnostic gap. Stop an arm if all non-`isAncestor` predicates remain far below the gate and `isAncestor` shows no meaningful improvement. If depth 8 becomes hard-tier seed-stable, expand only its independently controlled D/d/b/N frontiers before any new mechanism analysis.
+Depth 8 is observed at 2x only for seeds 11 and 23. Across those two seeds, `isAncestor` reaches mean/worst-observed-seed accuracies of 1.000/1.000, 0.997/0.993, and 0.998/0.995; its mean easy-minus-hard gap is 0.002. These values are promising but provisional. Seed 37 is missing, so the three-seed competence gate is not evaluable and these rows cannot establish a capacity transition.
+
+No broad 4x grid is justified. The immediate completion is only depth-8 seed 37 at 2x, followed by reconstruction of the six-checkpoint aggregate. If that seed preserves hard-tier competence, expand independently controlled D/d/b/N frontiers before mechanism analysis. If it fails, retain optimization/initialization sensitivity as the result.
 
 Recommended command:
 
 ```bash
 PYTHONPATH=src python -u -m cl.experiments.paper06_capacity_v5 \
-  --device mps --budget 2 --architectures baseline,depth8 \
-  --output docs/papers/paper0_6/results/v5/stage_a_2x_selected
+  --device mps --budget 2 --architectures depth8 --seeds 37 \
+  --output docs/papers/paper0_6/results/v5/stage_a_2x_seed37_completion
 ```
 
 ## Manuscript integration boundary
 
-The v4 conclusions remain intact for the original 15-cell phase. A v5 results section may add that Stage A found a depth-sensitive `isAncestor` transition on easy and medium diagnostics, while the hard tier and all other predicates remain below the central gate. Until the selected 2x controls run, it must not label the failure capacity-limited or optimization-limited, and it must describe training-budget recovery as planned rather than observed.
+The v4 conclusions remain intact for the original 15-cell phase. A v5 results section may add that 1x Stage A found a depth-sensitive `isAncestor` transition on easy and medium diagnostics, but the complete baseline 2x rescue proves that training budget also moves this boundary. The depth-8 2x result must be labeled as a two-seed provisional observation. Until seed 37 runs, the hard-tier central gate is unevaluable and the paper must not call the transition seed-stable, capacity-limited, or depth-specific.
