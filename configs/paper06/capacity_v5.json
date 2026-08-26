@@ -1,0 +1,20 @@
+{
+  "base_config": "configs/paper06/predicate_v4.json",
+  "architectures": [
+    {"name":"baseline","layers":4,"width":64,"heads":4},
+    {"name":"depth8","layers":8,"width":64,"heads":4},
+    {"name":"depth12","layers":12,"width":64,"heads":4},
+    {"name":"depth16","layers":16,"width":64,"heads":4},
+    {"name":"depth24","layers":24,"width":64,"heads":4},
+    {"name":"width128","layers":4,"width":128,"heads":4},
+    {"name":"width256","layers":4,"width":256,"heads":4},
+    {"name":"heads2","layers":4,"width":64,"heads":2},
+    {"name":"heads8","layers":4,"width":64,"heads":8},
+    {"name":"heads16","layers":4,"width":64,"heads":16},
+    {"name":"deep_narrow_match","layers":12,"width":48,"heads":4},
+    {"name":"shallow_wide_match","layers":4,"width":96,"heads":4}
+  ],
+  "model_seeds":[11,23,37],
+  "training_budgets":[1,2,4],
+  "stage_a_eval_examples":8
+}
