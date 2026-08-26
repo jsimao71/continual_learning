@@ -1,0 +1,11 @@
+{
+  "schema_version": "paper07.formal_v1.v1",
+  "split_seeds": {"train": 11, "validation": 23, "test": 37},
+  "examples_per_family": {"train": 7000, "validation": 1400, "test": 2800},
+  "smoke_examples_per_family": {"train": 70, "validation": 28, "test": 28},
+  "proposition_chain_lengths": [1, 2, 3, 4, 6, 8, 12, 16, 24, 32],
+  "functor_depths": [1, 2, 3, 4, 6, 8, 12],
+  "model_seeds": [11, 23, 37],
+  "model_grid": {"layers": [1, 2, 4, 6, 8, 12, 16, 24], "widths": [16, 32, 64, 128, 256], "heads": [1, 2, 4, 8], "budgets": [1, 2, 4]},
+  "smoke_model_grid": {"layers": [1, 2], "widths": [16, 32], "heads": [1, 2], "budgets": [1]}
+}

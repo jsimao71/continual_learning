@@ -1,0 +1,33 @@
+{
+  "dataset_hash": "a0d043aed14806ad0049e0da33a03f695760920131788d5dc1154a5a91520080",
+  "model_results": false,
+  "note": "CPU dataset/plan artifact; no trained-model outcomes.",
+  "planned_runs": 2880,
+  "schema_version": "paper07.formal_v1.v1",
+  "smoke": false,
+  "validation": {
+    "rows": 22400,
+    "split_namespaces_disjoint": true,
+    "stages": [
+      "F0",
+      "F1",
+      "F2",
+      "F3",
+      "F4",
+      "F5",
+      "F6",
+      "F7",
+      "F8",
+      "F9",
+      "P0",
+      "P1",
+      "P2",
+      "P3",
+      "P4",
+      "P5",
+      "P6"
+    ],
+    "unique_ids": true,
+    "valid": true
+  }
+}
