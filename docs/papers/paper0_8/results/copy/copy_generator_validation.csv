@@ -1,0 +1,3 @@
+cell_id,conditional_entropy_bits,examples,ideal_p_y_given_x,max_p_y_given_x,max_target_given_pair_position,passed,query_position_count,split,target_position_count,v2_degenerate,vocabulary
+C2_sa_only_L1_W8_H1_S11,1.5847014719487018,256,0.3333333333333333,0.34375,0.3132530120481928,0,1,train,5,0,4
+C2_sa_only_L1_W8_H1_S11,1.584962500721156,48,0.3333333333333333,0.3333333333333333,0.375,1,1,test,5,0,4

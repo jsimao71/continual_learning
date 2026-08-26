@@ -1,0 +1,4 @@
+critical_direct_mapping_count,heads,layers,model_seed,passed,stage,target_balance_applicable,test_examples,test_target_count,test_target_entropy_bits,train_examples,train_test_family_overlap,width
+152,1,6,11,False,D4,False,64,1,-0.0,384,8,8
+128,1,6,23,False,D4,False,64,1,-0.0,384,8,8
+120,1,6,37,False,D4,False,64,1,-0.0,384,8,8

@@ -1,0 +1,4 @@
+competent,context_free_accuracy,context_free_mean_rank,correct_accuracy,heads,icl_margin_gain,layers,max_matched_control_accuracy,model_seed,selectivity,stage,width
+1,0.0,125.375,1.0,1,19.495176136493683,3,0.0,11,1.0,D4,8
+0,0.25,2.5,1.0,1,7.3552292585372925,3,1.0,23,0.0,D4,8
+0,0.125,3.125,1.0,1,9.594446957111359,3,0.875,37,0.125,D4,8
