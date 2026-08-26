@@ -25,7 +25,9 @@ def train_model(stage,layers,width,heads,seed,cfg,device,updates):
         batch=[rows[rng.randrange(len(rows))] for _ in range(cfg["batch_size"])]
         x=torch.tensor([r.tokens for r in batch],device=device);y=torch.tensor([r.target for r in batch],device=device)
         opt.zero_grad(set_to_none=True);logits,_=model(x);loss=torch.nn.functional.cross_entropy(logits[:,-1],y);loss.backward();opt.step()
-        if step%50==0 or step==updates-1:losses.append({"stage":stage,"layers":layers,"width":width,"heads":heads,"model_seed":seed,"step":step+1,"loss":float(loss)})
+        if step%50==0 or step==updates-1:
+            losses.append({"stage":stage,"layers":layers,"width":width,"heads":heads,"model_seed":seed,"step":step+1,"loss":float(loss)})
+            if step>=100 and float(loss)<.002:break
     return model.eval(),losses,rows
 
 def metrics(logits,target):
@@ -63,8 +65,11 @@ def main(args):
     for l in cfg["layers"]:
         for w in cfg["widths"]:
             for h in cfg["heads"]:
-                if w%h==0:settings += [("D4",l,w,h,s) for s in seeds]
+                if w%h==0:settings += [("D4",l,w,h,seeds[0])]
     settings=list(dict.fromkeys(settings));raw=[];losses=[];valid=[]
+    if args.architecture:
+        l,w,h=map(int,args.architecture.split(","));chosen=[int(s) for s in args.seeds.split(",")]
+        settings=[("D4",l,w,h,s) for s in chosen]
     if args.only_stage:settings=[s for s in settings if s[0]==args.only_stage]
     if args.limit:settings=settings[:args.limit]
     for stage,l,w,h,seed in settings:
@@ -74,4 +79,4 @@ def main(args):
     atomic_write_json(out/"phase/phase_manifest.json",{"settings":len(settings),"updates":updates,"device":str(device),"competent_cells":sum(r["competent"] for r in cells)})
 
 if __name__=="__main__":
-    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper08/icl_v1.json");p.add_argument("--output",default="docs/papers/paper0_8/results");p.add_argument("--device");p.add_argument("--smoke",action="store_true");p.add_argument("--limit",type=int);p.add_argument("--only-stage");main(p.parse_args())
+    p=argparse.ArgumentParser();p.add_argument("--config",default="configs/paper08/icl_v1.json");p.add_argument("--output",default="docs/papers/paper0_8/results");p.add_argument("--device");p.add_argument("--smoke",action="store_true");p.add_argument("--limit",type=int);p.add_argument("--only-stage");p.add_argument("--architecture",help="layers,width,heads; run only this D4 cell");p.add_argument("--seeds",default="11,23,37");main(p.parse_args())

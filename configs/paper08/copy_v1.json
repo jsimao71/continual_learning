@@ -1,0 +1,19 @@
+{
+  "vocabularies": [2, 3, 4, 6, 8, 16, 32],
+  "episodes": [16, 32, 64, 128, 256, 512, 1024],
+  "mappings": [1, 2, 3, 4, 8, 16, 32, "fresh-random"],
+  "pairs_per_prompt": [1, 2, 3, 4, 8],
+  "layers": [1, 2, 3, 4],
+  "widths": [4, 8, 16, 32, 64, 128],
+  "heads_by_width": {"4": [1], "8": [1, 2], "16": [1, 2, 4], "32": [1, 2, 4], "64": [1, 2, 4, 8], "128": [1, 2, 4, 8]},
+  "mlp_ratios": [1, 2, 4],
+  "families": ["sa_only", "sa_ff"],
+  "model_seeds": [11, 23, 37],
+  "learning_rate": 0.003,
+  "batch_size": 32,
+  "updates": 1000,
+  "competence_accuracy": 0.95,
+  "minimum_context_free_rank": 2.0,
+  "maximum_control_accuracy": 0.35,
+  "device": "auto"
+}

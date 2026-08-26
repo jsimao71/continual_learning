@@ -65,7 +65,7 @@ def controlled(row:ICLExample,condition:str,seed:int)->ICLExample:
             for p,v in zip(pairs,vals):p[1]=v
         tokens=[x for p in pairs for x in p]+tokens[q:] if pairs else list(reversed(prefix))+tokens[q:]
     elif condition in {"irrelevant","wrong_chain"}:
-        delta=1000 if condition=="irrelevant" else 2*len(row.mapping)
+        delta=64 if condition=="irrelevant" else 2*len(row.mapping)
         tokens=[x+delta if x not in {PAD,SEP,QUERY} else x for x in tokens[:q]]+tokens[q:]
     elif condition!="correct":raise ValueError(condition)
     return ICLExample(tuple(tokens),row.target,row.query,row.family,row.stage,row.mapping,condition)
