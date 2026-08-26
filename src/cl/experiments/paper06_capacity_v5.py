@@ -10,9 +10,14 @@ from cl.semantic.predicates import evaluation_matrix,validate
 
 def tier(row):
     D,d,b,N=row.total_depth,row.required_path,row.branching,row.distractors
-    if D<=3 and d<=2 and b==2 and N==4:return "easy"
-    if D==6 and d<=4 and b==4 and N==16:return "medium"
-    if D in (12,16) and d<=12 and b==8 and N==64:return "hard"
+    marker=int(row.example_id.rsplit(":i",1)[1])
+    if marker>=20_000:
+        return "easy" if N==4 else "medium" if N==16 else "hard" if N==64 else None
+    if marker>=10_000:
+        return "easy" if b==2 else "medium" if b==4 else "hard" if b==8 else None
+    if D<=3 and d<=2:return "easy"
+    if D==6 and d<=4:return "medium"
+    if D in (12,16) and d<=12:return "hard"
     return None
 def main(args):
     design=json.loads(Path(args.config).read_text());base=json.loads(Path(design["base_config"]).read_text());out=Path(args.output);out.mkdir(parents=True,exist_ok=True)
