@@ -1,0 +1,111 @@
+{
+  "architecture_runs": 1008,
+  "artifact_hash": "0266658fee8c97e113b8996acec23f95c36bbef99626e657e70d98387173a59d",
+  "config": {
+    "base_steps": 400,
+    "competence_threshold": 0.8,
+    "dataset_seed": 90517,
+    "dependency_spans": [
+      1,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "depths": [
+      2,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "design": {
+      "baseline_family": "necessary_pattern",
+      "baseline_nuisance": 0,
+      "baseline_order": 2,
+      "baseline_raw_length": 12,
+      "baseline_span": 4
+    },
+    "evaluation_examples_per_cell": 32,
+    "generator_families": [
+      "contiguous",
+      "skip_gram",
+      "necessary_pattern"
+    ],
+    "heads": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "model_seeds": [
+      11,
+      23,
+      37
+    ],
+    "nuisance_counts": [
+      0,
+      2,
+      4,
+      8,
+      16,
+      32
+    ],
+    "parameter_match_relative_tolerance": 0.2,
+    "predictive_orders": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      8,
+      12
+    ],
+    "raw_lengths": [
+      2,
+      3,
+      4,
+      6,
+      8,
+      12,
+      16,
+      24
+    ],
+    "schema_version": "paper05.stress_frontier.v1",
+    "sequence_length": 96,
+    "training_budgets": [
+      1,
+      2,
+      4
+    ],
+    "vocab_size": 192,
+    "widths": [
+      32,
+      64,
+      128,
+      256
+    ]
+  },
+  "eligible_dataset_cells": 25,
+  "run_mode": "plan_only",
+  "schema_version": "paper05.stress_frontier.plan.v1",
+  "training_launched": false,
+  "validation": {
+    "artifact_hash": "4c600e968c331580a6a9b5964f2db423b6b99343326cb2516d768b7fe21664d6",
+    "checks": {
+      "axes_present": true,
+      "balanced_examples": true,
+      "fixed_sequence_length": true,
+      "measured_span_matches": true,
+      "three_or_more_seeds": true,
+      "unique_cells": true
+    },
+    "eligible_cells": 25,
+    "excluded_cells": 1,
+    "passed": true,
+    "schema_version": "paper05.stress_frontier.validation.v1"
+  }
+}

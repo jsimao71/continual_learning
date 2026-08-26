@@ -1,0 +1,22 @@
+{
+  "baseline_preservation": "v4/v5 modules and artifacts unchanged",
+  "frontiers": [
+    "D_max",
+    "d_max",
+    "b_max",
+    "N_max"
+  ],
+  "mechanism_gate": "newly competent seed-stable cells only",
+  "model_seeds": [
+    11,
+    23,
+    37
+  ],
+  "schema_version": "paper06.stress_v6.design.v1",
+  "training_budgets": [
+    1,
+    2,
+    4
+  ],
+  "training_performed": false
+}
