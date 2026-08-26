@@ -29,6 +29,16 @@ class LayerTrace:
     post_block: Tensor
     attention: Tensor
     head_outputs: Tensor | None = None
+    # Head-shaped tensors [batch, head, destination/source, head_width].
+    # Optional defaults preserve consumers and serialized analyses written
+    # before Paper 0.8 introduced token-level QKV tracing.
+    queries: Tensor | None = None
+    keys: Tensor | None = None
+    values: Tensor | None = None
+    qk_scores: Tensor | None = None
+    normalized_sa: Tensor | None = None
+    normalized_ff: Tensor | None = None
+    ff_activations: Tensor | None = None
 
 
 @dataclass
@@ -62,18 +72,19 @@ class InstrumentedBlock(nn.Module):
             return intervention.replacement.to(update).expand_as(update)
         raise ValueError(f"unknown intervention mode: {intervention.mode}")
 
-    def _diagnostic_attention(self, normalized: Tensor, causal_mask: Tensor) -> Tensor:
-        """Reconstruct probabilities without changing the model-output kernel."""
+    def _diagnostic_qkv(self, normalized: Tensor, causal_mask: Tensor) -> tuple[Tensor, Tensor, Tensor, Tensor, Tensor]:
+        """Reconstruct exact projected Q/K/V and probabilities diagnostically."""
         batch, length, width = normalized.shape
         heads = self.attention.num_heads
         head_width = width // heads
         projected = F.linear(normalized, self.attention.in_proj_weight, self.attention.in_proj_bias)
-        query, key, _ = projected.chunk(3, dim=-1)
+        query, key, value = projected.chunk(3, dim=-1)
         query = query.view(batch, length, heads, head_width).transpose(1, 2)
         key = key.view(batch, length, heads, head_width).transpose(1, 2)
+        value = value.view(batch, length, heads, head_width).transpose(1, 2)
         scores = query @ key.transpose(-2, -1) / (head_width ** 0.5)
-        scores = scores + causal_mask[None, None, :, :]
-        return torch.softmax(scores, dim=-1)
+        probability = torch.softmax(scores + causal_mask[None, None, :, :], dim=-1)
+        return query, key, value, scores, probability
 
     def _manual_attention(self, normalized: Tensor, causal_mask: Tensor, zero_head: int | None = None) -> Tensor:
         batch, length, width = normalized.shape
@@ -124,7 +135,8 @@ class InstrumentedBlock(nn.Module):
             need_weights=False,
             average_attn_weights=False,
         )
-        attention = self._diagnostic_attention(normalized, causal_mask) if capture else None
+        qkv = self._diagnostic_qkv(normalized, causal_mask) if capture else None
+        attention = qkv[-1] if qkv is not None else None
         head_outputs = self._head_contributions(normalized, causal_mask) if capture or (intervention and intervention.mode == "head_replace") else None
         if intervention and intervention.component == "sa" and intervention.mode == "head_zero":
             if intervention.head is None:
@@ -138,7 +150,9 @@ class InstrumentedBlock(nn.Module):
         else:
             effective_sa = self._intervene(delta_sa, intervention if intervention and intervention.component == "sa" else None)
         post_sa = pre_sa + effective_sa
-        delta_ff = self.ff(self.norm_ff(post_sa))
+        normalized_ff = self.norm_ff(post_sa)
+        ff_activations = self.ff[1](self.ff[0](normalized_ff))
+        delta_ff = self.ff[2](ff_activations)
         effective_ff = self._intervene(delta_ff, intervention if intervention and intervention.component == "ff" else None)
         post_block = post_sa + effective_ff
         if not capture:
@@ -151,6 +165,9 @@ class InstrumentedBlock(nn.Module):
             post_block=post_block,
             attention=attention,
             head_outputs=head_outputs,
+            queries=qkv[0], keys=qkv[1], values=qkv[2], qk_scores=qkv[3],
+            normalized_sa=normalized, normalized_ff=normalized_ff,
+            ff_activations=ff_activations,
         )
 
 

@@ -1,0 +1,6 @@
+{
+  "causal_interventions": 960,
+  "checkpoint": "docs/papers/paper0_8/results/copy/calibration_w64/checkpoints/C2_sa_ff_L2_W64_H2_S11.pt",
+  "examples": 48,
+  "qkv_matrices": 80
+}

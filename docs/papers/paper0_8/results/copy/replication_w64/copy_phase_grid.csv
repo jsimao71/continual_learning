@@ -1,0 +1,4 @@
+cell_id,competent,context_free_accuracy,context_free_mean_rank,copy_margin_gain,correct_accuracy,correct_mean_rank,episodes,family,heads,layers,mappings,max_association_control_accuracy,mlp_ratio,order_control_accuracy,pairs,regime,seed,vocabulary,width
+C2_sa_ff_L2_W64_H2_S11,0,0.3333333333333333,2.5833333333333335,16.952206472555797,0.8958333333333334,1.1875,256,sa_ff,2,2,fresh-random,0.125,2,0.9375,3,C2,11,4,64
+C2_sa_ff_L2_W64_H2_S23,0,0.16666666666666666,2.5833333333333335,8.066617906093597,0.7083333333333334,1.375,256,sa_ff,2,2,fresh-random,0.25,2,0.625,3,C2,23,4,64
+C2_sa_ff_L2_W64_H2_S37,0,0.25,3.1666666666666665,6.641122082869212,0.6666666666666666,1.6666666666666667,256,sa_ff,2,2,fresh-random,0.1875,2,0.7708333333333334,3,C2,37,4,64
