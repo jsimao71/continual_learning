@@ -6,7 +6,7 @@ from cl.experiments.paper05_stress_frontier import (
     measured_frontiers, parameter_matched_pairs, transformer_parameter_count, validate,
 )
 from cl.common.model_adapter import TinyTransformerLM
-from cl.experiments.paper05_stress_run import PILOT_ARCHITECTURES, tranche
+from cl.experiments.paper05_stress_run import PILOT_ARCHITECTURES, data_seed, initialization_seed, tranche
 
 CONFIG = json.loads(Path("configs/paper05/stress_frontier.json").read_text())
 
@@ -69,3 +69,9 @@ def test_initial_tranche_is_three_seed_parameter_matched_contrast():
     shallow = transformer_parameter_count(CONFIG["vocab_size"], CONFIG["sequence_length"], 64, 2)
     deep = transformer_parameter_count(CONFIG["vocab_size"], CONFIG["sequence_length"], 32, 8)
     assert abs(shallow - deep) / max(shallow, deep) < CONFIG["parameter_match_relative_tolerance"]
+    rescue = tranche(CONFIG, "rescue_t2")
+    assert len(rescue) == 6 and {budget for _, _, _, budget, _ in rescue} == {2}
+    rescue_t4 = tranche(CONFIG, "rescue_t4")
+    assert len(rescue_t4) == 6 and {budget for _, _, _, budget, _ in rescue_t4} == {4}
+    assert initialization_seed(2, 64, 4, 11) == 11 + 2 * 1009 + 64 * 31 + 4 * 7 + 1
+    assert data_seed(2, 64, 4, 11) == 11 + 2 * 10007 + 64 * 101 + 4 * 11 + 1

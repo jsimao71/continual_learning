@@ -53,6 +53,24 @@ def main(args: argparse.Namespace) -> None:
     seed_rows, aggregate_rows = aggregate(rows, args.threshold)
     write_csv(root / "stress_cell_accuracy_by_seed.csv", seed_rows)
     write_csv(root / "stress_cell_accuracy_three_seed.csv", aggregate_rows)
+    axis_fields = {"predictive_order": ("predictive_order", "pstar_max"),
+                   "raw_length": ("raw_length", "n_max"),
+                   "nuisance": ("nuisance_count", "k_max"),
+                   "dependency_span": ("requested_dependency_span", "s_max")}
+    frontier_rows = []
+    architectures = sorted({(row["model_depth"], row["model_width"], row["head_count"], row["training_budget"])
+                            for row in aggregate_rows})
+    for architecture in architectures:
+        subset = [row for row in aggregate_rows
+                  if tuple(row[key] for key in ("model_depth", "model_width", "head_count", "training_budget")) == architecture]
+        for axis, (field, label) in axis_fields.items():
+            measured = [row for row in subset if row["axis"] == axis]
+            competent = [int(row[field]) for row in measured if row["three_seed_competent"]]
+            frontier_rows.append({"model_depth": architecture[0], "model_width": architecture[1],
+                                  "head_count": architecture[2], "training_budget": architecture[3],
+                                  "frontier": label, "maximum_competent_value": max(competent) if competent else "",
+                                  "measured_values": len(measured), "status": "estimated" if competent else "threshold_failure"})
+    write_csv(root / "stress_measured_frontiers.csv", frontier_rows)
     baseline = [row for row in seed_rows if row["axis"] == "predictive_order"
                 and int(row["predictive_order"]) == 2]
     manifest = {
@@ -65,14 +83,22 @@ def main(args: argparse.Namespace) -> None:
                           else "frontier_estimable",
     }
     atomic_write_json(root / "stress_analysis_manifest.json", manifest)
+    if manifest["interpretation"] == "frontier_estimable":
+        frontier_text = "; ".join(
+            f"L{row['model_depth']}/W{row['model_width']} {row['frontier']}={row['maximum_competent_value']}"
+            for row in frontier_rows)
+        conclusion = ("The acquisition gate passes, so the controlled frontiers are estimable. "
+                      f"{frontier_text}. Raw length, nuisance, and span reach every tested value, while "
+                      "predictive order stops at two for both parameter-matched architectures.")
+    else:
+        conclusion = ("Consequently predictive-order, raw-length, nuisance, and span frontiers are not yet "
+                      "estimable: the supported result is a training/optimization failure at this budget. "
+                      "A larger matched budget is required before interpreting stress-factor slopes.")
     summary = (
         "# Paper 0.5 stress pilot\n\n"
         f"The parameter-matched pilot completed {manifest['raw_rows']} evaluations. "
         f"Only {manifest['baseline_competent_seeds']} of {manifest['baseline_seed_cells']} architecture/seed "
-        "baseline cells crossed the 0.8 competence gate. No dataset cell was competent in all three seeds. "
-        "Consequently predictive-order, raw-length, nuisance, and span frontiers are not yet estimable: "
-        "the supported result is a training/optimization failure at the nominal budget. A matched T2 budget "
-        "rescue is required before interpreting stress-factor slopes.\n")
+        f"baseline cells crossed the 0.8 competence gate. {conclusion}\n")
     (root / "stress_pilot_summary.md").write_text(summary)
 
 

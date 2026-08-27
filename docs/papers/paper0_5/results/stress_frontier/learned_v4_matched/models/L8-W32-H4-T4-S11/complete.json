@@ -1,0 +1,14 @@
+{
+  "artifact_hash": "5f99a6deb263366896893b5e5ee61109e4084a1b9434be27ae73facb1177cb75",
+  "evaluation_rows": 928,
+  "model": {
+    "head_count": 4,
+    "model_depth": 8,
+    "model_seed": 11,
+    "model_width": 32,
+    "parameter_count": 77632,
+    "training_budget": 4,
+    "training_steps": 1600
+  },
+  "schema_version": "paper05.stress.model.v1"
+}

@@ -1,0 +1,11 @@
+{
+  "baseline_competent_seeds": 6,
+  "baseline_seed_cells": 6,
+  "interpretation": "frontier_estimable",
+  "raw_rows": 5568,
+  "schema_version": "paper05.stress.analysis.v1",
+  "seed_cells": 174,
+  "three_seed_cells": 58,
+  "three_seed_competent_cells": 48,
+  "threshold": 0.8
+}

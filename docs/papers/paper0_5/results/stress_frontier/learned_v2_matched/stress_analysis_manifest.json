@@ -1,0 +1,11 @@
+{
+  "baseline_competent_seeds": 5,
+  "baseline_seed_cells": 6,
+  "interpretation": "optimization_gate_failed",
+  "raw_rows": 5568,
+  "schema_version": "paper05.stress.analysis.v1",
+  "seed_cells": 174,
+  "three_seed_cells": 58,
+  "three_seed_competent_cells": 19,
+  "threshold": 0.8
+}

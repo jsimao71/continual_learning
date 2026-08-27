@@ -1,0 +1,11 @@
+{
+  "completed_models": 6,
+  "device": "mps",
+  "final_rows": 5568,
+  "loss_rows": 102,
+  "planned_models": 6,
+  "schema_version": "paper05.stress.run.v1",
+  "smoke": false,
+  "trajectory_rows": 61248,
+  "tranche": "rescue_t2"
+}

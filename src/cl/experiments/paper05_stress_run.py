@@ -31,11 +31,24 @@ from cl.experiments.paper05_stress_frontier import (
 PILOT_ARCHITECTURES = ((2, 64, 4, 1), (8, 32, 4, 1))
 
 
+def initialization_seed(depth: int, width: int, heads: int, seed: int) -> int:
+    """Keep weights identical across T1/T2/T4 budget comparisons."""
+    # The trailing +1 preserves the already-completed T1 initialization, whose
+    # original formula included budget=1.
+    return seed + depth * 1009 + width * 31 + heads * 7 + 1
+
+
+def data_seed(depth: int, width: int, heads: int, seed: int) -> int:
+    """Keep the shorter run an exact data-order prefix of longer budgets."""
+    return seed + depth * 10007 + width * 101 + heads * 11 + 1
+
+
 def tranche(config: dict, name: str) -> list[tuple[int, int, int, int, int]]:
-    if name != "pilot":
+    if name not in {"pilot", "rescue_t2", "rescue_t4"}:
         raise ValueError(f"unknown tranche {name}")
-    return [(depth, width, heads, budget, seed)
-            for depth, width, heads, budget in PILOT_ARCHITECTURES
+    requested_budget = {"pilot": 1, "rescue_t2": 2, "rescue_t4": 4}[name]
+    return [(depth, width, heads, requested_budget, seed)
+            for depth, width, heads, _ in PILOT_ARCHITECTURES
             for seed in config["model_seeds"]]
 
 
@@ -70,11 +83,11 @@ def train(config: dict, spec: tuple[int, int, int, int, int], device: torch.devi
     depth, width, heads, budget, seed = spec
     steps = (4 if smoke else config["base_steps"] * budget)
     batch_size = 8 if smoke else config.get("batch_size", 64)
-    torch.manual_seed(seed + depth * 1009 + width * 31 + heads * 7 + budget)
+    torch.manual_seed(initialization_seed(depth, width, heads, seed))
     model = TinyTransformerLM(config["vocab_size"], config["sequence_length"], width, depth, heads).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=config.get("learning_rate", .003))
     cells, _ = designed_cells(config)
-    rng = random.Random(seed + depth * 10007 + width * 101 + heads * 11 + budget)
+    rng = random.Random(data_seed(depth, width, heads, seed))
     state_path = model_dir / "training_state.pt"
     losses: list[dict] = []
     first_step = 0
@@ -209,7 +222,7 @@ if __name__ == "__main__":
     parser.add_argument("--config", default="configs/paper05/stress_frontier.json")
     parser.add_argument("--output", default="docs/papers/paper0_5/results/stress_frontier/learned_v1")
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--tranche", default="pilot", choices=("pilot",))
+    parser.add_argument("--tranche", default="pilot", choices=("pilot", "rescue_t2", "rescue_t4"))
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--smoke", action="store_true")
     parser.add_argument("--max-models", type=int)

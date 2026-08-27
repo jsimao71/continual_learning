@@ -48,6 +48,26 @@ The causal bridge crosses irrelevant, supportive, refining, override, and multil
 The complete tracked tables are \path{phase_grid_results.csv}, \path{phase_min_depth.csv}, \path{phase_min_width.csv}, \path{phase_internal_decision_depth.csv}, and \path{phase_model_fits.csv}. They report every trained depth/width/budget/order cell and preserve failed high-order attempts. Multiple surface lengths, three dependency spans, and four nuisance counts are averaged only after their matched cell results are retained.\par
 \endgroup
 
+\section{Matched stress frontier and budget audit}
+The confirmatory stress design retains 29 axis-specific contrast rows over 25 unique physical dataset cells. Shared baseline examples appear in every relevant one-factor contrast but are deduplicated during training. L2/W64/H4 has 85,504 parameters and L8/W32/H4 has 77,632, a 9.2\% gap. Three model seeds are evaluated at each exact-prefix training budget. The 2x and 4x runs use the same initialization and respectively extend the first 400 and 800 training batches, so budget rescue is not confounded by a fresh draw.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llccc}\toprule
+Architecture & Seed & 1x & 2x & 4x\\\midrule
+L2/W64/H4 & 11 & .188 & .906 & 1.000\\
+ & 23 & .250 & 1.000 & 1.000\\
+ & 37 & 1.000 & 1.000 & 1.000\\
+L8/W32/H4 & 11 & 1.000 & 1.000 & 1.000\\
+ & 23 & .375 & 1.000 & 1.000\\
+ & 37 & .312 & .750 & 1.000\\\bottomrule
+\end{tabular}
+\caption{Held-out order-two baseline accuracy under exact-prefix budget scaling. Factor slopes are interpreted only at 4x, where all six cells cross the 0.80 gate.}
+\end{table}
+
+At 4x both architectures have $p^*_{\max}=2$, $n_{\max}=24$, $k_{\max}=32$, and $s_{\max}=32$ over the tested grid. The latter three are right-censored lower bounds because every maximum cell remains competent. The ten three-seed failures among 58 architecture/contrast cells are precisely the five $p^*\ge3$ cells for each architecture. Machine-readable seed, aggregate, trajectory, loss, and frontier tables are under \path{results/stress_frontier/learned_v1}, \path{learned_v2_matched}, and \path{learned_v4_matched}.
+
+An earlier diagnostic directory named \path{learned_v2} changed initialization and data-order seeds with budget. It is explicitly marked \path{INVALID_BUDGET_COMPARISON.md}, is excluded from every table and figure, and supports no claim.
+
 \section{Recurrent comparison details}
 R1 fixes $p^*=2$ and varies raw length; R2 fixes $p^*=2$ and varies the distance between the two indispensable values; R3 varies predictive order at controlled span; R4 varies same-vocabulary nuisance. Recurrent target margin and hidden norm are sampled through time. Matched nuisance pairs additionally record $\|h_t^{(k)}-h_t^{(0)}\|_2$. Transformer margins are decoded at depth boundaries. These plots diagnose different axes and do not equate a recurrent transition with a Transformer block.
 
@@ -63,6 +83,11 @@ Paper~0.5 neither implements nor validates continual learning. Stable predictive
 \begin{verbatim}
 PYTHONPATH=src python -m cl.experiments.paper05_predictive_order_phase
 PYTHONPATH=src python -m cl.analysis.paper05_predictive_order_phase
+PYTHONPATH=src python -m cl.experiments.paper05_stress_run \
+  --device mps --tranche rescue_t4 --resume
+PYTHONPATH=src python -m cl.experiments.paper05_stress_analyze \
+  --input results/stress_frontier/learned_v4_matched
+PYTHONPATH=src python -m cl.experiments.paper05_stress_figures
 PYTHONPATH=src python -m cl.experiments.paper05_rnn_comparison
 PYTHONPATH=src python -m cl.analysis.paper05_rnn_comparison
 PYTHONPATH=src python -m cl.experiments.paper05_layer_composition

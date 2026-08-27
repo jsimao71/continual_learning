@@ -1,0 +1,9 @@
+frontier,head_count,maximum_competent_value,measured_values,model_depth,model_width,status,training_budget
+pstar_max,4,2,7,2,64,estimated,2
+n_max,4,24,8,2,64,estimated,2
+k_max,4,32,6,2,64,estimated,2
+s_max,4,32,5,2,64,estimated,2
+pstar_max,4,,7,8,32,threshold_failure,2
+n_max,4,,8,8,32,threshold_failure,2
+k_max,4,,6,8,32,threshold_failure,2
+s_max,4,,5,8,32,threshold_failure,2
