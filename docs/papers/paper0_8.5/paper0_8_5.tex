@@ -6,10 +6,10 @@
 \hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
 \title{Autoregressive Inference Before Tools:\\The Multi-Token Computational Frontier of Tiny Transformers}
 \author{Paper 0.85 --- Multi-Token Inference Research Line}
-\date{Draft inception --- August 2026}
+\date{Stage-1 results --- August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-A one-token Transformer is a fixed-depth circuit, but a decoder generating multiple tokens is already an iterative machine: each generated token becomes writable state, and subsequent steps can attend to the full trajectory. Before attributing systematic reasoning gains to external agents or tools, we must measure how much computation ordinary autoregressive generation can learn to perform by itself. We introduce a minimal propositional-inference instrument comparing one-token answers with unconstrained and structured multi-token derivations. Training begins with local implication steps and proof chains of length at most two or three; evaluation extends to longer chains, branching, distractors, and unseen proposition identities. We distinguish local-rule acquisition, one-pass internal composition, autoregressive recurrence, termination, and closure-like train-short/test-long extrapolation. The central question is whether a tiny Transformer that reliably learns one implication step can acquire a time-invariant multi-token proof transition and reuse it at depths substantially beyond training, and with what probability across architectures and seeds. This paper supplies the missing baseline between the fixed-model formal computation of Paper 0.7 and the external iterative harness of Paper 0.9.
+A one-token Transformer is a fixed-depth circuit, but a decoder generating multiple tokens is already an iterative machine: each generated token becomes writable state, and subsequent steps can attend to the full trajectory. Before attributing systematic reasoning gains to external agents or tools, we measure how much computation ordinary autoregressive generation learns by itself. A leakage-audited local gate first establishes one-step implication over held-out ordered pairs with shared, fully trained lexical support: all three L2/W64/H4 seeds exceed 98.8\% on positive and negative controls. We then train proof chains only at $K\le3$ and test $K\in\{1,2,3,4,6,8\}$. One-token answers (O0), free traces (O1), and fully teacher-forced structured traces (O3) are perfect in range but fail abruptly at $K=4$ for every seed. Thus $K_{\rm internal}=K_{\rm AR}=K_{\rm O3}=3$ and measured recurrence gain is zero. Structured grammar/final supervision without intermediate state labels (O2) learns formatting but no exact trajectories. An earlier fully disjoint-symbol run is retained only as a lexical-transfer stress, and a query-target leakage pilot is quarantined. The result is a stable finite train-short/test-long boundary, not a closure signature, and supplies the model-only baseline for Paper 0.9.
 \end{abstract}
 
 \section{Motivation}
@@ -44,9 +44,11 @@ Every recurrence experiment first passes a local-step gate:
 \[
 A,\quad A\Rightarrow B\vdash B.
 \]
-A model that cannot reliably solve this across held-out proposition symbols cannot support an interpretable closure experiment. Report $P_{\rm acquire}^{\rm local}$ across model and generator seeds.
+A model that cannot reliably solve this across held-out proposition pairs cannot support an interpretable closure experiment. Report $P_{\rm acquire}^{\rm local}$ across model and generator seeds, while ensuring that lexical output support is not accidentally withheld.
 
-This gate has not yet been run for Paper 0.85. The current contribution is a CPU-validated symbolic instrument and preregistered accelerator phase. Exact reference-controller traces below validate the task and scoring code; they are not evidence that a Transformer acquired local implication or recurrence.
+R0-v1 withheld proposition identities entirely. Its three seeds learn the negative label (98.8--99.6\%) but achieve only 4.3--6.6\% entailed accuracy and 4.7--7.8\% on consequent swaps despite near-zero training loss. Because held-out symbols also have untrained output rows, this is a useful lexical/OOV-output transfer stress, not the central implication gate.
+
+R0-v2 corrects that confound. All 64 symbols occur during training as inputs and positive targets; 3,226 ordered implication pairs train the model and 806 pairs are held out, with zero observed pair leakage. Entailed, consequent-swap, fact-mismatch, and rule-LHS-mismatch controls are balanced. At L2/W64/H4, seed 11 scores 100\% on all four conditions; seed 23 scores 100\%, 100\%, 100\%, and 99.6\%; seed 37 scores 98.8\%, 98.8\%, 99.6\%, and 100\%. The preregistered 95\% three-seed gate therefore passes. This establishes local implication over held-out pairs with trained lexical support; it does not establish recurrence.
 
 \section{Dataset ladder}
 \subsection{R0: direct one-step implication}
@@ -81,19 +83,21 @@ N\in\{0,2,4,8,16,32,64\}.
 Introduce multiple outgoing rules and competing branches only after chain recurrence works. Keep a unique target proof initially, then increase search ambiguity.
 
 \subsection{Executable generator and split contract}
-Each row stores the fact, ordered ground-truth chain, implication multiset, query, minimal proof depth, distractor count, branching factor, shuffle flag, split, and split-specific namespace. Train, validation, and test identities use disjoint prefixes. Branches terminate away from the query, so the target proof remains unique; distractor antecedents are unreachable from the initial fact. The exact validator checks every chain edge, namespace membership, and target-path uniqueness before serialization.
+The broad CPU instrument stores the fact, ordered ground-truth chain, implication multiset, query, minimal proof depth, distractor count, branching factor, shuffle flag, split, and split-specific namespace. Branches terminate away from the query, so the target proof remains unique; distractor antecedents are unreachable from the initial fact. The exact validator checks every chain edge, namespace membership, and target-path uniqueness before serialization.
 
 The full CPU materialization contains 2,800 examples. Training is strictly bounded to $K\in\{1,2,3\}$; validation and test cover all eleven preregistered depths. All splits cross seven distractor levels, ordered/shuffled presentations, and branching factors one/two. Every row passes the symbolic validator. Four exact target serializations per example produce 11,200 reference traces. These reference outputs pass exact trajectory checks and are labeled \texttt{reference\_oracle}; they establish generator correctness, not model performance.
 
+The learned Stage-1 instrument uses the R0-v2 shared vocabulary and partitions ordered implication edges rather than lexical identities. Every edge in a training chain belongs to the training pair set and every evaluation edge belongs to the held-out pair set; observed edge leakage is zero. The query is a bare instruction token and contains no answer argument. This last audit was added after an initial pilot serialized \texttt{QUERY target}, producing a trivial copy path. That pilot is quarantined as invalid and contributes no result or figure.
+
 \section{Output-machine conditions}
 \paragraph{O0: one-token answer.} Emit final conclusion/boolean only.
-\paragraph{O1: free multi-token generation.} No prescribed proof grammar; score final answer and trajectory validity.
-\paragraph{O2: structured scratchpad.} Use minimal tokens such as
+\paragraph{O1: free multi-token generation.} Train an untyped proposition trace and score final answer, transitions, exact trajectory, and termination.
+\paragraph{O2: structured scratchpad without state labels.} Supervise grammar/control tokens and the final answer, but withhold intermediate proposition labels. Use minimal tokens such as
 \[
 \langle STATE:A\rangle\langle DERIVE:B\rangle\cdots\langle ANSWER:D\rangle.
 \]
 No external semantic operation is executed.
-\paragraph{O3: teacher-forced derivation training.} Provide correct intermediate proof tokens in training, then autoregress at test. Compare with final-answer-only training where feasible.
+\paragraph{O3: teacher-forced derivation training.} Supervise every structured intermediate proof token in training, then autoregress at test. The O2--O3 contrast isolates intermediate semantic supervision from format supervision; neither condition executes an external operation.
 
 \section{Core recurrence hypothesis}
 A learned proof procedure should approximate
@@ -119,6 +123,38 @@ as the largest multi-token chain length meeting the same final-answer gate. Prim
 G_{\rm recurrence}=K_{\rm AR}-K_{\rm internal}.
 \]
 Report full curves, not only maxima.
+
+\section{Corrected Stage-1 results}
+The first learned comparison fixes the passing R0-v2 architecture (L2/W64/H4), uses 1,000 updates per cell, trains only at $K\in\{1,2,3\}$, and evaluates 64 held-out-pair chains at each $K\in\{1,2,3,4,6,8\}$ for seeds 11, 23, and 37. Competence requires at least 95\% final and termination accuracy for every seed. Table~\ref{tab:frontier} reports only measured points.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llll}
+\toprule
+Condition & Supervision & Three-seed frontier & $P_{\rm acquire}(K=4)$\\\midrule
+O0 & final answer & 3 & 0/3\\
+O1 & free proposition trace & 3 & 0/3\\
+O2 & structure+final, no states & none & 0/3\\
+O3 & full structured trace & 3 & 0/3\\
+\bottomrule
+\end{tabular}
+\caption{Leakage-free Stage-1 frontiers. ``None'' means that O2 fails the gate even in range; it does not mean that the model produces no correct tokens.}\label{tab:frontier}
+\end{table}
+
+O0 is 100\% for all seeds at $K=1,2,3$, then falls at $K=4$ to 0\%, 1.6\%, and 4.7\%. O1 is likewise perfect in range but reaches only 1.6\%, 1.6\%, and 0\% at $K=4$. Its transition accuracy at that boundary is 32.0\%, 32.0\%, and 23.4\%; at $K=6,8$ it falls to roughly 10--20\%. Termination, perfect in range, becomes seed- and depth-dependent out of range. Free generation therefore adds writable tokens but does not acquire a reusable transition in this regime.
+
+O2 separates syntax from semantics. Across depths its seed-level aggregate final accuracy is 9.1\%, 25.0\%, and 3.4\%; transition accuracy is 1.3--4.6\%, and no exact trajectory occurs, although termination can remain high. The model learns much of the requested output grammar without the missing state labels. O3 restores perfect in-range trajectories, yet at $K=4$ final accuracy is only 1.6\%, 0\%, and 0\%; deeper values remain near chance. Richer derivation supervision improves interpolation but does not create extrapolative recurrence.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.72\linewidth]{../paper0_85/results/recurrence_stage1_v2/figures/one_token_vs_multitoken_depth.png}
+\caption{Mean three-seed final accuracy for the corrected Stage-1 comparison. The dashed line marks the maximum training depth. The sharp shared boundary, rather than gradual accumulated error, is inconsistent with a measured closure signature.}
+\end{figure}
+
+Consequently,
+\[
+K_{\rm internal}=K_{\rm AR}=K_{\rm O3}=3,
+\qquad G_{\rm recurrence}=0
+\]
+over the tested architecture, supervision, and depths. This is a finite empirical statement. It neither proves that autoregression cannot expand the frontier under another curriculum/architecture nor licenses infinite-closure claims.
 
 \section{Closure signatures}
 Train on $K\le2$ or $3$ and test much larger $K$. Evidence for reusable recurrence strengthens when:
@@ -146,7 +182,7 @@ Start with
 \[
 L\in\{1,2,3,4\},\quad W\in\{16,32,64\},\quad H\in\{1,2,4\},
 \]
-and training budgets $T\in\{1,2,4\}\times$. This diagnostic grid, four output conditions, and three model seeds enumerate 1,296 planned accelerator runs. Deeper $L\in\{6,8\}$ and wider $W=128$ cells are conditional expansions, not part of the initial factorial. Use staged diagnostics: first local competence, then O0--O3 on R1--R2, then expand around the recurrence boundary, then add distractors/branching.
+and training budgets $T\in\{1,2,4\}\times$. This diagnostic grid, four output conditions, and three model seeds enumerates 1,296 possible phase cells, not completed evidence. Stage 1 runs only the 12-cell passing R0 architecture slice. Deeper $L\in\{6,8\}$ and wider $W=128$ cells remain conditional expansions. The next justified step is a narrow boundary/curriculum test, followed by shuffled rules, distractors, and branching only if recurrence becomes competent.
 
 \section{Mechanistic measurements}
 At every generation step record next-token distribution, correct-next-state rank/margin, Q/K/V, attention role mass, SA/FF residual increments, representation similarity across recurrence steps, and attention to original rules versus generated state.
@@ -186,7 +222,7 @@ The prompt token count in the pure ordered chain is $4K+6$ under the whitespace 
 \caption{Prompt-plus-target length for the validated reference serialization. This is a dataset geometry result, not a learned competence frontier.}
 \end{figure}
 
-No learned accuracy, $K_{\rm internal}$, $K_{\rm AR}$, recurrence gain, acquisition probability, termination curve, role invariance, or causal result is currently reported. Those quantities remain blocked on the three-seed R0 accelerator gate. In particular, exact oracle performance is never entered into a model-results table.
+The learned Stage-1 results above report accuracy, measured frontiers, transition accuracy, and termination. Role invariance and causal recurrence tests remain blocked because no condition is recurrently competent beyond the training range. Exact oracle performance is never entered into a model-results table.
 
 \section{ICL extension}
 After base recurrence is understood, compare rules learned in weights against novel implication graphs supplied entirely in context with held-out symbols. If the latter succeeds at long depth, the clean interpretation is:
@@ -212,8 +248,12 @@ The executable components are:
 \item phase materialization: \path{src/cl/experiments/paper085_phase.py};
 \item serialization analysis: \path{src/cl/experiments/paper085_analyze.py};
 \item configuration: \path{configs/paper085/phase_v1.json}.
+\item R0-v2 gate: \path{paper085_r0_gate_v2.py} with \path{r0_gate_v2.json};
+\item recurrence runner: \path{paper085_recurrence_stage1.py};
+\item recurrence analysis: \path{paper085_recurrence_analyze.py};
+\item recurrence configuration: \path{recurrence_stage1_v2.json}.
 \end{itemize}
-Machine-readable artifacts are under \path{docs/papers/paper0_85/results}. The manifest explicitly says that learned-model results are false; each phase-plan row is marked as a planned accelerator run. This status remains until R0 passes at least three model seeds with held-out identities and shortcut controls.
+Machine-readable artifacts are under \path{docs/papers/paper0_85/results}. The broad phase manifest explicitly labels its 11,200 exact traces as reference results rather than learned evidence. Learned R0-v1, R0-v2, and corrected Stage1-v2 occupy isolated directories; the Stage1-v1 manifest is quarantined because of query-target leakage. Tracked dense checkpoints are locally reproducible and may remain ignored. Planned long-depth, context-limit, role-invariance, causal, shuffled-rule, distractor, branching, and ICL experiments are not stated as findings.
 
 \begin{thebibliography}{99}
 \bibitem{li2024} Z. Li, H. Liu, D. Zhou, and T. Ma. Chain of Thought Empowers Transformers to Solve Inherently Serial Problems. arXiv:2402.12875, 2024.
