@@ -1,0 +1,17 @@
+{
+  "aggregate_cells": 90,
+  "architectures": [
+    "baseline",
+    "depth8"
+  ],
+  "budget_multiplier": 2,
+  "checkpoints": 6,
+  "model_seeds": [
+    11,
+    23,
+    37
+  ],
+  "raw_rows": 12960,
+  "schema_version": "paper06.capacity_v5.stage_a_complete.v1",
+  "status": "complete_6_of_6"
+}

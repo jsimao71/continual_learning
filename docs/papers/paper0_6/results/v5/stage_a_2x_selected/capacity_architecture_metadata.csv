@@ -1,0 +1,2 @@
+architecture,budget_multiplier,elapsed_seconds,ff_dimension,final_loss,head_dimension,heads,layers,model_seed,parameters,training_steps,width
+depth8,2,1129.7609531879425,128,1.3598320484161377,16,4,8,37,292480,1000,64

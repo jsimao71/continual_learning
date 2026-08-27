@@ -118,11 +118,29 @@ def main() -> None:
     ]
     write_csv(ROOT / "capacity_training_budget_plan.csv", plan)
 
-    partial_path = ROOT / "stage_a_2x_selected" / "capacity_diagnostic_grid_partial.csv"
+    selected_2x = ROOT / "stage_a_2x_selected"
+    partial_path = selected_2x / "capacity_diagnostic_grid_partial.csv"
     partial_manifest_path = ROOT / "stage_a_2x_selected" / "capacity_stage_a_partial_manifest.json"
     partial_summary = []
+    complete_2x_summary = []
     if partial_path.exists():
         partial = read_csv(partial_path)
+        completion_path = selected_2x / "capacity_diagnostic_grid.csv"
+        completion = read_csv(completion_path) if completion_path.exists() else []
+        completion_is_seed37 = {
+            (r["architecture"], int(r["model_seed"])) for r in completion
+        } == {("depth8", 37)}
+        complete_2x = partial + completion if completion_is_seed37 else []
+        if complete_2x:
+            keys = [(r["architecture"], r["model_seed"], r["diagnostic_tier"], r["predicate"]) for r in complete_2x]
+            assert len(complete_2x) == 90 and len(set(keys)) == 90
+            for row in complete_2x:
+                row["status"] = "observed_complete_2x"
+            write_csv(selected_2x / "capacity_diagnostic_grid_complete.csv", complete_2x)
+            raw_partial = read_csv(selected_2x / "capacity_diagnostic_raw_partial.csv")
+            raw_completion = read_csv(selected_2x / "capacity_diagnostic_raw.csv")
+            assert len(raw_partial) == 10_800 and len(raw_completion) == 2_160
+            write_csv(selected_2x / "capacity_diagnostic_raw_complete.csv", raw_partial + raw_completion)
         partial_groups: dict[tuple[str, str, str], list[float]] = defaultdict(list)
         for row in partial:
             partial_groups[(row["architecture"], row["diagnostic_tier"], row["predicate"])].append(float(row["accuracy"]))
@@ -140,6 +158,49 @@ def main() -> None:
                 "status": "observed_partial_2x",
             })
         write_csv(ROOT / "capacity_training_sweep_partial.csv", partial_summary)
+
+        if complete_2x:
+            complete_groups: dict[tuple[str, str, str], list[float]] = defaultdict(list)
+            for row in complete_2x:
+                complete_groups[(row["architecture"], row["diagnostic_tier"], row["predicate"])].append(float(row["accuracy"]))
+            for (architecture, tier, predicate), values in sorted(complete_groups.items()):
+                assert len(values) == 3
+                complete_2x_summary.append({
+                    "architecture": architecture,
+                    "diagnostic_tier": tier,
+                    "predicate": predicate,
+                    "budget_multiplier": 2,
+                    "mean_accuracy": float(np.mean(values)),
+                    "worst_seed_accuracy": min(values),
+                    "seed_variance": float(np.var(values)),
+                    "seed_count": len(values),
+                    "passes_0_80_worst_seed": min(values) >= .8,
+                    "passes_0_90_worst_seed": min(values) >= .9,
+                    "status": "observed_complete_2x",
+                })
+            write_csv(ROOT / "capacity_training_sweep_complete.csv", complete_2x_summary)
+            completed_plan = [
+                {"wave": 1, "architecture": architecture, "budget_multiplier": 2, "seeds": "11;23;37", "status": "observed_complete", "rationale": rationale}
+                for architecture, rationale in (
+                    ("baseline", "training-only control for the unstable 1x reference"),
+                    ("depth8", "completed preregistered three-seed hard-tier gate"),
+                )
+            ]
+            completed_plan += [
+                {"wave": 2, "architecture": architecture, "budget_multiplier": 4, "seeds": "11;23;37", "status": "not_run_not_justified", "rationale": "complete 2x comparison resolves the selected budget control; prioritize independent D/d/b/N frontiers"}
+                for architecture in ("baseline", "depth8")
+            ]
+            write_csv(ROOT / "capacity_training_budget_plan.csv", completed_plan)
+            atomic_write_json(selected_2x / "capacity_stage_a_complete_manifest.json", {
+                "schema_version": "paper06.capacity_v5.stage_a_complete.v1",
+                "architectures": ["baseline", "depth8"],
+                "model_seeds": [11, 23, 37],
+                "budget_multiplier": 2,
+                "checkpoints": 6,
+                "aggregate_cells": 90,
+                "raw_rows": 12_960,
+                "status": "complete_6_of_6",
+            })
 
     architectures = ["baseline", "depth8", "width128", "heads2", "heads8", "deep_narrow_match", "shallow_wide_match"]
     predicates = ["parent", "grandparent", "ancestor_k", "root", "isAncestor"]
@@ -170,23 +231,26 @@ def main() -> None:
     plt.legend(ncol=4, fontsize=8)
     save("capacity_parameter_matched_comparison.png")
 
-    if partial_summary:
-        partial_lookup = {(r["architecture"], r["diagnostic_tier"], r["predicate"]): r for r in partial_summary}
+    budget_summary = complete_2x_summary or partial_summary
+    if budget_summary:
+        budget_lookup = {(r["architecture"], r["diagnostic_tier"], r["predicate"]): r for r in budget_summary}
         fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.6), sharey=True)
         for ax, architecture in zip(axes, ("baseline", "depth8")):
             x = np.arange(3); tiers = ("easy", "medium", "hard")
             one_x = [by_arch_pred[(architecture, "isAncestor", tier)]["worst_seed_accuracy"] for tier in tiers]
-            two_x = [partial_lookup[(architecture, tier, "isAncestor")]["worst_observed_seed_accuracy"] for tier in tiers]
+            worst_field = "worst_seed_accuracy" if complete_2x_summary else "worst_observed_seed_accuracy"
+            two_x = [budget_lookup[(architecture, tier, "isAncestor")][worst_field] for tier in tiers]
             ax.bar(x - .18, one_x, .36, label="1x, 3 seeds")
-            seed_count = partial_lookup[(architecture, "easy", "isAncestor")]["observed_seed_count"]
-            ax.bar(x + .18, two_x, .36, label=f"2x, {seed_count} observed seeds")
+            count_field = "seed_count" if complete_2x_summary else "observed_seed_count"
+            seed_count = budget_lookup[(architecture, "easy", "isAncestor")][count_field]
+            ax.bar(x + .18, two_x, .36, label=f"2x, {seed_count} seeds")
             ax.axhline(.8, color="black", linestyle="--", linewidth=1)
             ax.set_xticks(x, tiers)
             ax.set_title(architecture)
             ax.set_ylim(0, 1.04)
             ax.set_ylabel("Worst observed seed accuracy")
             ax.legend(fontsize=8, loc="lower left")
-        fig.suptitle("Training-budget recovery; depth-8 2x remains incomplete")
+        fig.suptitle("Training-budget recovery; complete three-seed comparison" if complete_2x_summary else "Training-budget recovery; depth-8 2x remains incomplete")
         save("capacity_training_budget_recovery.png")
 
     atomic_write_json(ROOT / "capacity_analysis_manifest.json", {
@@ -197,9 +261,9 @@ def main() -> None:
         "observed_competent_cells": competent,
         "central_result": "depth8_isAncestor_easy_medium_only",
         "hard_tier_status": "threshold_failure_worst_seed_0.759",
-        "training_budget_status": "partial_2x_five_of_six" if partial_summary else "planned_not_run",
-        "partial_training_manifest": str(partial_manifest_path) if partial_summary else None,
-        "next_run": "depth8 seed37 at 2x; reconstruct complete aggregate from all six checkpoints" if partial_summary else "baseline,depth8 at 2x across seeds 11,23,37",
+        "training_budget_status": "complete_2x_six_of_six" if complete_2x_summary else "partial_2x_five_of_six" if partial_summary else "planned_not_run",
+        "training_manifest": str(selected_2x / "capacity_stage_a_complete_manifest.json") if complete_2x_summary else str(partial_manifest_path) if partial_summary else None,
+        "next_run": "independently controlled D/d/b/N frontier; no broad 4x grid" if complete_2x_summary else "depth8 seed37 at 2x; reconstruct complete aggregate from all six checkpoints" if partial_summary else "baseline,depth8 at 2x across seeds 11,23,37",
     })
 
 

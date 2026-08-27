@@ -1,6 +1,5 @@
 architecture,budget_multiplier,rationale,seeds,status,wave
 baseline,2,training-only control for the unstable 1x reference,11;23;37,observed_complete,1
-depth8,2,two observed seeds; central gate unevaluable,11;23,observed_partial,1
-depth8,2,complete the preregistered three-seed hard-tier gate,37,planned_completion,1
-baseline,4,run only if 2x approaches/crosses a gate or changes the easy-hard gap materially,11;23;37,conditional_not_run,2
-depth8,4,run only if 2x approaches/crosses a gate or changes the easy-hard gap materially,11;23;37,conditional_not_run,2
+depth8,2,completed preregistered three-seed hard-tier gate,11;23;37,observed_complete,1
+baseline,4,complete 2x comparison resolves the selected budget control; prioritize independent D/d/b/N frontiers,11;23;37,not_run_not_justified,2
+depth8,4,complete 2x comparison resolves the selected budget control; prioritize independent D/d/b/N frontiers,11;23;37,not_run_not_justified,2

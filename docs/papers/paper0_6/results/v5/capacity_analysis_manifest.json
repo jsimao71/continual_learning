@@ -1,7 +1,7 @@
 {
   "central_result": "depth8_isAncestor_easy_medium_only",
   "hard_tier_status": "threshold_failure_worst_seed_0.759",
-  "next_run": "depth8 seed37 at 2x; reconstruct complete aggregate from all six checkpoints",
+  "next_run": "independently controlled D/d/b/N frontier; no broad 4x grid",
   "observed_architectures": [
     "baseline",
     "depth8",
@@ -43,7 +43,7 @@
     23,
     37
   ],
-  "partial_training_manifest": "docs/papers/paper0_6/results/v5/stage_a_2x_selected/capacity_stage_a_partial_manifest.json",
   "schema_version": "paper06.capacity_v5.stage_a_analysis.v1",
-  "training_budget_status": "partial_2x_five_of_six"
+  "training_budget_status": "complete_2x_six_of_six",
+  "training_manifest": "docs/papers/paper0_6/results/v5/stage_a_2x_selected/capacity_stage_a_complete_manifest.json"
 }
