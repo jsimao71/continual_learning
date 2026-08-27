@@ -1,0 +1,2 @@
+mapping,start,target_trajectory,predicted_trajectory,correct,generation_steps
+A->B;B->C;C->D;D->STOP,A,B C D STOP,STOP,False,1

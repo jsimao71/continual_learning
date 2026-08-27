@@ -9,3 +9,9 @@ grandparent,sa_only,2,2,1.0,True,True,True,0.9999995498566162,fixed_weight_const
 grandparent,ff_only,2,0,0.0,False,False,True,0.0,fixed_weight_constructive_representability_only
 grandparent,sa_ff,2,2,1.0,True,True,True,0.9999995498566162,fixed_weight_constructive_representability_only
 grandparent,sa_only_1layer,2,0,0.0,False,False,True,0.0,fixed_weight_constructive_representability_only
+root_recurrence,sa_only,24,24,1.0,True,True,True,0.9999990997193113,fixed_weight_bounded_autoregressive_representability_only
+root_recurrence,ff_only,24,6,0.25,False,False,True,0.0,fixed_weight_bounded_autoregressive_representability_only
+root_recurrence,sa_ff,24,24,1.0,True,True,True,0.9999990997193113,fixed_weight_bounded_autoregressive_representability_only
+implication_recurrence,sa_only,96,96,1.0,True,True,True,0.9999990997193113,fixed_weight_bounded_autoregressive_representability_only
+implication_recurrence,ff_only,96,24,0.25,False,False,True,0.0,fixed_weight_bounded_autoregressive_representability_only
+implication_recurrence,sa_ff,96,96,1.0,True,True,True,0.9999990997193113,fixed_weight_bounded_autoregressive_representability_only

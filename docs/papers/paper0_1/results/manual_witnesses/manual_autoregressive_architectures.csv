@@ -1,0 +1,7 @@
+task,topology,controller,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax
+root_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
+root_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
+root_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True
+implication_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
+implication_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
+implication_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True

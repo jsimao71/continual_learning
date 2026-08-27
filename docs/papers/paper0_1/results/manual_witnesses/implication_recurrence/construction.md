@@ -1,0 +1,7 @@
+# Implication Recurrence construction
+
+This is a deterministic fixed-weight representability witness; no weight is trained.  A single local transition circuit is called once per generated token.  Atomic `MAP_X_Y` tokens store implication rules in separate key/value subspaces, while `STATE_X` tokens place the latest generated symbol in a query-only subspace.  The model has `L=1`, `H=1`, `d_model=15`, `d_head=5`, identity residuals, zero positions, finite causal softmax, no LayerNorm/dropout, and a zero FF update.
+
+At every step, `W_Q` reads the current state, `W_K` reads map keys, `W_V` reads map values, and `W_O` writes the selected successor into the output subspace.  The predicted symbol is appended as the next `STATE` token and the same matrices are reused.  The selector score is finite (`alpha=16`); as prior generated states accumulate they contribute zero-score leakage, so each step records its actual probability and positive margin rather than treating attention as hard.
+
+The exhaustive declared domain is all 24 orderings of four atoms x all 4 fact positions (96 trajectories; chain lengths 1--4).  `STOP` is an explicit terminal value.  SA-only and SA+FF must reproduce every complete trajectory; FF-only cannot read the contextual map and must fail the full-domain gate.  These controls are encoding-relative.  The witness establishes bounded tested-depth autoregressive reuse, not minimality, unbounded closure, robustness outside the domain, or SGD acquisition.

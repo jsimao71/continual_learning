@@ -1,0 +1,2 @@
+step,current,target,prediction,correct,logit_margin,attention_probability,attention_probability_margin,sequence
+1,C,B,STOP,False,0.0,0.9999995498595037,0.9999994373243796,MAP_R_STOP MAP_A_R MAP_B_A MAP_C_B STATE_C

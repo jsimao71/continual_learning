@@ -1,0 +1,3 @@
+task,primary_topology,sa_needed_under_encoding,ff_needed_under_encoding,recurrence,external_iteration,control_result
+root_recurrence,sa_only,True,False,True,False,sa_only:pass;ff_only:fail;sa_ff:pass
+implication_recurrence,sa_only,True,False,True,False,sa_only:pass;ff_only:fail;sa_ff:pass

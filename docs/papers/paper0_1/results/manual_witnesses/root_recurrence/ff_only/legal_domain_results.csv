@@ -1,0 +1,25 @@
+case_id,mapping,start,depth_to_root,target_trajectory,predicted_trajectory,correct,steps_expected,steps_observed,minimum_logit_margin
+0,R->STOP;A->R;B->A;C->B,R,0,STOP,STOP,True,1,1,0.0
+1,R->STOP;A->R;B->A;C->B,A,1,R STOP,STOP,False,2,1,0.0
+2,R->STOP;A->R;B->A;C->B,B,2,A R STOP,STOP,False,3,1,0.0
+3,R->STOP;A->R;B->A;C->B,C,3,B A R STOP,STOP,False,4,1,0.0
+4,R->STOP;A->R;C->A;B->C,R,0,STOP,STOP,True,1,1,0.0
+5,R->STOP;A->R;C->A;B->C,A,1,R STOP,STOP,False,2,1,0.0
+6,R->STOP;A->R;C->A;B->C,C,2,A R STOP,STOP,False,3,1,0.0
+7,R->STOP;A->R;C->A;B->C,B,3,C A R STOP,STOP,False,4,1,0.0
+8,R->STOP;B->R;A->B;C->A,R,0,STOP,STOP,True,1,1,0.0
+9,R->STOP;B->R;A->B;C->A,B,1,R STOP,STOP,False,2,1,0.0
+10,R->STOP;B->R;A->B;C->A,A,2,B R STOP,STOP,False,3,1,0.0
+11,R->STOP;B->R;A->B;C->A,C,3,A B R STOP,STOP,False,4,1,0.0
+12,R->STOP;B->R;C->B;A->C,R,0,STOP,STOP,True,1,1,0.0
+13,R->STOP;B->R;C->B;A->C,B,1,R STOP,STOP,False,2,1,0.0
+14,R->STOP;B->R;C->B;A->C,C,2,B R STOP,STOP,False,3,1,0.0
+15,R->STOP;B->R;C->B;A->C,A,3,C B R STOP,STOP,False,4,1,0.0
+16,R->STOP;C->R;A->C;B->A,R,0,STOP,STOP,True,1,1,0.0
+17,R->STOP;C->R;A->C;B->A,C,1,R STOP,STOP,False,2,1,0.0
+18,R->STOP;C->R;A->C;B->A,A,2,C R STOP,STOP,False,3,1,0.0
+19,R->STOP;C->R;A->C;B->A,B,3,A C R STOP,STOP,False,4,1,0.0
+20,R->STOP;C->R;B->C;A->B,R,0,STOP,STOP,True,1,1,0.0
+21,R->STOP;C->R;B->C;A->B,C,1,R STOP,STOP,False,2,1,0.0
+22,R->STOP;C->R;B->C;A->B,B,2,C R STOP,STOP,False,3,1,0.0
+23,R->STOP;C->R;B->C;A->B,A,3,B C R STOP,STOP,False,4,1,0.0

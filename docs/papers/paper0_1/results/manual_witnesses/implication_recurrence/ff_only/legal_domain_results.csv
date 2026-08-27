@@ -1,0 +1,97 @@
+case_id,rules,fact,chain_steps,target_trajectory,predicted_trajectory,correct,steps_expected,steps_observed,minimum_logit_margin
+0,A->B;B->C;C->D;D->STOP,A,4,B C D STOP,STOP,False,4,1,0.0
+1,A->B;B->C;C->D;D->STOP,B,3,C D STOP,STOP,False,3,1,0.0
+2,A->B;B->C;C->D;D->STOP,C,2,D STOP,STOP,False,2,1,0.0
+3,A->B;B->C;C->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+4,A->B;B->D;D->C;C->STOP,A,4,B D C STOP,STOP,False,4,1,0.0
+5,A->B;B->D;D->C;C->STOP,B,3,D C STOP,STOP,False,3,1,0.0
+6,A->B;B->D;D->C;C->STOP,D,2,C STOP,STOP,False,2,1,0.0
+7,A->B;B->D;D->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+8,A->C;C->B;B->D;D->STOP,A,4,C B D STOP,STOP,False,4,1,0.0
+9,A->C;C->B;B->D;D->STOP,C,3,B D STOP,STOP,False,3,1,0.0
+10,A->C;C->B;B->D;D->STOP,B,2,D STOP,STOP,False,2,1,0.0
+11,A->C;C->B;B->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+12,A->C;C->D;D->B;B->STOP,A,4,C D B STOP,STOP,False,4,1,0.0
+13,A->C;C->D;D->B;B->STOP,C,3,D B STOP,STOP,False,3,1,0.0
+14,A->C;C->D;D->B;B->STOP,D,2,B STOP,STOP,False,2,1,0.0
+15,A->C;C->D;D->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+16,A->D;D->B;B->C;C->STOP,A,4,D B C STOP,STOP,False,4,1,0.0
+17,A->D;D->B;B->C;C->STOP,D,3,B C STOP,STOP,False,3,1,0.0
+18,A->D;D->B;B->C;C->STOP,B,2,C STOP,STOP,False,2,1,0.0
+19,A->D;D->B;B->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+20,A->D;D->C;C->B;B->STOP,A,4,D C B STOP,STOP,False,4,1,0.0
+21,A->D;D->C;C->B;B->STOP,D,3,C B STOP,STOP,False,3,1,0.0
+22,A->D;D->C;C->B;B->STOP,C,2,B STOP,STOP,False,2,1,0.0
+23,A->D;D->C;C->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+24,B->A;A->C;C->D;D->STOP,B,4,A C D STOP,STOP,False,4,1,0.0
+25,B->A;A->C;C->D;D->STOP,A,3,C D STOP,STOP,False,3,1,0.0
+26,B->A;A->C;C->D;D->STOP,C,2,D STOP,STOP,False,2,1,0.0
+27,B->A;A->C;C->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+28,B->A;A->D;D->C;C->STOP,B,4,A D C STOP,STOP,False,4,1,0.0
+29,B->A;A->D;D->C;C->STOP,A,3,D C STOP,STOP,False,3,1,0.0
+30,B->A;A->D;D->C;C->STOP,D,2,C STOP,STOP,False,2,1,0.0
+31,B->A;A->D;D->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+32,B->C;C->A;A->D;D->STOP,B,4,C A D STOP,STOP,False,4,1,0.0
+33,B->C;C->A;A->D;D->STOP,C,3,A D STOP,STOP,False,3,1,0.0
+34,B->C;C->A;A->D;D->STOP,A,2,D STOP,STOP,False,2,1,0.0
+35,B->C;C->A;A->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+36,B->C;C->D;D->A;A->STOP,B,4,C D A STOP,STOP,False,4,1,0.0
+37,B->C;C->D;D->A;A->STOP,C,3,D A STOP,STOP,False,3,1,0.0
+38,B->C;C->D;D->A;A->STOP,D,2,A STOP,STOP,False,2,1,0.0
+39,B->C;C->D;D->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0
+40,B->D;D->A;A->C;C->STOP,B,4,D A C STOP,STOP,False,4,1,0.0
+41,B->D;D->A;A->C;C->STOP,D,3,A C STOP,STOP,False,3,1,0.0
+42,B->D;D->A;A->C;C->STOP,A,2,C STOP,STOP,False,2,1,0.0
+43,B->D;D->A;A->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+44,B->D;D->C;C->A;A->STOP,B,4,D C A STOP,STOP,False,4,1,0.0
+45,B->D;D->C;C->A;A->STOP,D,3,C A STOP,STOP,False,3,1,0.0
+46,B->D;D->C;C->A;A->STOP,C,2,A STOP,STOP,False,2,1,0.0
+47,B->D;D->C;C->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0
+48,C->A;A->B;B->D;D->STOP,C,4,A B D STOP,STOP,False,4,1,0.0
+49,C->A;A->B;B->D;D->STOP,A,3,B D STOP,STOP,False,3,1,0.0
+50,C->A;A->B;B->D;D->STOP,B,2,D STOP,STOP,False,2,1,0.0
+51,C->A;A->B;B->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+52,C->A;A->D;D->B;B->STOP,C,4,A D B STOP,STOP,False,4,1,0.0
+53,C->A;A->D;D->B;B->STOP,A,3,D B STOP,STOP,False,3,1,0.0
+54,C->A;A->D;D->B;B->STOP,D,2,B STOP,STOP,False,2,1,0.0
+55,C->A;A->D;D->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+56,C->B;B->A;A->D;D->STOP,C,4,B A D STOP,STOP,False,4,1,0.0
+57,C->B;B->A;A->D;D->STOP,B,3,A D STOP,STOP,False,3,1,0.0
+58,C->B;B->A;A->D;D->STOP,A,2,D STOP,STOP,False,2,1,0.0
+59,C->B;B->A;A->D;D->STOP,D,1,STOP,STOP,True,1,1,0.0
+60,C->B;B->D;D->A;A->STOP,C,4,B D A STOP,STOP,False,4,1,0.0
+61,C->B;B->D;D->A;A->STOP,B,3,D A STOP,STOP,False,3,1,0.0
+62,C->B;B->D;D->A;A->STOP,D,2,A STOP,STOP,False,2,1,0.0
+63,C->B;B->D;D->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0
+64,C->D;D->A;A->B;B->STOP,C,4,D A B STOP,STOP,False,4,1,0.0
+65,C->D;D->A;A->B;B->STOP,D,3,A B STOP,STOP,False,3,1,0.0
+66,C->D;D->A;A->B;B->STOP,A,2,B STOP,STOP,False,2,1,0.0
+67,C->D;D->A;A->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+68,C->D;D->B;B->A;A->STOP,C,4,D B A STOP,STOP,False,4,1,0.0
+69,C->D;D->B;B->A;A->STOP,D,3,B A STOP,STOP,False,3,1,0.0
+70,C->D;D->B;B->A;A->STOP,B,2,A STOP,STOP,False,2,1,0.0
+71,C->D;D->B;B->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0
+72,D->A;A->B;B->C;C->STOP,D,4,A B C STOP,STOP,False,4,1,0.0
+73,D->A;A->B;B->C;C->STOP,A,3,B C STOP,STOP,False,3,1,0.0
+74,D->A;A->B;B->C;C->STOP,B,2,C STOP,STOP,False,2,1,0.0
+75,D->A;A->B;B->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+76,D->A;A->C;C->B;B->STOP,D,4,A C B STOP,STOP,False,4,1,0.0
+77,D->A;A->C;C->B;B->STOP,A,3,C B STOP,STOP,False,3,1,0.0
+78,D->A;A->C;C->B;B->STOP,C,2,B STOP,STOP,False,2,1,0.0
+79,D->A;A->C;C->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+80,D->B;B->A;A->C;C->STOP,D,4,B A C STOP,STOP,False,4,1,0.0
+81,D->B;B->A;A->C;C->STOP,B,3,A C STOP,STOP,False,3,1,0.0
+82,D->B;B->A;A->C;C->STOP,A,2,C STOP,STOP,False,2,1,0.0
+83,D->B;B->A;A->C;C->STOP,C,1,STOP,STOP,True,1,1,0.0
+84,D->B;B->C;C->A;A->STOP,D,4,B C A STOP,STOP,False,4,1,0.0
+85,D->B;B->C;C->A;A->STOP,B,3,C A STOP,STOP,False,3,1,0.0
+86,D->B;B->C;C->A;A->STOP,C,2,A STOP,STOP,False,2,1,0.0
+87,D->B;B->C;C->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0
+88,D->C;C->A;A->B;B->STOP,D,4,C A B STOP,STOP,False,4,1,0.0
+89,D->C;C->A;A->B;B->STOP,C,3,A B STOP,STOP,False,3,1,0.0
+90,D->C;C->A;A->B;B->STOP,A,2,B STOP,STOP,False,2,1,0.0
+91,D->C;C->A;A->B;B->STOP,B,1,STOP,STOP,True,1,1,0.0
+92,D->C;C->B;B->A;A->STOP,D,4,C B A STOP,STOP,False,4,1,0.0
+93,D->C;C->B;B->A;A->STOP,C,3,B A STOP,STOP,False,3,1,0.0
+94,D->C;C->B;B->A;A->STOP,B,2,A STOP,STOP,False,2,1,0.0
+95,D->C;C->B;B->A;A->STOP,A,1,STOP,STOP,True,1,1,0.0

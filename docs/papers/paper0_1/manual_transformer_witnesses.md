@@ -16,6 +16,25 @@ The implementation uses row-vector weights, causal finite-softmax attention, ide
 
 All passing results use no recurrence, external iteration, information service, or tool. The contextual pair and edge records are atomic tokens with explicitly separated key/value features. This choice makes the circuit readable but is not claimed to be the smallest serialization.
 
+## Milestone-2 result: bounded autoregressive reuse
+
+Milestone 2 adds two M1 witnesses. Both use the same one-layer, one-head transition circuit (`d_model=15`, `d_head=5`) once per generated token. The weights are fixed across steps; the generated symbol becomes the next query. Atomic map tokens again separate keys and values for readability.
+
+| Task | Controller | Data | Primary topology | Tested domain | Result | Controls |
+|---|---|---|---|---|---|---|
+| root traversal | M1 | contextual parent map | SA-only | all 6 three-node orderings x 4 starts; root depths 0--3 | 24/24 exact trajectories; minimum step margin 0.99999910 | FF-only 6/24; SA+FF 24/24 |
+| implication recurrence | M1 | contextual implication map | SA-only | all 24 four-atom orderings x 4 starts; chain lengths 1--4 | 96/96 exact trajectories; minimum step margin 0.99999910 | FF-only 24/96; SA+FF 96/96 |
+
+For either task, a contextual `MAP_X_Y` token carries `X` in the key subspace and `Y` in the value subspace. A `STATE_X` token carries `X` only in the query subspace. One forward call retrieves `Y`; the autoregressive harness appends `STATE_Y` and invokes the identical block again:
+
+```
+x_(t+1) = transition(x_t; fixed contextual map).
+```
+
+The desired scaled score is 16 at every step. Previously generated state tokens have zero keys and add finite softmax leakage, so the desired probability decreases slightly with trajectory length. The minimum observed output margin remains 0.99999910. This is finite attention, and every step's actual scores, probabilities, residuals, FF intermediates, and logits are recorded. `STOP` is an explicit terminal mapping. FF-only's 25% trajectory accuracy consists of cases whose correct first output is the deterministic tie-break `STOP`; it has zero margin and cannot read the contextual map.
+
+These results demonstrate reuse through the maximum declared root depth three and implication length four. They do not prove arbitrary-depth correctness: increasing length adds zero-score distractors, eventually exceeds the declared positional matrix, and has not been exhaustively tested. They also do not show architectural minimality, that FF is universally unnecessary, or that training will acquire this circuit. Unary successor recurrence was not added because it would only reapply the already-exact local FF successor and would not sharpen the contextual-recurrence comparison.
+
 ## Witness 1: local successor
 
 For one-hot inputs A--D, the legal task is A->B, B->C, C->D. Let `M` contain the desired output one-hot in each source row. The primary block has zero attention, `W1=I`, and `W2=M-I`. ReLU is the identity on the legal one-hot inputs, so the residual update is
@@ -44,19 +63,23 @@ Both finite-softmax layers assign more than 0.99999966 probability to their inte
 
 ## Artifact map and reproducibility
 
-Artifacts live under `results/manual_witnesses/{successor,pair_lookup,grandparent}/{topology}`. Each topology contains embedding, positional, Q/K/V/O, FF, bias, and unembedding CSVs; exhaustive legal-domain results; a canonical example; and one CSV per traced activation. Each task root contains `construction.md`. Cross-task files are:
+Artifacts live under `results/manual_witnesses/{successor,pair_lookup,grandparent,root_recurrence,implication_recurrence}/{topology}`. Each topology contains embedding, positional, Q/K/V/O, FF, bias, and unembedding CSVs; exhaustive legal-domain results; a canonical example; and traced activations. M1 topology directories additionally contain every exhaustive generation step and canonical per-step trace trees. Each task root contains `construction.md`. Cross-task files are:
 
 - `manual_witness_summary.csv`: accuracy, margins, and expectation gates;
 - `manual_architectures.csv`: L/H/d, controller, data location, residual, and normalization choices;
 - `manual_component_necessity.csv`: encoding-relative SA/FF control outcomes;
 - `manual_sa_vs_ff.png`: component comparison;
 - `manual_two_hop_attention.png`: layerwise parent/grandparent selection.
+- `manual_autoregressive_summary.csv`, `manual_autoregressive_architectures.csv`, and `manual_autoregressive_component_necessity.csv`: M1-only gates and architecture metadata;
+- `manual_autoregressive_depth.png`: exact trajectory accuracy by generated transition count.
 
 Regenerate with:
 
 ```bash
 PYTHONPATH=src python -m cl.manual_transformers.run_milestone1
+PYTHONPATH=src python -m cl.manual_transformers.run_milestone2
 PYTHONPATH=src pytest -q tests/test_manual_transformers_milestone1.py
+PYTHONPATH=src pytest -q tests/test_manual_transformers_milestone2.py
 ```
 
-Later milestones may add autoregressive recurrence, structured counters, local tools, and interpreters. Those are not results of Milestone 1.
+Later milestones may add structured counters, local tools, and interpreters. Those are not results of Milestones 1--2.
