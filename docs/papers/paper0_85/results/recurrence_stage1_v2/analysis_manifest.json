@@ -1,0 +1,14 @@
+{
+  "cells": 72,
+  "closure_signature_observed": false,
+  "frontiers": {
+    "O0": 3,
+    "O1": 3,
+    "O2": 0,
+    "O3": 3
+  },
+  "invalid_predecessor": "recurrence_stage1_v1_query_target_leak",
+  "raw_rows": 4608,
+  "recurrence_gain": 0,
+  "schema_version": "paper085.recurrence_analysis_v1"
+}

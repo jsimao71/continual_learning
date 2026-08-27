@@ -1,0 +1,37 @@
+{
+  "all_conditions_three_seed_complete": true,
+  "cells_completed": 12,
+  "checkpoint_resume": true,
+  "dataset_audit": {
+    "observed_pair_leakage": 0,
+    "pair_partition_disjoint": true,
+    "query_field_contains_no_target": true,
+    "test_chains_within_heldout_pairs": true,
+    "train_chains_within_train_pairs": true,
+    "valid": true
+  },
+  "device": "mps",
+  "r0_gate_passed": true,
+  "required_cells": 12,
+  "schema_version": "paper085.recurrence_stage1_v2.v1",
+  "smoke": false,
+  "supervision": {
+    "O0": "final_only",
+    "O1": "free_trace",
+    "O2": "structured_grammar_and_final_without_intermediate_state_labels",
+    "O3": "fully_teacher_forced_structured_trace"
+  },
+  "test_depths": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    8
+  ],
+  "train_depths": [
+    1,
+    2,
+    3
+  ]
+}

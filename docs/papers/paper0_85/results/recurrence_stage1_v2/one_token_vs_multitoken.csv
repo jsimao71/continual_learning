@@ -1,0 +1,5 @@
+acquisition_probability_at_K4,claim,condition,measured_frontier,recurrence_gain_vs_O0
+0.0,measured_stage1_frontier_not_closure,O0,3,0
+0.0,measured_stage1_frontier_not_closure,O1,3,0
+0.0,measured_stage1_frontier_not_closure,O2,0,-3
+0.0,measured_stage1_frontier_not_closure,O3,3,0
