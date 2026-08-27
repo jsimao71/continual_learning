@@ -1,0 +1,59 @@
+{
+  "schema_version": "paper09.learned_controller_v3.plan.v1",
+  "status": "plan_only_no_accelerator_results",
+  "quarantined_plan": "configs/paper09/paper085_comparison_v1.json",
+  "quarantine_reason": "The stale 1620-cell full factorial predates the corrected shared64 pair split and is not an executable evidence plan.",
+  "dataset": {
+    "generator": "src/cl/semantic/recurrence_chains.py",
+    "symbol_count": 64,
+    "pair_split_seed": 8502,
+    "test_pair_fraction": 0.2,
+    "train_test_pairs_disjoint": true,
+    "train_depth_default": [1, 2, 3],
+    "test_depths": [1, 2, 3, 4, 6, 8],
+    "eval_per_depth_per_seed": 64,
+    "master_example_seed": 90301,
+    "order_seed_by_model_seed": {"11": 90311, "23": 90323, "37": 90337}
+  },
+  "common": {
+    "machines": ["M3", "M4"],
+    "model_seeds": [11, 23, 37],
+    "mlp_ratio": 2,
+    "max_length": 128,
+    "learning_rate": 0.001,
+    "batch_size": 96,
+    "base_updates": 1000,
+    "checkpoint_every": 100,
+    "max_extra_steps": 2,
+    "parameter_match_tolerance_fraction": 0.10,
+    "baseline": {"layers": 2, "width": 64, "heads": 4, "parameters": 80128}
+  },
+  "metrics": {
+    "M3": ["final_accuracy", "one_call_coverage", "selected_edge_validity", "post_tool_answer_accuracy", "invalid_call_rate"],
+    "M4": ["final_accuracy", "per_transition_accuracy", "exact_trajectory_accuracy", "termination_precision", "termination_recall", "termination_accuracy", "invalid_call_rate", "nontermination_rate", "tool_calls", "model_forwards"],
+    "reporting": "Report each depth and seed; never average train-range and extrapolation depths into a competence gate."
+  },
+  "gates": {
+    "competence_threshold": 0.95,
+    "all_three_seeds_required": true,
+    "frontier": "largest contiguous depth prefix for which every seed passes final accuracy and machine-specific execution gates",
+    "M3_execution_gate": "one_call_coverage>=0.95 and post_tool_answer_accuracy>=0.95",
+    "M4_execution_gate": "per_transition_accuracy>=0.95 and termination_accuracy>=0.95 and exact_trajectory_accuracy>=0.95",
+    "rescue": "advance an architecture only if it improves the three-seed frontier or raises every seed by at least 0.10 at the first failed depth without reducing any train-depth gate below 0.95",
+    "futility": "stop a branch after two successive budget/resource levels fail the rescue rule",
+    "success": "stop expanding a branch after all three seeds pass K=8"
+  },
+  "checkpoint_contract": {
+    "resume": true,
+    "save": ["model", "optimizer", "step", "python_rng", "numpy_rng", "torch_rng", "mps_rng_if_available", "master_stream_cursor", "config_sha256", "dataset_sha256"],
+    "exact_resume_required": true,
+    "v1_checkpoint_policy": "May initialize Stage A, but replay from step 0 with the v3 stateless stream is required unless exact v1 RNG/cursor reconstruction is demonstrated."
+  },
+  "stages": {
+    "A": {"purpose": "exact 2x/4x budget rescue", "architectures": ["baseline"], "snapshot_updates": [2000, 4000], "max_training_trajectories": 6, "max_evaluation_cells": 12, "output": "docs/papers/paper0_9/results/learned_controller_v3/stage_a_budget"},
+    "B": {"purpose": "depth and parameter-matched depth/width allocation", "architectures": ["deep_full", "deep_matched", "shallow_matched"], "updates": 1000, "max_training_trajectories": 18, "max_evaluation_cells": 18, "requires": "Stage A complete", "output": "docs/papers/paper0_9/results/learned_controller_v3/stage_b_depth"},
+    "C": {"purpose": "width and head controls", "architectures": ["narrow", "wide", "one_head", "eight_heads"], "updates": 1000, "max_training_trajectories": 24, "max_evaluation_cells": 24, "requires": "Stage B identifies no decisive winner or a control is required", "output": "docs/papers/paper0_9/results/learned_controller_v3/stage_c_width_heads"},
+    "D": {"purpose": "training-example diversity with Kmax fixed at 3", "diversity_pool_sizes": [24000, 48000, 96000], "updates": 1000, "draws": 96000, "exact_prefix": true, "max_training_trajectories": 18, "max_evaluation_cells": 18, "requires": "best architecture selected from A-C", "output": "docs/papers/paper0_9/results/learned_controller_v3/stage_d_diversity"},
+    "E": {"purpose": "training boundary Kmax 3 versus 4", "train_kmax": [3, 4], "updates": 1000, "draws": 96000, "shared_prefix_draws": 72000, "max_training_trajectories": 12, "max_evaluation_cells": 12, "requires": "best architecture and diversity fixed", "output": "docs/papers/paper0_9/results/learned_controller_v3/stage_e_train_depth"}
+  }
+}

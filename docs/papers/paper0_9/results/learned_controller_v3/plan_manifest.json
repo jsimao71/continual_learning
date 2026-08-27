@@ -1,0 +1,25 @@
+{
+  "schema_version": "paper09.learned_controller_v3.plan_manifest.v1",
+  "evidence_status": "plan_only",
+  "accelerator_runs_launched": false,
+  "observed_v1_reference": {
+    "path": "docs/papers/paper0_9/results/learned_controller_v1",
+    "complete_cells": 6,
+    "shared64_pair_split_valid": true,
+    "observed_pair_leakage": 0,
+    "M3_frontier": 3,
+    "M4_frontier": 3,
+    "long_depth_gain_observed": false,
+    "metric_caveat": "v1 M3 transition_accuracy divided its one valid call by proof depth; v3 replaces this with one_call_coverage and reports final accuracy separately."
+  },
+  "source_hashes_sha256": {
+    "recurrence_chains.py": "8934efee418e083947feae256f9ca5e6578ba75564ccf03288ac8e727ab9c0cb",
+    "learned_controller_v1.json": "ee461a080d2ef8baaa507160cccce2ff6133f2ff3250d803faa4c3ee827e2410",
+    "v1_manifest.json": "8bf64cfb6132656deaa2a5367357543f866da940d0bf2b078bad1e1cb11e1fa6",
+    "v1_cells.csv": "e4ff2f469a81963431375607605ae39a6d2b053d35100a71776bd7cdd7d8dc85"
+  },
+  "maximum_plan": {"training_trajectories": 78, "evaluation_cells": 84, "optimizer_updates": 90000, "v1_run_equivalents": 15.0, "provisional_serial_mps_hours": "8-14", "estimate_note": "Capacity variants are not throughput-equivalent; recalibrate from Stage A before launching B."},
+  "stage_gate_order": ["A", "B", "C", "D", "E"],
+  "stale_1620_cell_plan_quarantined": true,
+  "required_prelaunch_audits": ["config_hash", "generator_hash", "pair_split_disjointness", "symbol_input_output_coverage", "query_target_absence", "master_example_prefix_hash", "batch_order_hash", "checkpoint_resume_equivalence", "metric_unit_tests"]
+}

@@ -1,0 +1,15 @@
+stage,condition,layers,width,heads,parameters,param_delta_vs_baseline,updates_or_snapshot,train_kmax,diversity_pool,machines,seeds,evaluation_cells,launch_rule
+A,budget_2x,2,64,4,80128,0.0000,2000,3,96000,M3|M4,11|23|37,6,always
+A,budget_4x,2,64,4,80128,0.0000,4000,3,96000,M3|M4,11|23|37,6,continue_same_trajectories_after_2x
+B,deep_full,4,64,4,147072,0.8355,1000,3,96000,M3|M4,11|23|37,6,after_A
+B,deep_matched,4,48,4,85728,0.0699,1000,3,96000,M3|M4,11|23|37,6,after_A
+B,shallow_matched,1,88,4,81048,0.0115,1000,3,96000,M3|M4,11|23|37,6,after_A
+C,narrow,2,32,4,23680,-0.7045,1000,3,96000,M3|M4,11|23|37,6,conditional_after_B
+C,wide,2,96,4,169344,1.1133,1000,3,96000,M3|M4,11|23|37,6,conditional_after_B
+C,one_head,2,64,1,80128,0.0000,1000,3,96000,M3|M4,11|23|37,6,conditional_after_B
+C,eight_heads,2,64,8,80128,0.0000,1000,3,96000,M3|M4,11|23|37,6,conditional_after_B
+D,diversity_24k,2,64,4,80128,0.0000,1000,3,24000,M3|M4,11|23|37,6,best_architecture_substituted
+D,diversity_48k,2,64,4,80128,0.0000,1000,3,48000,M3|M4,11|23|37,6,best_architecture_substituted
+D,diversity_96k,2,64,4,80128,0.0000,1000,3,96000,M3|M4,11|23|37,6,best_architecture_substituted
+E,train_kmax3,2,64,4,80128,0.0000,1000,3,96000,M3|M4,11|23|37,6,best_architecture_and_diversity_substituted
+E,train_kmax4,2,64,4,80128,0.0000,1000,4,96000,M3|M4,11|23|37,6,best_architecture_and_diversity_substituted
