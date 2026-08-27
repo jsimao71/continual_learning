@@ -1,5 +1,5 @@
 {
-  "artifact_hash": "4c600e968c331580a6a9b5964f2db423b6b99343326cb2516d768b7fe21664d6",
+  "artifact_hash": "bf863e8398772946b5c096756afa633a3abcd2142f1820b7559625369cf1bb5a",
   "checks": {
     "axes_present": true,
     "balanced_examples": true,
@@ -8,7 +8,7 @@
     "three_or_more_seeds": true,
     "unique_cells": true
   },
-  "eligible_cells": 25,
+  "eligible_cells": 29,
   "excluded_cells": 1,
   "passed": true,
   "schema_version": "paper05.stress_frontier.validation.v1"
