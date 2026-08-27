@@ -1,480 +1,188 @@
 \documentclass[10pt]{article}
 \usepackage[margin=.76in]{geometry}
-\usepackage{amsmath,amssymb,amsthm,booktabs,microtype,enumitem,hyperref,float,array,tabularx}
+\usepackage{amsmath,amssymb,amsthm,booktabs,microtype,enumitem,hyperref,float,array,tabularx,tikz}
+\usetikzlibrary{arrows.meta,positioning,fit,calc,matrix,shapes.geometric}
 \usepackage[T1]{fontenc}\usepackage{lmodern}
-\setlist{nosep,leftmargin=*}
-\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hypertexnames=false}
-\newtheorem{proposition}{Proposition}
-\newtheorem{definition}{Definition}
+\setlist{nosep,leftmargin=*}\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hypertexnames=false}
+\newtheorem{proposition}{Proposition}\newtheorem{definition}{Definition}
 \newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\tikzset{box/.style={draw,rounded corners,align=center,minimum height=7mm,inner sep=3pt},arr/.style={-{Latex[length=2mm]},thick}}
 \title{Toward a Theory of Computation for Learned Transformer Machines:\\Tasks, Resources, Learnability, Composition, and Closure}
-\author{Paper 0.1 --- Position and Formal Framework}
-\date{Draft inception --- August 2026}
+\author{Paper 0.1 --- Position and Formal Framework}\date{August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-The dominant theoretical question about large language models is often phrased too coarsely: ``what can a Transformer compute?'' Classical expressivity results characterize idealized Transformers through formal languages and circuit classes, while empirical work usually asks whether a trained model succeeds on a benchmark. Between these views lies a missing object: the computational theory of a \emph{learned} Transformer machine. A computation may be representable by an architecture yet rarely acquired by training; it may be learned on bounded instances yet fail to compose or close over instance depth. Moreover, the computational object in a modern application is usually compound:
-\[
-\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B),
-\]
-combining a learned transition map, execution protocol, writable state, information interfaces, a tool algebra, and finite resource budgets. These are product-space coordinates, not a scalar ``agent level.'' We distinguish information sufficiency, representability, acquisition, execution reliability, efficiency, systematic generalization, and closure. Tasks are classified by required state and iteration; experiments estimate competence and acquisition frontiers rather than infer algorithms from endpoint accuracy. Papers 0.5, 0.6, 0.8, and 0.85 provide later empirical anchors; Papers 0.7 and 0.9 remain prospective. None is required for the framework.
+Classical expressivity asks what an idealized Transformer can compute; benchmark studies ask whether a trained model succeeds. Between them lies the theory of a \emph{learned} Transformer machine. We formalize task structure, information sufficiency, machine resources, acquisition probability, one-pass and autoregressive composition, and resource-scheduled closure. The operational object is compound, $\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B)$. Five executable fixed-weight witnesses calibrate representability under explicit finite encodings. Their contrast with Paper 0.85---where trained one-token and autoregressive machines share frontier $K=3$ and fail at unseen $K=4$---makes the central distinction concrete: representability is not reliable acquisition. Empirical papers appear only as late, nonessential anchors.
 \end{abstract}
 
-\section{Why a learned-machine theory is needed}
-A fixed architecture can represent computations that gradient-based training rarely discovers. A trained model can fit finite examples without acquiring a reusable rule. A rule can be reusable over a bounded range without supporting closure. Conversely, autoregressive generation can repeatedly apply the same learned local transformation and thereby change the effective computational machine without changing the model weights.
-
-We therefore separate:
+\section{Introduction}
+A fixed architecture may represent a computation that training rarely discovers; a trained model may fit bounded instances without a reusable rule; a reusable local rule may still fail under composition or termination. Autoregression changes the effective machine by applying the same transition repeatedly. We therefore separate
 \[
-\boxed{\text{representability}\neq\text{learnability}\neq\text{reliable acquisition}\neq\text{systematic executability}\neq\text{closure}.}
+\boxed{\text{representability}\ne\text{learnability}\ne\text{reliable acquisition}\ne\text{systematic executability}\ne\text{closure}.}
 \]
+The evidential layers are distinct: propositions follow from premises; executable hand-weighted constructions establish finite-domain representability; trained-model experiments measure acquisition; conjectures remain prospective.
 
-Classical Transformer theory provides essential upper and lower bounds under explicit architectural and precision assumptions. Formal-language work relates fixed-depth attention models to circuit classes such as AC$^0$ and TC$^0$, while recent chain-of-thought theory shows that autoregressive intermediate computation can substantially expand expressivity. Our objective is complementary: characterize the \emph{trained finite machine} and measure how its empirical computational frontier depends on architecture, training distribution, generated state, context, and external execution resources.
-
-The evidential layers are intentionally distinct. Propositions state consequences of explicit premises; manually weighted executable constructions establish finite-domain representability; trained-model experiments provide measured acquisition evidence; and conjectures and future-paper designs remain prospective until their gates are run. Terminology alone cannot promote a result from one layer to another.
-
-\section{Basic objects}
-\subsection{Task family}
-A task family is
+\section{Task families and concrete examples}
+A task family is $\mathcal T=(\mathcal X,\mathcal Y,\mathcal D,\mathcal R)$, where $\mathcal D$ is a generator/distribution and $\mathcal R$ the declared prior. Its partially ordered complexity vector is
 \[
-\mathcal T=(\mathcal X,\mathcal Y,\mathcal D,\mathcal R),
+\mathbf c=(s_{\rm atom},k_{\rm comp},b_{\rm branch},v_{\rm state},n_{\rm nuisance},m_{\rm context},\ldots).
 \]
-where $\mathcal D$ is a generator/distribution and $\mathcal R$ is the declared structural prior that makes prediction possible.
+The coordinates measure atomic syntax, composition/proof depth, branching, state, nuisance, and context/memory demand. Raw length need not increase composition depth.
 
-Each instance has a complexity vector
+\subsection{From concrete tasks to the abstract task vector}
+\paragraph{T1: atomic mapping.} \texttt{A->B, B->C, QUERY B} targets \texttt{C}: very low syntax, $k=1$, unit branching, negligible state/nuisance.
+\paragraph{T2: contextual lookup.} \texttt{A->X, B->Y, C->Z, QUERY B} targets \texttt{Y}: low syntax and $k=1$, but contextual cross-token transport. Distractors can increase length without depth.
+\paragraph{T3: grandparent.} \texttt{PARENT C B, PARENT B A, QUERY GRANDPARENT C} targets \texttt{A}: parent lookup composed twice.
+\paragraph{T4: root.} For \texttt{C->B->A->R}, a one-token answer needs bounded internal composition; multi-token \texttt{C B A R} needs recurrence and termination for scalable execution.
+\paragraph{T5: ancestor-(k).} \texttt{ANCESTOR C 2} needs node-and-counter state, decrement, and termination.
+\paragraph{T6: proof chain.} From \texttt{A}, \texttt{A->B->C->D}, decide \texttt{D?}; proof depth, distractors, and branching vary independently.
+\paragraph{T7: unification.} \texttt{P(f(x),y)} with \texttt{P(f(a),b)} yields $\{x=a,y=b\}$: high syntax, binding state, and functor depth.
+\paragraph{T8: branching search.} \texttt{A->B,A->C,B->D,C->E,...} separates search width and frontier/visited state from proof depth.
+
+\begin{table}[H]\centering\small
+\begin{tabularx}{\linewidth}{lccccYY}\toprule Task&$s_{\rm atom}$&$k_{\rm comp}$&$b_{\rm branch}$&$v_{\rm state}$&Context&Recurrence\\\midrule
+Successor&low&1&1&low&optional&no\\ Pair lookup&low&1&1&low&yes&no\\ Grandparent&low&2&1&low&yes&no\\ Root&low&variable&1&current node&yes&useful\\ Ancestor-(k)&low&variable&1&node+counter&yes&yes\\ Proof chain&medium&variable&variable&proof state&yes&useful\\ Unification&high&bounded&1&bindings&yes&maybe\\ Branching search&medium&variable&high&frontier+visited&yes&yes\\\bottomrule\end{tabularx}
+\caption{Concrete tasks mapped to the abstract vector; entries are task requirements or useful protocols, not architectural lower bounds.}\end{table}
+
+\section{Information sufficiency}
+For query $X$, context $D$, target $Y$, and prior $\mathcal R$, validate
 \[
-\mathbf c=(s_{\rm atom},k_{\rm comp},b_{\rm branch},v_{\rm state},n_{\rm nuisance},m_{\rm context},\ldots),
+I(Y;D\mid X)=H(Y\mid X)-H(Y\mid X,D),\qquad H(Y\mid X,D,\mathcal R)=0
 \]
-where the coordinates respectively measure atomic operator complexity, required composition/proof depth, branching/search width, variable/state complexity, nuisance context, and memory/context requirement. Lower-case task coordinates avoid collision with controller $C$, state interface $S$, and budget $\mathcal B$ below. Complexity is generally partially ordered, so measured Pareto competence regions are preferable to a single scalar difficulty.
-
-\subsection{Information sufficiency}
-Before studying an intelligent mechanism, determine whether the task is information-theoretically solvable. For query $X$, context $D$, and target $Y$:
+for deterministic identifiable tasks. Record
 \[
-I(Y;D\mid X)=H(Y\mid X)-H(Y\mid X,D).
+\mathcal I=(H(Y\mid X),H(Y\mid X,D),I(Y;D\mid X),\mathcal R,A_{\rm Bayes},|\mathcal H_{X,D,\mathcal R}|,m_{\rm id}).
 \]
-For deterministic rule inference under declared prior $\mathcal R$, require
-\[
-H(Y\mid X,D,\mathcal R)=0.
-\]
-An arbitrary unseen random mapping with insufficient demonstrations is not a reasoning problem: no oracle lacking additional information can exceed the Bayes ceiling.
+These mean, respectively: query-only uncertainty; remaining uncertainty after context; context's added information; declared hypothesis family; best possible expected accuracy; number of consistent hypotheses; and minimum context for identification.
 
-Every task release should therefore include an information-validity record
-\[
-\mathcal I=(H(Y\mid X),H(Y\mid X,D),I(Y;D\mid X),\mathcal R,A_{\rm Bayes},
-|\mathcal H_{X,D,\mathcal R}|,m_{\rm id}),
-\]
-where $\mathcal H_{X,D,\mathcal R}$ is the set of hypotheses consistent with the query, demonstrations, and declared prior, and $m_{\rm id}$ is the minimum context needed for identifiability. Entropies are distribution-dependent quantities, not properties of a serialization alone. If the generator is deterministic only after conditioning on $\mathcal R$, that conditioning must be stated rather than smuggled into an oracle.
+\paragraph{Impossible random mapping.} \texttt{A->7, B->2, QUERY C} is underdetermined if $C$'s output is independent: $H(Y\mid X,D)>0$.
+\paragraph{Permutation completion.} \texttt{A->3, B->1, C->4, QUERY D} forces \texttt{D->2} only under the prior that outputs permute $\{1,2,3,4\}$. This is constraint completion, not general induction.
+\paragraph{Affine induction.} Under $f(x)=ax+b\pmod7$, $f(0)=3,f(1)=5$ give $b=3,a=2$. The prior changes identifiability.
+\paragraph{Standard Bayes-risk fact.} Positive conditional entropy on positive measure implies $A_{\rm Bayes}=\mathbb E\max_yP(Y=y\mid X,D,\mathcal R)<1$. This routine fact enforces dataset discipline; it is not a novelty claim.
 
-\begin{proposition}[Information impossibility]
-Under zero--one loss, if $H(Y\mid X,D,\mathcal R)>0$, then no predictor measurable with respect to $(X,D,\mathcal R)$ is universally correct. Its optimal expected accuracy is
-\[
-A_{\rm Bayes}=\mathbb E_{X,D,\mathcal R}\max_y P(Y=y\mid X,D,\mathcal R)<1
-\]
-whenever the conditional distribution is non-degenerate on a set of positive measure.
-\end{proposition}
-\noindent Pointwise, the best decision selects the most probable conditional label; positive conditional entropy entails ambiguity on at least one event of positive measure. This separates model failure from task underdetermination.
-
-\subsection{Controller hierarchy and compound machines}
-The controller coordinate has four operational levels. At $C_0$, a fixed pass computes $Y=F_\theta(X)$. At $C_1$, autoregression computes $y_t=F_\theta(X,y_{<t})$; generated tokens form serialized writable state. At $C_2$, the state language is structured into fields such as \textsc{current}, \textsc{target}, \textsc{counter}, \textsc{stack}, \textsc{substitution}, or \textsc{proof-state}. At $C_3$, an external loop repeatedly inspects state, selects an action or tool, incorporates its result, and decides whether to continue. A practical ``agent'' is typically a $C_3$ protocol, not automatically a new formal class.
-
-Controller sophistication is only one coordinate. We define the compound learned machine
+\section{Machine, controller, and resource formalism}
+$C_0$ invokes $F_\theta$ once; $C_1$ invokes it autoregressively; $C_2$ gives state typed fields; $C_3$ is an external action/tool loop.
 \begin{definition}[Compound learned machine]
 \[
-\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B),
+\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B),qquad
+P_{\rm acquire}=P_\Pi[A(\tau,\mathbf c;\mathcal M,\Pi)\ge\gamma].
 \]
-where $F_\theta$ is the learned next-token or fixed-pass transition map; $C$ is the protocol that schedules and invokes that map; $S$ is the writable-state interface; $I:q\mapsto D$ supplies external information; $\mathbb T=\{T_1,\ldots,T_m\}$ is a set of partial external operations $T_i:\mathcal X_i\rightharpoonup\mathcal Y_i$; and $\mathcal B$ bounds context, calls, tokens, time, and memory. For acquisition process $\Pi$,
-\[
-A(\tau,\mathbf c;F_\theta,C,S,I,\mathbb T,\mathcal B,\Pi),\qquad
-P_{\rm acquire}=P_\Pi[A\ge\gamma].
-\]
+$F_\theta$ is the learned transition map, $C$ its scheduling protocol, $S$ writable state, $I:q\mapsto D$ information, $\mathbb T$ partial external operations, and $\mathcal B$ context/call/token/time/memory budget.
 \end{definition}
-This product description replaces a scalar tool/agent ordering. Autoregression and structured traces alter $C$ and $S$; retrieval primarily alters $I$; a local graph edge, a closure oracle, and Python alter $\mathbb T$ in categorically different ways. Every comparison should record
-\[
-\Delta\mathcal M=(\Delta C,\Delta S,\Delta I,\Delta\mathbb T,\Delta\mathcal B,\Delta\Pi),
-\]
-so an easier prompt, a stronger primitive, more execution time, and better training are not all called ``augmentation.''
+Report $\Delta\mathcal M=(\Delta C,\Delta S,\Delta I,\Delta\mathbb T,\Delta\mathcal B,\Delta\Pi)$, so easier prompts, stronger tools, more time, and different training are not all ``augmentation.''
 
 \section{Six computational axes}
-\subsection{Axis 1: atomic syntax and local operator learning}
-What is the most complex single-step relation a model of size $(L,W,H)$ learns reliably? A rough ladder is
-\[
-\begin{aligned}
-&\text{association}\to\text{n-gram}\to\text{unary}\to\text{binary}\to\text{Boolean rule}\\
-&\qquad\to\text{predicate+variables}\to\text{nested functor}\to\text{type dispatch}\to\text{rewrite}.
-\end{aligned}
-\]
-Define acquisition probability
-\[
-P_{\rm acquire}(\tau;\mathcal M,\mathcal D,T)=P_s[A_s(\tau)\ge\gamma]
-\]
-and coverage over the intended legal instance set.
-The falsifiable resource question is whether a controlled change in width, heads, layers, data, or budget moves this boundary across seeds. A single successful seed establishes neither learnability nor reliable acquisition.
+\begin{enumerate}
+\item \textbf{Atomic acquisition:} which local operators pass across seeds?
+\item \textbf{One-pass composition:} $K_{\rm internal}=\max\{K:A(f^K)\ge\gamma\}$, controlling dependency radius, depth, nuisance, and length.
+\item \textbf{Autoregressive composition:} $s_{t+1}=F_\theta(X,s_{\le t})$; report transitions, stopping, sequence success, and train-short/test-long behavior.
+\item \textbf{Closure signature:} separate a contiguous tested frontier from a uniform resource-scheduled procedure.
+\item \textbf{In-context information:} separate copying, completion, task selection, parameter estimation, and procedure induction.
+\item \textbf{Tool/harness augmentation:} separate computational, acquisition, reliability, and efficiency gains.
+\end{enumerate}
+Much classical circuit/logical work studies a fixed one-pass Transformer under precision assumptions. It cannot be transferred automatically to $C_1$, where emitted tokens create serial applications of the transition map.
 
-\subsection{Axis 2: internal one-pass composition}
-Assume local operator $f$ is competent. How much composition can one forward pass implement?
-\[
-x\mapsto f(x)\mapsto f^2(x)\mapsto\cdots\mapsto f^K(x).
-\]
-Define
-\[
-K_{\rm internal}(M,\tau)=\max\{K:A(f^K;M)\ge\gamma\}.
-\]
-A larger frontier does not prove serial layer-by-layer execution.
-Required dependency radius, operator count, proof depth, branching, nuisance, and raw length must be crossed rather than conflated. Ordered intermediate decoding and causal transfer are required before an $L\times K$ interaction is interpreted as serial internal computation.
+\section{Constructive witnesses and the learnability gap}
+Representability asks whether $\exists W^*$ such that $\mathcal M(W^*)$ implements $\tau$; acquisition asks for $P_\Pi[\mathcal M(W_\Pi)\text{ passes }\tau]$. The hand-weighted witnesses instantiate the first statement without training.
+\begin{table}[H]\centering\small
+\begin{tabularx}{\linewidth}{lccccY}\toprule Witness&Protocol&((L,H,d))&Legal result&Main control&Scope\\\midrule
+Successor&$C_0$&$(1,0,4)$&3/3, margin 1&SA 0/3&local weight map\\ Pair lookup&$C_0$&$(1,1,9)$&18/18&FF 6/18 ties&atomic pairs\\ Grandparent&$C_0$&$(2,1,20)$&2/2&one-layer SA 0/2&fixed two-hop chain\\ Root&$C_1$&$(1,1,15)$&24/24&FF 6/24&depth 0--3\\ Unary chain&$C_1$&$(1,1,15)$&96/96&FF 24/96&length 1--4\\\bottomrule\end{tabularx}
+\caption{Fixed-weight calibration. Exact means exhaustive argmax correctness, not one-hot attention; no witness is claimed minimal.}\end{table}
+Paper 0.85 supplies the learned contrast. On its corrected dataset, one-token O0, free-trace O1, and supervised structured O3 have contiguous frontier three; O2 has none. Every condition has zero three-seed acquisition probability at $K=4$. Thus $K_{\rm internal}=K_{\rm AR}=3$ in that phase despite a handcrafted recurrent transition under a different atomic encoding: representability does not imply acquisition.
 
-\subsection{Axis 3: autoregressive multi-token composition}
-Autoregression exposes recurrence:
+\section{Composition and resource-scheduled closure}
+For legal set $R_K$, per-$K$ solvability $\forall K\exists(\mathcal M_K,\mathcal B_K)$ differs from
 \[
-s_{t+1}=F_\theta(X,s_{\le t}).
+\exists\mathcal M\exists\mathcal B(K)\forall K<\infty:\ \mathcal M\text{ solves all }x\in R_K\text{ within }\mathcal B(K).
 \]
-For a parent relation, a root trajectory may be serialized as
-\[C\to B\to A\to R.\]
-Self-attention can read the entire generated history, so the state may be a tuple, proof prefix, substitution, or counter. Define $K_{\rm AR}$ and compare it directly with $K_{\rm internal}$.
-Report local transition accuracy, stopping accuracy, total-sequence success, generated steps, and train-short/test-long behavior. This distinguishes a competent transition with accumulated error from a failed recurrence controller.
-
-\subsection{Axis 4: closure}
-Let $R_K$ be the legal instances of complexity $K$. Distinguish bounded-family solvability, $\forall K<\infty\;\exists(\mathcal M_K,\mathcal B_K)$ that solves $R_K$, from a fixed machine's tested range, $\exists\mathcal M\;\forall K\le K_{\max}^{\rm test}$ within the declared test budget. A coherent resource-scheduled closure claim instead fixes one procedure-bearing machine $\mathcal M$ and permits an explicit growing budget schedule:
+Empirically, $K_{\rm prefix}$ is the largest $k$ for which every tested $1\le j\le k$ passes. Report
 \[
-\exists\mathcal M\;\exists\mathcal B(K)\;\forall K<\infty:\quad
-\mathcal M\text{ solves every }x\in R_K\text{ within }\mathcal B(K).
+\Sigma=(K_{\rm train},K_{\rm test},K_{\rm prefix},\rho_{\rm step},\rho_{\rm stop},g,f_{\rm fail}).
 \]
-Without the schedule, a universal claim conflicts with finite context, tokens, or time; allowing a different $\mathcal M_K$ removes uniform procedural reuse. Resource-scheduled closure cannot be established from finite observations, but signatures can be tested by train-short/test-long extrapolation, computation length scaling, local-transition reuse, and termination generalization.
-
-\begin{definition}[Budgeted closure signature]
-For a fixed trained machine $m$ and explicit context/step budget $\mathcal B_{\max}$, define
-\[
-\Sigma_{m,\mathcal B_{\max}}=(K_{\rm train},K_{\rm test},K_{\rm prefix},
-\rho_{\rm step},\rho_{\rm stop},g(K),f_{\rm fail}),
-\]
-where $K_{\rm prefix}$ is the largest $k$ for which \emph{every tested} complexity $1\le j\le k$ passes the multi-seed gate. This contiguous-prefix definition prevents an isolated high-$K$ success from hiding an earlier failure. The remaining entries are local-transition and stopping reliability, observed computation-length scaling, and the first classified failure. This is a finite empirical object, not resource-scheduled closure.
-\end{definition}
-
-\subsection{Axis 5: in-context information}
-ICL changes what facts, rules, or parameters are available without changing weights. Separate fact acquisition from procedure acquisition. Contextual tasks should be classified as copy, constraint completion, finite task selection, parametric rule induction, or compositional/procedural induction.
-Holding $X$ fixed while varying $D$ is essential. Even when $I(Y;D\mid X)>0$, controls must distinguish copying, elimination, task selection, parameter estimation, and construction of a reusable procedure.
-
-\subsection{Axis 6: harness and tool augmentation}
-External execution may expand representable computation, improve acquisition, stabilize execution, or merely save resources. These are different claims. A proper factorial comparison crosses controller $C_0$--$C_3$ with tool semantics rather than placing ``tools'' above autoregression on one ladder. Without controller-matched and tool-matched baselines, delegated computation can be mistaken for neural acquisition.
+\begin{proposition}[Finite observations do not establish closure]
+For any finite evaluated input--output set consistent with a resource-scheduled procedure, a finite lookup machine agrees on all observations and diverges on an unobserved legal input.
+\end{proposition}
+\begin{proposition}[Budgeted local composition]
+If $D$ is closed under deterministic $T:D\to D$, and $C$ exactly preserves state, invokes/integrates $T$, and applies a total correct stop rule, then $T^k(x)$ is representable whenever all states and trace fit $\mathcal B$.
+\end{proposition}
+Independent reliability $r_{\rm stop}\prod_i r_i$ is only a baseline; acquisition and reliability are separate.
 
 \section{Information interfaces and tool algebra}
-An information interface $I(q)=D$ changes the evidence available to the controller. Its characteristic contribution is a conditional-entropy reduction $H(Y\mid X,D)<H(Y\mid X)$, not necessarily a stronger inference procedure. Basic retrieval-augmented generation is therefore approximated by
-\[
-q\longmapsto I(q)=D\longmapsto F_\theta(q,D),
-\]
-or ``external information selection plus in-context computation.'' Ranking, query decomposition, iterative search, and filtering may add control or computation, but must be classified separately from retrieval itself.
+Retrieval changes evidence: $q\mapsto I(q)=D\mapsto F_\theta(q,D)$. Tools are semantic: $T_0$ lookup, $T_1$ local transition, $T_2$ transform, $T_3$ search/closure, $T_4$ programmable executor.
+\begin{table}[H]\centering\scriptsize\sloppy
+\begin{tabularx}{\linewidth}{lYYYY}\toprule&$C_0$&$C_1$&$C_2$&$C_3$\\\midrule No tool&one-shot&generation&typed scratchpad&environment loop\\ $T_0$&evidence&retrieve/generate&evidence state&iterative retrieval\\ $T_1$&one call&serialized calls&current/counter&parent iteration\\ $T_2$&delegated transform&calculator/PAL&expression/result&CAS/SQL\\ $T_3$&delegated answer&closure call&query/result&search\\ $T_4$&run code&generate/execute&program state&code agent\\\bottomrule\end{tabularx}
+\caption{Controller $\times$ tool configurations, not an intelligence ladder.}\end{table}
+For information $I_s$, acquisition $Q$, and execution $E$, $P(I_s\cap Q\cap E)=P(I_s)P(Q\mid I_s)P(E\mid Q,I_s)$. This equals endpoint success only when shortcut branches are excluded. The heterogeneous-network extension is developed separately in Paper 0.2.
 
-The tool coordinate is semantic. We use: $T_0$, information lookup such as \texttt{retrieve} or \texttt{read}; $T_1$, a local transition such as \texttt{parent}, \texttt{neighbor}, or \texttt{successor}; $T_2$, a deterministic transformation such as arithmetic, sorting, simplification, or unification; $T_3$, search or closure such as \texttt{root}, \texttt{shortestPath}, or recursive SQL; and $T_4$, a programmable executor such as Python, shell, SQL, or Cypher. A single $T_2$ or $T_3$ call may hide many elementary steps. A $T_4$ interpreter may be universal under suitable language and resource assumptions, yet this says nothing about learned program synthesis, reliability, description length, or efficiency.
-
-Let $\langle\mathbb T\rangle_C^{\mathcal B}$ denote computations obtainable by finite, budgeted composition of $\mathbb T$ under controller $C$. A $C_3$ controller with \texttt{parent} can represent repeated $\operatorname{parent}^k$ if it also represents state update and termination. Supplying \texttt{root} instead moves the task-defining closure inside the tool. Supplying an interpreter $T_{\rm int}(p,x)=p(x)$ moves the learned problem further toward program synthesis and call reliability. Computability equivalence between two interfaces therefore does not imply equal acquisition probability or cost.
-
+\section{Classical theory and related work}
 \begin{table}[H]\centering\scriptsize
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.13\linewidth}YYYY}
-\toprule
-Tool/information & $C_0$ fixed pass & $C_1$ autoregressive & $C_2$ structured state & $C_3$ iterative control\\\midrule
-None & one-shot prediction & ordinary generation; CoT & typed scratchpad & repeated model/environment loop\\
-$T_0$ lookup & basic RAG context & retrieve then generate & cited/evidence state & iterative RAG\\
-$T_1$ local & one external step & serialized local calls & explicit current/counter & GraphRAG traversal; parent iteration\\
-$T_2$ transform & delegated transform & calculator/PAL call & typed expression/result & CAS or nonrecursive SQL agent\\
-$T_3$ closure & delegated answer & closure API call & explicit query/result & shortest-path or recursive-query agent\\
-$T_4$ interpreter & execute supplied program & generate then execute & program plus execution state & code/SQL/Cypher agent\\
-\bottomrule
-\end{tabularx}
-\caption{Controller $\times$ tool/information product space. Entries are examples, not formal equivalence classes; state, budget, and training remain separate coordinates.}\label{tab:controller-tool}
-\end{table}
+\begin{tabularx}{\linewidth}{p{.2\linewidth}p{.12\linewidth}p{.16\linewidth}p{.1\linewidth}YY}\toprule Topic/work&Pass&Assumptions&Model&Evidence&Boundary here\\\midrule Hahn; Hao&fixed&attention restrictions&encoder&theory&acquisition\\ Merrill--Sabharwal; Chiang&fixed&log precision&encoder&theory&learned frontier\\ Strobl survey&fixed&variant-dependent&both&survey&schema\\ Merrill--Sabharwal CoT; Li&AR&serial tokens&decoder&theory&acquisition\\ Joshi; Amiri Bavandpour&AR&iterated/hard attention&decoder&theory&finite learned $K$\\ Elhage; Olsson; Meng&fixed activations&trained finite&decoder&mechanistic&causal vs geometric\\ Dziri; Huang&trained&distribution-specific&decoder&empirical/theory&task controls\\\bottomrule\end{tabularx}
+\caption{Topic-organized comparison: assumptions do not transfer across pass, precision, or encoder/decoder setting.}\end{table}
+\paragraph{Fixed one-pass.} Results depend on attention, precision, positions, and uniformity \cite{hahn2020,hao2022,merrill2022,merrill2023parallel,merrill2023logic,chiang2023,strobl2024}; universality is representability, not acquisition \cite{yun2020,perez2021}.
+\paragraph{Autoregressive/CoT.} Serial tokens change expressivity under explicit assumptions \cite{merrill2024cot,li2024,joshi2025,bavandpour2025}.
+\paragraph{Mechanistic circuits.} Residual decomposition, induction heads, and causal tracing distinguish description from necessity \cite{elhage2021,olsson2022,meng2022}.
+\paragraph{Composition limits.} Endpoint success can conceal brittle, distribution-specific computation \cite{dziri2023,huang2025}.
 
-\subsection{Delegation and four kinds of gain}
-For benchmark function $f$, a tool pipeline can be written conceptually as
-\[
-f=g\circ T\circ h,
-\]
-where $h$ serializes arguments, $T$ performs an external operation, and $g$ integrates the result. With $T=\operatorname{parent}$, root finding still requires controller-side iteration and termination. With $T=\operatorname{root}$, the benchmark is directly delegated. Every tool result should identify where the task-defining computation occurs.
-
-Four gains must be reported separately: \emph{computational gain}, when a resource makes a computation representable under stated base-machine constraints; \emph{acquisition gain}, when it raises $P_{\rm acquire}$ although both machines can represent the procedure; \emph{execution-reliability gain}, when it raises $P_{\rm exec}(\text{success}\mid\text{acquired})$; and \emph{efficiency gain}, when it reduces examples, generated steps, errors, latency, memory, or model size. Endpoint accuracy alone cannot identify which occurred.
-
-Let $I_s$ be information sufficiency, $Q$ successful procedure acquisition, and $E$ successful execution conditional on acquisition. The chain rule gives the gated-event identity
-\[
-\begin{aligned}
-P(I_s\cap Q\cap E)={}&P(I_s)P(Q\mid I_s)P(E\mid Q,I_s).
-\end{aligned}
-\]
-This equals endpoint success only when the benchmark definition makes success impossible outside the gated conjunction. Otherwise shortcut, guessing, or direct-delegation branches must be included separately, as in the mixture model below. No independence is assumed.
-Tool execution further factors into action selection, argument correctness, tool success, result integration, and termination. These conditional events are the natural failure taxonomy for Paper 0.9.
-
-\begin{proposition}[Direct delegation]
-If tool $T$ computes benchmark target $f$ exactly and a controller reliably serializes the input and interprets the output, success establishes acquisition of the call-and-integrate interface, not neural acquisition of $f$.
-\end{proposition}
-\noindent The distinction is empirical: argument formation and result use may remain difficult, but the defining computation occurs in $T$.
-
-\begin{proposition}[Budgeted composition of a local primitive]
-Let $D$ be closed under the deterministic primitive $T:D\to D$. If controller $C$ exactly serializes and preserves the current state, invokes $T$ with the correct argument, integrates its result, and applies a total correct stopping rule on the declared domain, then $T^k(x)$ is representable for every finite $k$ whose intermediate states and trace fit $\mathcal B$.
-\end{proposition}
-\noindent This is a representability statement, not a guarantee that $\Pi$ acquires the controller. Reliability is separate: if each of the $k$ transitions and the stop decision succeeds independently with probabilities $r_1,\ldots,r_k,r_{\rm stop}$, trajectory reliability is $r_{\rm stop}\prod_i r_i$; without independence this product is only a baseline.
-
-\subsection{Common systems are compound configurations}
-\begin{sloppypar}
-RAG, GraphRAG, calculators, and agents are application patterns rather than single computational classes. GraphRAG is heterogeneous: \texttt{neighbor(v)} is $T_1$, while community aggregation is a substantial $T_2$-like transform. Shortest-path and common-ancestor APIs are $T_3$; Cypher is a $T_4$-like programmable query interface. Microsoft GraphRAG combines graph construction, network analysis, retrieval, prompting, and summarization; its product name does not determine one row of the algebra \cite{edge2024}.
-\end{sloppypar}
-
-\begin{table}[H]\centering\scriptsize
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.14\linewidth}>{\raggedright\arraybackslash}p{.09\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}YY}
-\toprule
-System & Controller & Information & Tool algebra & Added resource & Task-defining computation\\\midrule
-One-shot / CoT & $C_0/C_1$ & prompt & none & pass / serial tokens & learned controller\\
-Basic / iterative RAG & $C_0,C_1/C_3$ & retrieved documents & $T_0$ & external evidence & retrieval plus in-context use\\
-Local GraphRAG & $C_3$ & graph & $T_1$ neighbor & graph access, iteration & controller traversal\\
-Search GraphRAG & $C_3$ & graph & $T_3$ path/search & delegated closure & graph engine\\
-Calculator / CAS & $C_1/C_3$ & prompt & $T_2$ & arithmetic/symbolic engine & often external engine\\
-SQL agent & $C_3$ & database & $T_2/T_4$ & query language/engine & split; recursive SQL can close\\
-Code interpreter & $C_3$ & files/state & $T_4$ & loops, recursion, memory & synthesized program + runtime\\
-ReAct / multi-tool & $C_3$ & observations & mixed & action--observation loop & depends on selected primitive\\
-\bottomrule
-\end{tabularx}
-\caption{System mapping. Calculator serialization, CAS operations, SQL planning, and code generation remain learned tasks even when execution is external.}\label{tab:systems}
-\end{table}
-
-\section{Task classes by required state}
+\section{Late empirical anchors}
 \begin{table}[H]\centering\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.12\linewidth}>{\raggedright\arraybackslash}p{.22\linewidth}>{\raggedright\arraybackslash}p{.18\linewidth}YY}
-\toprule
-Class & Required computation & Example & One sufficient resource pattern & Empirically helpful resource\\\midrule
-A: local & $x\mapsto f(x)$ & parent & $C_0$ or one $T_1$ call & width/data or reliable call\\
-B: fixed composition & $f^k(x)$ & grandparent & finite $C_0$ depth or bounded trace & $C_1/C_2$ state\\
-C: termination closure & iterate to predicate & root & recurrence + stop & $C_3+T_1$; $T_3$ delegates\\
-D: variable count & $(x,k)\mapsto(f(x),k-1)$ & ancestor$_k$ & counter/state + recurrence & $C_2/C_3+T_1$\\
-E: multi-state & update several pointers & paired traversal & tuple state + recurrence & typed $C_2$ fields\\
-F: search & frontier/visited set & proof search & memory + branching control & $C_3$; $T_3$ delegates search\\
-G: binding & environment $\sigma$ & unification & substitution state & $C_2$ or $T_2$ unifier\\
-H: proof state & repeated rule choice & theorem proving & structured state + control & $C_3$ plus local rules\\\bottomrule
-\end{tabularx}
-\caption{Task-state progression. The fourth column gives sufficient sketches, not architectural lower bounds; ``helpful'' is an empirical hypothesis, and closure/search tools may delegate the task.}
-\end{table}
+\begin{tabularx}{\linewidth}{lYY}\toprule Paper&Axis&Status/illustration\\\midrule 0.5&internal composition&evidence; non-monotone depth, distributed heads\\ 0.6&semantic frontier&evidence; budget--allocation interaction\\ 0.7&formal inference&infrastructure; learned frontier pending\\ 0.8&information/ICL&evidence; sufficiency vs acquisition\\ 0.85&AR recurrence&Stage 1; no $K=4$ acquisition or AR gain\\ 0.9&tools/harness&pending\\\bottomrule\end{tabularx}
+\caption{The framework does not depend on these bounded series results.}\end{table}
 
-\section{A learned-computation phase diagram}
-For machine class $\mathcal M$, task family $\tau$, complexity $\mathbf c$, and training process $\Pi$, define
-\[
-A(\tau,\mathbf c;\mathcal M,\Pi),\qquad P_{\rm acquire}(\tau,\mathbf c;\mathcal M,\Pi).
-\]
-Here $\Pi$ is a distribution over initialization $s_\theta$, minibatch/order $s_b$, generator $s_g$, and optimizer/hyperparameters $h$, not a single lucky run:
-\[
-P_{\rm acquire}=\Pr_{s_\theta,s_b,s_g,h}\{A\ge\gamma\}.
-\]
-Shortcut and negative-control metrics are separately named gates rather than an undefined conjunct inside acquisition. For a tested domain $\Omega_{\tau,\mathbf c}$, coverage is the measured mass or fraction on which the gate holds. The internal and autoregressive frontiers $K_{\rm internal}$ and $K_{\rm AR}$ are task- and protocol-specific projections of a generally non-rectangular competence region. A complete report distinguishes Bayes solvability, representability, learnability, reliable acquisition, coverage, composition frontier, recurrence frontier, and closure signature.
-
-Let $Q$ be the latent event that a reusable procedure was acquired and $S$ the event of evaluation success. Then
-\[
-P(S)=P(Q)P(S\mid Q)+P(\neg Q)P(S\mid\neg Q).
-\]
-The shorthand $P(S)\approx P_{\rm acquire}P(S\mid Q)$ is valid only when shortcut success in the $\neg Q$ class is negligible. Because $Q$ is not directly observed, controls and interventions identify a useful mixture model rather than a unique psychological state.
-
-\begin{proposition}[Local-error accumulation]
-If an execution requires $T$ transitions and, conditional on every previously correct state, each transition is correct independently with probability $1-\epsilon$, then exact trajectory success is $(1-\epsilon)^T\le e^{-\epsilon T}$.
-\end{proposition}
-\noindent Independence is a diagnostic baseline, not a default model: correlated errors, recovery, verification, or history-dependent attention can produce slower or faster decay. Reporting both local and sequence accuracy tests which regime applies.
-
-\begin{proposition}[Finite evidence does not establish closure]
-For any finite set of evaluated input--output observations consistent with at least one resource-scheduled closed procedure, there is a finite lookup machine that agrees with that procedure on every observation and diverges on some unobserved legal input.
-\end{proposition}
-\noindent Store the finitely many observed pairs and return a fixed wrong answer elsewhere. Thus finite evidence can support closure signatures and falsify particular bounded hypotheses, but cannot identify the universal procedure or prove its quantified claim.
-
-No empirical resource monotonicity is assumed. Although a larger architecture may contain a smaller computation representationally, its optimizer, implicit bias, attention geometry, and finite-data basin differ. Hence $P_{\rm acquire}(L+1)\ge P_{\rm acquire}(L)$ is an empirical hypothesis, not an axiom.
-
-Failure labels should include:
-\[
-\begin{gathered}
-\text{Bayes-impossible, missing fact, operator, composition, recurrence, counter/control,}\\
-\text{termination, search, context overflow, accumulated local error, acquisition-basin failure.}
-\end{gathered}
-\]
-
-\section{Relation to classical computation theory}
-Classical automata theory classifies languages and machines using memory, state transition, stack access, and recursion. Circuit complexity classifies computations by size, depth, fan-in, and gate type. The analogies below are conditional descriptions of resources, not identities between neural architectures and classical machines.
-
-A $C_0$ fixed Transformer is naturally compared with a bounded circuit only after specifying hard versus soft attention, numerical precision, positional encoding, uniformity, sequence-length scaling, and whether depth and size are fixed or grow. AC$^0$/TC$^0$-style statements established for one variant do not transfer automatically to another \cite{hahn2020,hao2022,merrill2022,strobl2024}. A $C_1$ autoregressive Transformer adds serial computational time through generated tokens; it is better described as a learned sequential transducer with readable serialized history than as a finite-state automaton absent an explicit finite-state restriction. Li et al.'s separation result makes this resource change precise under their assumptions \cite{li2024}.
-
-A $C_2$ scratchpad can serialize counters, stacks, substitutions, proof states, registers, or tape-like configurations. These analogies identify the state a task requires; they do not show that the architecture acquired a counter machine, pushdown automaton, register machine, or Turing machine. A $C_3$ tool controller resembles an instruction-set- or oracle-augmented machine, but ``oracle'' suppresses real tool cost and failure. A $T_4$ interpreter can provide general program execution under finite resources, making pure computability too coarse: learned program description, synthesis probability, execution reliability, and budget dominate practical behavior.
-
-The present program adds an empirical learned-machine dimension. A construction proving that a Transformer \emph{can} implement an operation establishes representability, not that SGD will find it from a finite generator. Turing completeness in principle does not imply reliable algorithm acquisition. Conversely, bounded empirical failure does not establish architectural impossibility.
-
-The desired bridge is
-\[
-\boxed{\begin{gathered}\text{machine resources}+\text{task structure}+\text{training distribution}\\
-\longrightarrow\text{acquisition and execution frontier}\end{gathered}}
-\]
-
-\section{Related work}
-Table~\ref{tab:related} locates the learned-machine layer relative to representative theory. The labels summarize theorem assumptions rather than asserting equivalence between models.
-\begin{table}[H]\centering\scriptsize
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.17\linewidth}>{\raggedright\arraybackslash}p{.13\linewidth}YYY}
-\toprule
-Work & Machine & Assumptions emphasized & Result type & Gap addressed here\\\midrule
-Hahn (2020) & fixed attention & bounded depth; formal-language setting & limitation/sensitivity & training and finite acquisition\\
-Hao et al. (2022) & fixed hard attention & circuit assumptions, precision & AC$^0$-related bounds & empirical competence regions\\
-Merrill et al. (2022) & saturated attention & asymptotic precision/size assumptions & threshold-circuit characterization & finite learned frontier\\
-P\'erez et al. (2021) & recurrent/encoded Transformer & explicit precision/encoding assumptions & Turing-completeness construction & probability of learning construction\\
-Strobl et al. (2024) & multiple variants & positions, precision, uniformity & expressivity survey & common reporting schema\\
-Li et al. (2024) & autoregressive CoT & serial intermediate tokens & expressivity separation & acquired finite $K_{\rm AR}$\\
-Joshi et al. (2025) & autoregressive learner & time-invariant generator & learning/sample analysis & seed and generator acquisition\\
-Bavandpour et al. (2025) & hard-attention CoT & scratchpad assumptions & length lower bounds & measured closure signatures\\
-Huang et al. (2025) & trained recognizer & regular-language distributions & training dynamics & broader task/resource phase diagram\\
-\bottomrule
-\end{tabularx}
-\caption{Representative related-work matrix. Precision, positional assumptions, and uniformity must be read from each theorem; no row transfers automatically to the finite models studied here.}\label{tab:related}
-\end{table}
-
-Formal-language and circuit-complexity analyses have established limitations and capabilities of fixed-depth Transformer variants under explicit assumptions \cite{hahn2020,hao2022}. Strobl et al. survey this literature and emphasize that conclusions depend critically on precision, positional encodings, attention definitions, and uniformity \cite{strobl2024}. Universality and Turing-completeness constructions establish strong representability under richer assumptions \cite{yun2020,perez2021}, but do not answer finite-data acquisition probability.
-
-Recent chain-of-thought theory is especially relevant. Li et al. show that intermediate autoregressive steps can enable inherently serial computations inaccessible to shallow one-pass models under their assumptions \cite{li2024}. Joshi et al. formalize learning with an iterated time-invariant next-token generator and analyze sample/computational complexity \cite{joshi2025}. Bavandpour et al. derive lower bounds on scratchpad length for algorithmic problems in hard-attention Transformers \cite{bavandpour2025}. Huang et al. study training dynamics for regular-language recognition \cite{huang2025}. These works motivate treating generated tokens as a computational resource rather than merely explanatory prose.
-
-Compound-system work supplies concrete configurations. Retrieval-augmented generation adds a learned retriever and retrieved evidence to generation \cite{lewis2020}. MRKL routes queries among neural and symbolic modules \cite{karpas2022}; Toolformer studies self-supervised acquisition of tool calls \cite{schick2023}; program-aided language models delegate execution of generated programs \cite{gao2023}; and ReAct interleaves learned reasoning traces, actions, and observations \cite{yao2023}. Their endpoints should be reanalyzed through Table~\ref{tab:controller-tool}: what information, state, primitive semantics, control, and budget changed, and was the observed gain computational, acquisitional, reliable, or efficient?
-
-Mechanistic evidence answers another layer. Induction-head work demonstrates circuit emergence and links it to in-context behavior \cite{olsson2022}; residual-stream decompositions provide a vocabulary for attributing component updates \cite{elhage2021}; and causal tracing tests necessity by controlled activation replacement rather than by geometry alone \cite{meng2022}. Circuit existence, causal necessity, acquisition dynamics, systematic generalization, and length/closure extrapolation are progressively stronger and should not be collapsed into one claim of ``understanding.''
-
-Our emphasis is different: measure learned finite-machine frontiers, acquisition probability, information sufficiency, and transitions between one-pass, recurrent, contextual, and harnessed execution in tiny models where causal inspection is feasible.
-
-\section{Distributed cognition and heterogeneous computational intelligence}
-The compound-machine formalism admits a broader, secondary interpretation: useful computation need not be localized in one model. Distributed cognition has long analyzed cognition at the level of people, representations, artifacts, and environment \cite{hutchins1995}. This systems stance is related to, but weaker than, the extended-mind thesis of Clark and Chalmers \cite{clark1998}. Nothing here requires a metaphysical claim that a database, API, or notebook literally constitutes a person's mind. The claim is operational: heterogeneous components can participate in one stateful computation, and the location of task-relevant work can be measured across their interfaces.
-
-\subsection{A heterogeneous computational graph}
-Extend a compound machine to a directed graph
-\[
-\mathcal G=(V,E),\qquad
-N_i:(X_i,S_i)\longrightarrow(Y_i,S_i'),\quad v_i\in V\text{ realizes }N_i,
-\]
-where an edge $e_{ij}:Y_i\to X_j$ is a communication channel or callable interface. Nodes may be learned models, humans, calculators, databases, retrievers, graph engines, theorem provers, interpreters, APIs, or microservices. This shared node notation asserts interface participation, not internal equivalence. A human and a deterministic service differ radically in adaptation, grounding, memory, failure, and mechanism even when both accept a request and return a result.
-
-For each node, retain a vector rather than an ``intelligence score'':
-\[
-\chi_i=(\mathcal F_i,c_i,\ell_i,r_i,a_i,m_i,\kappa_i),
-\]
-where $\mathcal F_i$ is its supported function family, $c_i$ cost, $\ell_i$ latency, $r_i$ reliability, $a_i$ adaptability/generalization, $m_i$ state capacity, and $\kappa_i$ its iteration or closure characteristics. A calculator is narrow and exact; an LLM is broad and adaptive but probabilistic; a database exposes a narrow query interface over large persistent state; a human is broadly adaptive and grounded but slow, costly, and working-memory limited. The vector makes complementarity visible without erasing mechanism.
-
-For goal $g$, a controller selects a possibly branching, stateful trajectory
-\[
-\pi_g=(N_{i_1},N_{i_2},\ldots,N_{i_T}),\qquad
-A(g;\mathcal G,\pi_g,\mathcal B).
-\]
-Writing $F_{\pi_g}=N_{i_T}\circ\cdots\circ N_{i_1}$ is useful shorthand, but real trajectories exchange messages, revisit nodes, branch on observations, and mutate state. Routing is itself a learned or programmed problem. A cautious design objective is to choose $\pi$ under accuracy, cost, latency, reliability, and resource constraints; no single scalar utility is assumed here.
-
-An orchestrating model need not implement every sub-operation internally, but it must recognize a subproblem, select a node, parameterize its interface, integrate the result, verify it when needed, update state, and continue or terminate. Corresponding conditional quantities include
-\[
-P_{\rm select},\quad P_{\rm parameterize},\quad P_{\rm integrate},\quad
-P_{\rm verify},\quad P_{\rm continue}.
-\]
-A perfect solver is useless behind an interface the controller cannot invoke. These terms refine the earlier decomposition into action choice, argument formation, and result integration. They make orchestration an empirical capability rather than a synonym for intelligence.
-
-\subsection{Reachable composition and distributed closure}
-Reachable network capability need not equal either the maximum or the simple union of node capabilities. Writing $\mathcal F_{\mathcal G}^{\rm reach}(\mathcal B)$ for functions executable through accessible interfaces under budget $\mathcal B$,
-\[
-\mathcal F_{\mathcal G}^{\rm reach}(\mathcal B)\ \text{need not equal}\ \bigcup_i\mathcal F_i,
-\qquad
-\mathcal F_{\mathcal G}^{\rm reach}(\mathcal B)\subseteq
-\left\langle\mathcal F_1,\ldots,\mathcal F_n\right\rangle_{\rm routing,state,budget}.
-\]
-Equality may hold in a degenerate graph. In general, routed composition can add functions that no node realizes alone, while inaccessible interfaces, bad serialization, missing state, unreliable routing, or insufficient budget can make some nominal node functions unreachable. The inclusion is relative to the declared routing, state, and budget semantics. This is the controller--state--information--tool algebra lifted from one compound machine to a network.
-
-A component may have only a finite measured frontier $K_i$, while the network exhibits a larger \emph{system-level} or \emph{distributed closure signature}. For example, an LLM that cannot reliably execute $f^{1000}$ internally may synthesize a loop and invoke a $T_4$ interpreter. Then $K_{\rm LLM}<K_{\rm LLM+interpreter}$ over the measured budget. The closure belongs to the routed system, and the LLM's learned contribution may be program synthesis and result integration rather than iteration. As before, finite context, calls, time, memory, and interpreter limits prohibit an unqualified claim of mathematical closure.
-
-\subsection{Real systems and non-equivalent nodes}
-Humans have long externalized memory and computation into speech, writing, notation, books, maps, calculators, computers, and networks. This is not a strict evolutionary ladder; it is a recurring pattern of persistent representation and specialized delegation. LLM-centered systems add a potentially useful node type: an adaptive semantic interface and probabilistic controller between rigid typed services. This flexibility complements, rather than dominates, the high reliability of narrow deterministic components.
-
-\begin{table}[H]\centering\scriptsize
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.15\linewidth}>{\raggedright\arraybackslash}p{.31\linewidth}YY}
-\toprule
-System & Representative nodes/route & Distributed contribution & Principal failure boundary\\\midrule
-RAG assistant & human $\to$ LLM $\leftrightarrow$ retriever/store & evidence access plus semantic integration & retrieval sufficiency, citation/use\\
-Graph assistant & LLM $\leftrightarrow$ graph store/API & local traversal or delegated search by API semantics & query choice, closure delegation\\
-Calculator/CAS & LLM $\to$ arithmetic/symbolic engine $\to$ LLM & semantic dispatch plus exact transform & serialization and interpretation\\
-Coding agent & human $\to$ LLM $\to$ editor/compiler/tests/repository & deterministic feedback on generated actions & patch validity, test coverage, stopping\\
-Scientific workflow & human, LLM, Python, simulator, database, statistics & heterogeneous modeling and verification loop & model choice, data validity, review\\
-Enterprise workflow & human, LLM, APIs, SQL, business rules & semantic routing among typed services & authorization, schema, policy, escalation\\
-\bottomrule
-\end{tabularx}
-\caption{Examples of heterogeneous goal execution. No row implies that humans, learned models, and services are mechanistically or cognitively equivalent.}\label{tab:distributed-examples}
-\end{table}
-
-The system abstraction can make it less practically important that one node internally realize every sub-operation, but it makes component science more important, not less: system capability depends on the actual frontier, calibration, and failure distribution of each node. A trajectory such as human $\to$ coding model $\to$ compiler $\to$ tests $\to$ repository $\to$ model $\to$ human distributes proposal, execution, checking, persistent state, and final judgment across non-equivalent components.
-
-\subsection{Reliability, verification, and qualified analogies}
-For a path with conditional node/call reliabilities $r_t$, $\prod_t r_t$ is only an independent-error baseline. Real systems contain correlated failures, retries, redundancy, self-correction, and escalation. A \emph{verification topology} can improve system reliability by routing generated code through a compiler and tests, a proof through a theorem checker, an API request through a schema validator, arithmetic through a calculator, or high-risk output through a human. Verification adds calls and latency, and is only useful when checks cover the relevant failure modes.
-
-Classical distributed systems supply helpful analogies---message passing, state, scheduling, latency, failure, retries, consistency, and resource allocation---but learned nodes are distribution-sensitive, semantic interfaces may be underspecified, and decomposition/routing may itself be inferred. Likewise, multi-agent LLM systems are the homogeneous special case $N_i=\mathrm{LLM}_i$; adding agents does not by itself create a stronger class. Node semantics and communication topology determine the change. Distributed problem solving and multi-agent research provide the established computational context for such coordination \cite{wooldridge2009}; Paper 0.1 contributes a connection to learned acquisition frontiers, tool algebra, reliability, and measured closure, not the broad novelty claim that cognition can be distributed.
-
-The practical unit of analysis may therefore be a heterogeneous computational network rather than an isolated model. That perspective remains downstream of the core theory: first characterize local machines and interfaces; then ask which compositions the graph can acquire, route, verify, and execute under finite resources.
-
-\section{Constructive representability calibration}
-The framework separates representability from acquisition; fixed-weight witnesses make that distinction concrete. We specify five fixed-weight task witnesses with identity residuals, causal finite-softmax attention, ReLU FF blocks, zero positional embeddings, and no LayerNorm or dropout. The M0 witnesses use a $C_0$ fixed-pass protocol; the M1 witnesses use a $C_1$ external autoregressive model loop that appends the argmax token and invokes the same model again. This driver is not a tool and performs no semantic transition itself. No weight is trained or fitted.
-
+\section{Conjectures and status}
 \begin{table}[H]\centering\small
-\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.19\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}>{\raggedright\arraybackslash}p{.12\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}YY}
-\toprule
-Task / data & Primary machine & $(L,H,d)$ & Full-domain result & Component controls & Constructive interpretation\\\midrule
-Successor / weights & FF-only & $(1,0,4)$ & 3/3; margin 1 & SA 0/3; SA+FF 3/3 & exact local linear/ReLU map\\
-Pair lookup / context & SA-only & $(1,1,9)$ & 18/18; margin $>.9999995$ & FF 6/18 ties; SA+FF 18/18 & finite-softmax key/value transport\\
-Grandparent / context & SA-only & $(2,1,20)$ & 2/2; margin $>.9999995$ & FF 0/2; SA+FF 2/2; one-layer SA 0/2 & bounded two-hop residual composition\\
-Root / context & recurrent SA-only & $(1,1,15)$ & 24/24 trajectories & FF 6/24; SA+FF 24/24 & one parent transition reused to depth 3\\
-Unary chain / context & recurrent SA-only & $(1,1,15)$ & 96/96 argmax-correct & FF 24/96; SA+FF 96/96 & one unary transition reused to length 4\\
-\bottomrule
-\end{tabularx}
-\caption{Milestones 1--2 manually weighted witnesses. ``SA'' and ``FF'' columns are encoding-relative controls, not universal architectural lower bounds.}\label{tab:manual-witnesses}
-\end{table}
+\begin{tabularx}{\linewidth}{p{.06\linewidth}p{.44\linewidth}Y}\toprule&Conjecture&Status\\\midrule C1&local acquisition need not imply composition&consistent with 0.6/0.85\\ C2&trained models often have bounded one-pass frontiers&consistent with 0.5/0.6\\ C3&multi-token state expands the measured frontier&not supported in 0.85 Stage 1; construction is representability only\\ C4&competent recurrence shifts failure toward control&pending\\ C5&context separates knowledge from procedure&consistent as design principle/0.8 taxonomy\\ C6&harnesses may improve reliability before expressivity&pending 0.9\\\bottomrule\end{tabularx}
+\caption{Falsifiable conjectures with bounded status language.}\end{table}
 
-For associative lookup, the desired scaled score is 16 and three other final-query scores are zero, giving finite probability $e^{16}/(e^{16}+3)=.999999662395$. Grandparent uses the same selector twice. The M1 witnesses reuse one fixed one-hop selector autoregressively: all 24 root trajectories through depth three and all 96 unary-chain trajectories through length four have the correct argmax, with minimum signed target margin .99999910. At the longest step, finite attention assigns the desired record probability .9999992122543974; ``exact'' refers to exhaustive argmax correctness, not a one-hot softmax. Reversed and fixed-shuffle context orders also pass. FF-only cannot read either contextual map. The declared legal domain uses one atomic, unique, complete map record per key; cycles, missing, duplicate or conflicting records, larger vocabularies, non-atomic serialization, and lengths beyond the positional budget are excluded. These constructions establish neither minimality, arbitrary-depth closure, robustness beyond that domain, nor SGD acquisition. Full matrices, both winner and signed-target margins, and per-step traces are under \path{results/manual_witnesses/}.
+\section{Discussion and conclusion}
+Validate identifiability; establish local competence; measure contiguous composition and recurrence frontiers; only then interpret mechanism. Fixed weights calibrate representability, while learned experiments measure acquisition. Resource-scheduled closure is a quantified property of one reusable procedure, not a long successful trace.
 
-\section{Empirical anchors from the series}
-These anchors occur after the framework because none is needed for its definitions or propositions. They are bounded observations, not universal claims.
+\appendix
+\section{Fixed-weight micro-Transformer constructions}
+All implementations use row vectors $XW$, not $WX$; attention is finite $\operatorname{softmax}(QK^\top/\sqrt{d_h})V$. Complete artifacts are under \path{results/manual_witnesses/}.
 
-\paragraph{Paper 0.5: one-pass refinement.} Across three controlled generators, depth improves predictive-class organization, usually non-monotonically. Signal grows faster than fluctuation; absolute margin variance does not contract. Local-attention reachability is necessary but insufficient, and head effects are distributed and non-additive. This anchors Axes 1--2 while falsifying simple monotone-depth, contraction, and stable-head-role stories.
+\subsection{FF-only successor}
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=8mm]\node[box](b){\texttt{<B>}\\$[0,1,0,0]$};\node[box,right=of b](f){residual + FF\\$x+\mathrm{ReLU}(xW_1)W_2$};\node[box,right=of f](c){\texttt{<C>}\\logits $[0,0,1,0]$};\draw[arr](b)--(f);\draw[arr](f)--(c);\end{tikzpicture}\caption{Successor, margin 1.}\end{figure}
+\[
+M=\begin{bmatrix}0&1&0&0\\0&0&1&0\\0&0&0&1\\0&0&0&0\end{bmatrix},\quad W_1=I_4,\quad W_2=M-I_4=\begin{bmatrix}-1&1&0&0\\0&-1&1&0\\0&0&-1&1\\0&0&0&0\end{bmatrix}.
+\]
+For legal one-hots, $x+\mathrm{ReLU}(xW_1)W_2=xM$. Result/control: 3/3; SA 0/3; SA+FF 3/3. Biases, positions, and attention are zero.
 
-\paragraph{Paper 0.6: competence and allocation.} Bounded structured attribute composition is a positive generator-specific result, but the original depth-general predicate phase passes no three-seed gate. A later capacity diagnostic finds that depth 8 makes \texttt{isAncestor} seed-stable on easy and medium tiers at 1x, while four other predicates remain far below competence. At twice the training budget, the complete baseline passes easy and medium but fails hard; depth eight passes all three selected tiers across three seeds, including hard at 99.7/99.5\% mean/worst accuracy. Optimization therefore moves the boundary and interacts with allocation. This remains a finite membership diagnostic, not a depth-only law or general predicate closure.
+\subsection{SA-only pair lookup}
+Architecture $L=1,H=1,d=9,d_h=3$, subspaces $[\mathrm{key}(3)|\mathrm{query}(3)|\mathrm{value/output}(3)]$.
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=6mm]\node[box](q){QUERY(B)};\node[box,right=of q](s){scores\\$[0,16,0,0]$};\node[box,right=of s](v){MAP(B,C)\\transport C};\node[box,right=of v](o){logits\\$[1.13\!\times\!10^{-7},1.13\!\times\!10^{-7},.999999662]$};\draw[arr](q)--(s);\draw[arr](s)--(v);\draw[arr](v)--(o);\end{tikzpicture}\caption{Finite key match and value transport.}\end{figure}
+Actual sparse blocks: $W_Q[4{:}6,:]=27.7128129211I_3=16\sqrt3I_3$, $W_K[1{:}3,:]=I_3$, $W_V[7{:}9,:]=I_3$, $W_O[:,7{:}9]=I_3$, others zero. Probabilities are $(1.125351\!\times\!10^{-7},.999999662395,1.125351\!\times\!10^{-7},1.125351\!\times\!10^{-7})$; margin .999999549859. Result/control: 18/18; FF 6/18 ties; SA+FF 18/18.
 
-\paragraph{Paper 0.8: information versus acquisition.} The D4 permutation-completion task is information-sufficient: under its declared prior, context reduces target uncertainty from $\log_2 3$ to zero. Yet none of five Pareto-small candidates passes all three seeds. In contextual-copy calibration, one competent checkpoint exhibits pair binding and later value routing, while fresh replications miss the 95\% three-seed gate. At 1,024 episodes, seeds 11 and 23 reach 100\%, whereas seed 37 moves from 52.1\% at nominal budget to 81.2\% at $2\times$ and 60.4\% at a targeted $4\times$ run. This directly motivates separating information sufficiency, physical mechanism after acquisition, and reliable acquisition.
+\subsection{Two-layer SA grandparent}
+Architecture $L=2,H=1,d=20,d_h=4$; subspaces are edge key, initial query, parent value, hop state, output.
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=5mm]\node[box](c){C};\node[box,above=of c](b){B};\node[box,above=of b](a){A};\node[box,above=of a](r){R};\draw[arr](c)--(b);\draw[arr](b)--(a);\draw[arr](a)--(r);\node[box,right=18mm of c](l1){L1: C selects C\(\to\)B\\(p=.999999662395)};\node[box,above=of l1](l2){L2: B selects B\(\to\)A\\(p=.999999662393)};\draw[arr](c)--(l1);\draw[arr](l1)--(l2);\end{tikzpicture}\caption{First hop is written to state; layer 2 reads it.}\end{figure}
+Layer 1 maps query $\to Q$, edge key $\to K$, and parent value $\to V\to$ hop state; layer 2 maps hop state $\to Q$, the same edge blocks to $K,V$, and writes output. Canonical selected probabilities are .999999662395 and .999999662393; final logits are $(1.125359\!\times\!10^{-7},.999999662393,1.125357\!\times\!10^{-7},0)$, margin .999999549857. Result/control: 2/2; FF and one-layer SA 0/2; SA+FF 2/2.
 
-\paragraph{Paper 0.85: recurrence acquisition.} On the corrected leakage-free unary-chain dataset, all four controller and supervision conditions are complete over three seeds. One-token, free-trace, and fully teacher-forced structured conditions pass only the trained prefix $K\le3$ and fail every tested $K\ge4$; the unsupervised structured-grammar condition has no contiguous passing prefix. Acquisition probability at $K=4$ is zero throughout, so no recurrence gain or closure signature is observed. This learned-model evidence is distinct from the fixed-weight M1 construction above.
+\subsection{Autoregressive root}
+Architecture $L=1,H=1,d=15,d_h=5$, reused by an external $C_1$ model loop.
+\begin{figure}[H]\centering\begin{tikzpicture}[node distance=6mm]\node[box](m){parent map};\node[box,right=of m](c){STATE C};\node[box,right=of c](sa){same fixed SA block};\node[box,right=of sa](b){emit B};\node[box,below=of sa](loop){append STATE B\\reuse same weights};\node[box,right=of loop](end){emit A, R, STOP};\draw[arr](m)--(c);\draw[arr](c)--(sa);\draw[arr](sa)--(b);\draw[arr](b)|-(loop);\draw[arr](loop)--(end);\end{tikzpicture}\caption{The driver appends argmax tokens but performs no semantic transition.}\end{figure}
+\begin{table}[H]\centering\small\begin{tabular}{ccccc}\toprule Step&Current&Target/prediction&Attention (p)&signed margin\\\midrule1&C&B/B&.999999549860&.999999437324\\2&B&A/A&.999999437324&.999999324789\\3&A&R/R&.999999324789&.999999212254\\4&R&STOP/STOP&.999999212254&.999999099719\\\bottomrule\end{tabular}\caption{Tracked canonical trace.}\end{table}
+Canonical, reversed, and fixed-shuffle orders each pass all 24 root cases; minimum margin .999999099719. FF passes 6/24 ties; SA+FF 24/24. Cycles, missing/duplicate/conflicting records, non-atomic encodings, larger vocabularies, and out-of-budget lengths are excluded.
 
-\paragraph{Papers 0.7 and 0.9: pending gates.} Paper 0.7 has exact CPU-validated propositional and unification generators, but no formal-model frontier is yet a finding. Paper 0.9 will compare scratchpad, proto-tool, and harness transitions. These planned comparisons are hypotheses, not empirical anchors.
+\section{Artifact and formal details}
+Complete $Q/K$, raw $QK^\top$, score, probability, $V$, residual, FF, and logit traces, signed and winner margins, matrices, legal rows, and controls are documented in \path{manual_transformer_witnesses.md} and generated by \path{src/cl/manual_transformers/}.
 
-\section{Implications for Paper 0.9}
-Paper 0.9 should not compare an undifferentiated ``model'' with an ``agent.'' Its primary factorial design crosses controller---one-token $C_0$, free autoregression $C_1$, structured state $C_2$, iterative control $C_3$---with tool---none, local $T_1$, deterministic $T_2$, closure/search $T_3$, and programmable $T_4$. The first contrast should be none versus a local primitive such as \texttt{parent(x)}. That leaves iteration and termination with the controller and therefore tests recurrence acquisition. A \texttt{root(x)} or shortest-path API is an upper delegation control; it tests calling and integration, not learned closure.
-
-For every trajectory Paper 0.9 should record information sufficiency, procedure acquisition, action selection, argument correctness, tool success, result integration, and termination. Conditional local accuracy and exact trajectory accuracy test the independent-error baseline; correlated failure and self-correction must be measured rather than assumed. Results should report controller-by-tool competence, call and token budgets, execution cost, and where the benchmark-defining computation occurs. This factorization connects failure modes to the compound machine instead of assigning them vaguely to ``agency.''
-
-\section{Core falsifiable conjectures}
-\paragraph{C1.} Reliable acquisition of a local operator does not imply reliable acquisition of its finite compositions.
-\paragraph{C2.} Many iterative task families exhibit a finite one-pass composition frontier for a fixed trained Transformer.
-\paragraph{C3.} Multi-token state generation substantially expands the measured composition frontier for tasks admitting a reusable local transition.
-\paragraph{C4.} After local competence, long-recurrence failure increasingly reflects state representation, termination, counters, and accumulated error.
-\paragraph{C5.} Supplying facts/rules in context separates factual memory failure from procedural failure.
-\paragraph{C6.} For some tasks, explicit harnesses greatly improve acquisition/execution reliability without changing what an ideal autoregressive Transformer could represent in principle.
-
-\section{Open problems}
-The framework sharpens eight questions. Which local operators have high acquisition probability at a fixed scale and distribution? Which resource interactions move one-pass composition frontiers? When does autoregressive state produce a stable train-short/test-long signature rather than a longer bounded repertoire? Which tasks genuinely require counters, multiple state variables, stacks, substitutions, or visited-state memory under a specified interface? Does context provide missing facts, choose among stored tasks, estimate parameters, or construct a transition? When does a harness enlarge the semantic machine rather than stabilize an already representable trajectory? Can empirical acquisition boundaries be connected to circuit or automata classes without discarding precision and uniformity assumptions? Finally, what generator and curriculum properties favor a reusable transition over memorized finite coverage?
-
-\section{Conclusion}
-A theory of computation for LLMs should distinguish what a model can represent, what training can reliably acquire, what one pass can compose, which finite closure signatures autoregressive recurrence exhibits, what context contributes as information, and where external execution performs the task. The computational object in a modern application is not the language model alone: it is a learned transition map scheduled by a controller protocol, embedded in state and information interfaces and a tool algebra under finite resource bounds; heterogeneous graphs extend the same accounting across non-equivalent nodes. The fixed-weight witnesses calibrate representability, while the learned-model anchors show that acquisition can fall far short even on the corresponding bounded recurrence. Classical computability characterizes what such machines can represent in principle. A theory of learned machines must additionally characterize which procedures training discovers, with what probability, over which contiguous complexity frontier, at what cost, and with what execution reliability.
-
-\begin{sloppypar}
-\begin{thebibliography}{99}
-\raggedright
-\bibitem{hahn2020} M. Hahn. Theoretical Limitations of Self-Attention in Neural Sequence Models. \emph{TACL}, 8:156--171, 2020. doi:10.1162/tacl\_a\_00306.
-\bibitem{hao2022} Y. Hao, D. Angluin, and R. Frank. Formal Language Recognition by Hard Attention Transformers: Perspectives from Circuit Complexity. \emph{TACL}, 10:800--810, 2022. doi:10.1162/tacl\_a\_00490.
-\bibitem{perez2021} J. P\'erez, P. Barcel\'o, and J. Marinkovi\'c. Attention is Turing-Complete. \emph{JMLR}, 22(75):1--35, 2021.
-\bibitem{yun2020} C. Yun et al. Are Transformers Universal Approximators of Sequence-to-Sequence Functions? \emph{ICLR}, 2020. OpenReview:ByxRM0Ntvr.
-\bibitem{strobl2024} L. Strobl, W. Merrill, G. Weiss, D. Chiang, and D. Angluin. What Formal Languages Can Transformers Express? A Survey. \emph{TACL}, 12:543--561, 2024. doi:10.1162/tacl\_a\_00663.
-\bibitem{li2024} Z. Li, H. Liu, D. Zhou, and T. Ma. Chain of Thought Empowers Transformers to Solve Inherently Serial Problems. \emph{ICLR}, 2024. arXiv:2402.12875.
+\begin{sloppypar}\begin{thebibliography}{99}\raggedright
+\bibitem{hahn2020} M. Hahn. Theoretical Limitations of Self-Attention in Neural Sequence Models. \emph{TACL} 8:156--171, 2020.
+\bibitem{hao2022} Y. Hao, D. Angluin, R. Frank. Formal Language Recognition by Hard Attention Transformers. \emph{TACL} 10:800--810, 2022.
+\bibitem{merrill2022} W. Merrill, A. Sabharwal, N. Smith. Saturated Transformers are Constant-Depth Threshold Circuits. \emph{TACL} 10:843--856, 2022.
+\bibitem{merrill2023parallel} W. Merrill, A. Sabharwal. The Parallelism Tradeoff. \emph{TACL} 11:531--545, 2023. doi:10.1162/tacl\_a\_00562.
+\bibitem{merrill2023logic} W. Merrill, A. Sabharwal. A Logic for Expressing Log-Precision Transformers. \emph{NeurIPS} 36, 2023. arXiv:2210.02671.
+\bibitem{chiang2023} D. Chiang, P. Cholak, A. Pillay. Tighter Bounds on the Expressivity of Transformer Encoders. \emph{ICML}, PMLR 202:5544--5562, 2023.
+\bibitem{strobl2024} L. Strobl et al. What Formal Languages Can Transformers Express? \emph{TACL} 12:543--561, 2024.
+\bibitem{yun2020} C. Yun et al. Are Transformers Universal Approximators? \emph{ICLR}, 2020.
+\bibitem{perez2021} J. P\'erez et al. Attention is Turing-Complete. \emph{JMLR} 22(75):1--35, 2021.
+\bibitem{merrill2024cot} W. Merrill, A. Sabharwal. The Expressive Power of Transformers with Chain of Thought. \emph{ICLR}, 2024. OpenReview:NjNGILPh8Wh.
+\bibitem{li2024} Z. Li et al. Chain of Thought Empowers Transformers to Solve Inherently Serial Problems. \emph{ICLR}, 2024.
 \bibitem{joshi2025} N. Joshi et al. A Theory of Learning with Autoregressive Chain of Thought. \emph{COLT}, PMLR 291:3161--3212, 2025.
-\bibitem{bavandpour2025} A. Amiri Bavandpour, X. Huang, M. Rofin, and M. Hahn. Lower Bounds for Chain-of-Thought Reasoning in Hard-Attention Transformers. \emph{ICML}, PMLR 267:3274--3306, 2025. arXiv:2502.02393.
-\bibitem{huang2025} R. Huang, Y. Liang, and J. Yang. How Transformers Learn Regular Language Recognition: A Theoretical Study on Training Dynamics and Implicit Bias. \emph{ICML}, PMLR 267:25516--25549, 2025.
-\bibitem{merrill2022} W. Merrill, A. Sabharwal, and N. A. Smith. Saturated Transformers are Constant-Depth Threshold Circuits. \emph{TACL}, 10:843--856, 2022. doi:10.1162/tacl\_a\_00493.
-\bibitem{lewis2020} P. Lewis et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. \emph{NeurIPS}, 33, 2020.
-\bibitem{karpas2022} E. Karpas et al. MRKL Systems: A Modular, Neuro-Symbolic Architecture That Combines Large Language Models, External Knowledge Sources and Discrete Reasoning. arXiv:2205.00445, 2022.
-\bibitem{schick2023} T. Schick et al. Toolformer: Language Models Can Teach Themselves to Use Tools. \emph{NeurIPS}, 36, 2023. doi:10.52202/075280-2997.
-\bibitem{gao2023} L. Gao et al. PAL: Program-aided Language Models. \emph{ICML}, PMLR 202:10764--10799, 2023.
-\bibitem{yao2023} S. Yao et al. ReAct: Synergizing Reasoning and Acting in Language Models. \emph{ICLR}, 2023. OpenReview:WwGWMAktQY.
-\bibitem{edge2024} D. Edge et al. From Local to Global: A Graph RAG Approach to Query-Focused Summarization. arXiv:2404.16130, 2024.
-\bibitem{olsson2022} C. Olsson et al. In-context Learning and Induction Heads. \emph{Transformer Circuits Thread}, 8 March 2022 (non-peer-reviewed).
-\bibitem{elhage2021} N. Elhage et al. A Mathematical Framework for Transformer Circuits. \emph{Transformer Circuits Thread}, 22 December 2021 (non-peer-reviewed).
-\bibitem{meng2022} K. Meng, D. Bau, A. Andonian, and Y. Belinkov. Locating and Editing Factual Associations in GPT. \emph{NeurIPS}, 35, 2022. doi:10.52202/068431-1262.
-\bibitem{hutchins1995} E. Hutchins. \emph{Cognition in the Wild}. MIT Press, 1995. doi:10.7551/mitpress/1881.001.0001.
-\bibitem{clark1998} A. Clark and D. Chalmers. The Extended Mind. \emph{Analysis}, 58(1):7--19, 1998. doi:10.1093/analys/58.1.7.
-\bibitem{wooldridge2009} M. Wooldridge. \emph{An Introduction to MultiAgent Systems}, 2nd ed. Wiley, 2009. ISBN 978-0-470-51946-2.
-\end{thebibliography}
-\end{sloppypar}
+\bibitem{bavandpour2025} A. Amiri Bavandpour et al. Lower Bounds for Chain-of-Thought Reasoning. \emph{ICML}, PMLR 267:3274--3306, 2025.
+\bibitem{elhage2021} N. Elhage et al. A Mathematical Framework for Transformer Circuits. \emph{Transformer Circuits Thread}, 2021 (non-peer-reviewed).
+\bibitem{olsson2022} C. Olsson et al. In-context Learning and Induction Heads. \emph{Transformer Circuits Thread}, 2022.
+\bibitem{meng2022} K. Meng et al. Locating and Editing Factual Associations in GPT. \emph{NeurIPS} 35, 2022.
+\bibitem{dziri2023} N. Dziri et al. Faith and Fate: Limits of Transformers on Compositionality. \emph{NeurIPS} 36:70293--70332, 2023.
+\bibitem{huang2025} R. Huang et al. How Transformers Learn Regular Language Recognition. \emph{ICML}, PMLR 267:25516--25549, 2025.
+\end{thebibliography}\end{sloppypar}
 \end{document}
