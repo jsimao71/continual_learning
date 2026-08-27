@@ -1,0 +1,132 @@
+\documentclass[10pt]{article}
+\usepackage[margin=.78in]{geometry}
+\usepackage{amsmath,amssymb,booktabs,microtype,enumitem,hyperref,graphicx,float}
+\usepackage[T1]{fontenc}\usepackage{lmodern}
+\setlist{nosep,leftmargin=*}
+\title{Minimal Iterative Harnesses for Learned Reasoning:\\When a Tiny Transformer Becomes a Procedure Executor}
+\author{Paper 0.9 --- Model + Harness Computational Boundary}
+\date{Matched Paper 0.85 protocol --- August 2026}
+\begin{document}\maketitle
+\begin{abstract}
+Fixed Transformers have bounded forward computational depth, while many symbolic tasks have instance-dependent execution depth. We study the smallest external harness that turns a tiny Transformer from a predictor into an iterative controller, but require a five-machine comparison before attributing gains to tools: one-token output (M0), free autoregression (M1), structured scratchpad (M2), local proto-tool (M3), and explicit iterative harness (M4). The primary instrument exactly reuses Paper 0.85's shared-vocabulary, held-out-pair implication chains. Its local R0 gate passes three seeds, yet observed model-only Stage 1 has $K_{\rm M0}=K_{\rm M1}=3$ and zero recurrence gain; structured derivation supervision also stops at three. These are learned-model baselines. In contrast, the present T1/T2/T3 executions use an explicitly oracle selecting controller to validate tool semantics and cost accounting; they are not M3/M4 model results. Learned controller comparisons therefore remain pending. Tree traversal is retained as a later matched extension rather than the central initial benchmark.
+\end{abstract}
+
+\section{Core idea}
+A fixed Transformer computes \(y=F_\theta(x)\). The minimal harness permits
+\[
+s_{t+1}=F_\theta(x,s_t),
+\]
+where output may contain a special action token:
+\[
+\langle CALL,\ op,\ args\rangle.
+\]
+The harness deterministically evaluates the primitive, appends its typed result, and invokes the same model again.
+
+The effective machine transition must be reported explicitly. M0 performs one final-token prediction. M1 emits an unconstrained proposition trace. M2 emits typed \texttt{STATE/DERIVE/ANSWER} tokens but receives no semantic callback. M3 may issue one local tool call; M4 repeatedly selects calls or an answer under an explicit step budget. A comparison that skips M1/M2 cannot distinguish external semantic execution from writable-state or supervision effects.
+
+\section{Matched propositional prerequisite and dataset}
+The primary experiment reuses Paper 0.85's corrected R0-v2 and recurrence Stage1-v2. Its 64-symbol vocabulary is shared across train and test and every symbol has positive input/output training coverage. Ordered implication pairs, rather than lexical items, are disjoint: 3,226 train pairs and 806 held-out pairs with zero observed leakage. The three L2/W64/H4 R0 seeds pass entailed, consequent-swap, fact-mismatch, and rule-LHS controls at 98.8--100\%. An earlier all-new-symbol condition is only a lexical/OOV-output stress and is not the local-rule prerequisite.
+
+Proof training is bounded to $K\le3$. The matched initial test uses $K\in\{1,2,3,4,6,8\}$ with held-out edges and a query instruction that does not contain the target. An earlier query-target pilot is quarantined as invalid. Future shuffled-rule, distractor, branching, and ICL cells must preserve this generator rather than substitute an easier logic task.
+
+\section{Required machine ladder and current evidence}
+For matched architecture and task cells define
+\[
+K_{1\rm tok},\ K_{\rm AR},\ K_{\rm scratch},\ K_{\rm tool},\ K_{\rm harness}.
+\]
+Table~\ref{tab:status} distinguishes observed learned-model evidence from planned controller work.
+
+\begin{table}[H]\centering\small
+\begin{tabular}{llll}
+\toprule
+Machine & Current condition & Measured frontier & Status\\\midrule
+M0 & O0 final-only & 3 & observed learned model\\
+M1 & O1 free trace & 3 & observed learned model\\
+M2 & O2 structure, no state labels & none & observed learned model\\
+M2 & O3 full derivation labels & 3 & observed learned model\\
+M3 & selected local proto-tool & --- & planned accelerator\\
+M4 & iterative controller+harness & --- & planned accelerator\\
+\bottomrule
+\end{tabular}
+\caption{Evidence status for the matched ladder. Oracle-controller validation does not fill the M3/M4 rows.}\label{tab:status}
+\end{table}
+
+M0, M1, and fully supervised M2 are perfect at $K=1,2,3$ for every seed, then fail the three-seed gate at $K=4$; the $K=4$ acquisition fraction is zero for every condition. Hence
+\[
+K_{1\rm tok}=K_{\rm AR}=K_{\rm scratch,O3}=3,
+\qquad G_{\rm recurrence}=0.
+\]
+O1 transition accuracy falls to 23--32\% at $K=4$ and approximately 10--20\% at $K=6,8$, with degraded termination. O2 often learns formatting/termination but no exact trajectories. This supplies a sharp model-only boundary against which M3/M4 must be compared; it does not yet show that tools expand it.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.68\linewidth]{../paper0_85/results/recurrence_stage1_v2/figures/one_token_vs_multitoken_depth.png}
+\caption{Observed Paper 0.85 model-only baselines reused unchanged. M3/M4 curves are intentionally absent because learned controllers have not run.}
+\end{figure}
+
+\section{Minimal proto-tool interface}
+Use the smallest action grammar:
+\[
+\langle CALL,\ op,\ arg_1,\ldots,arg_n\rangle
+\]
+and terminal
+\[
+\langle ANSWER,\ y\rangle.
+\]
+No planner, search algorithm, hidden chain-of-thought, retrieval system, or extra LLM is allowed in the primary tiny-model experiment.
+
+Tool strength is a controlled resource. T1 evaluates only a controller-selected pair, \(\operatorname{apply}(current,rule)\to next\), and performs no search. T2 returns rules applicable to the current state, changing the selection/search burden. T3 returns the certified next proof state and is an upper control that moves most reasoning into the tool. The central condition begins with T1; T2 is introduced only to diagnose search, and T3 can never support the central model claim.
+
+\section{CPU-validated harness semantics}
+The corrected comparison infrastructure generates 384 Stage1-v2 test chains (64 at each of six depths). An explicitly oracle selecting controller executes each under T1, T2, and T3, producing 1,152 exact reference runs. All terminate correctly; calls equal $K$ and model-invocation placeholders equal $K+1$ by construction. These facts validate typed transitions, termination, and cost logging only. They do not estimate learned rule selection, call arguments, result integration, or stopping.
+
+The initial learned M3/M4 slice contains 15 planned cells: five machine labels crossed with the three existing model seeds at L2/W64/H4. Model-only M0--M2 rows are imported from observed Paper 0.85 artifacts; M3/M4 remain marked \texttt{planned\_accelerator}. A valid future result must separately report model forwards, generated tokens, tool calls, total context, wall time, final/transition/termination accuracy, invalid calls, and repeated-state loops.
+
+\section{Later extension: tree primitives}
+Begin with one primitive:
+\[
+parent(x)\rightarrow y
+\]
+plus a root/no-parent signal. Add children, equality, or level primitives only if necessary.
+
+\section{Later relational tasks}
+Compare model-only with model+harness on:
+\[
+parent(x),\ grandparent(x),\ root(x),\ isAncestor(x,y),
+\]
+\[
+sameParent(x,y),\ sameGrandparent(x,y),\ sameAncestorAtLevel_k(x,y).
+\]
+Vary tree depth, branching, distractors, and required traversal independently.
+These experiments follow the propositional M0--M4 comparison. Existing deterministic tree reference controllers validate the harness API but are not learned-model evidence.
+
+\section{Closure hypothesis}
+For a fixed model, \(d_{\max}<\infty\) may persist even with scale. For a harnessed model, if local transition competence is reliable,
+\[
+T_{\rm steps}\approx O(d)
+\]
+should permit much larger relation depth. The key question is whether the learned controller generalizes:
+\[
+\text{call parent; update state; test stop; repeat}.
+\]
+
+\section{Cross-paper benchmark families}
+Paper 0.5 supplies bounded pattern/refinement tasks; Paper 0.6 supplies semantic/tree relations; Paper 0.7 supplies propositional proof chains and first-order unification; Paper 0.8 supplies copy, contextual task selection, and structured rule induction. Not every task requires a tool: the objective is to determine where iteration changes the competence class.
+
+\section{Tiny-model phase diagram and pending analyses}
+Vary model resources \(L,W,H\) and harness budget \(T_{\max}\). Compare:
+model-only, one callback, bounded loop, and loop until a learned stop condition.
+
+The immediate experiment keeps L2/W64/H4 and the 1$\times$ Paper 0.85 budget fixed. Only after a three-seed M3/M4 result should the design expand architecture or budget. Required analyses then separate acquisition probability from execution frontier, local rule-selection error from exact tool execution, termination from transition accuracy, observed whole-proof success from $\prod_t p_t$, and computational failure from context overflow. Mechanistic CALL/ANSWER tracing and causal patching are restricted to competent controller cells.
+
+\section{Minimality}
+Shrink model size, special-token grammar, tool primitives, state fields, and maximum steps. The target is the smallest model+harness pair that exhibits systematic depth extrapolation unavailable to the model alone.
+
+\section{Reproducibility and evidence boundary}
+Matched generator construction is in \path{recurrence_chains.py}. Typed T1/T2/T3 semantics are in \path{proof_harness.py}; the comparison and status runners use the \path{paper09_paper085_*} prefix. Configuration \path{paper085_comparison_v2.json} pins the corrected shared-vocabulary split. Artifacts under \path{results/paper085_comparison_v2} include the 384-instance fingerprint, 1,152 reference runs, transition/cost tables, the 15-cell plan, and a status table joining Paper 0.85 observations to pending M3/M4 work. Manifests explicitly record \texttt{oracle\_controller=true} and \texttt{learned\_model\_results=false} for the harness validation. No tool or harness competence finding is reported in this draft.
+
+\section{Appendix: pretrained models}
+Use small pretrained models only as external validation, separating direct answer, proto-tool harness, native tool calling, and native reasoning/scratchpad modes where available. Corpus exposure and learned procedures remain uncontrolled.
+
+\section{Conclusion}
+Paper 0.9 asks where systematicity comes from when the same learned local operator is embedded in a minimal iterative machine. The present evidence fixes the baseline: local implication is reliably acquired, but ordinary one-token, free-trace, and fully supervised structured generation all stop at measured depth three. Whether a local tool or explicit loop expands that frontier, raises acquisition probability, or merely makes each selected transition exact remains an experiment rather than a conclusion. The object is not a sophisticated agent framework, but the smallest controlled resource addition that changes a measured boundary.
+\end{document}

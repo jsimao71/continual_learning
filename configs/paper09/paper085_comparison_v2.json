@@ -1,0 +1,16 @@
+{
+  "schema_version": "paper09.paper085_comparison_v2.v1",
+  "matched_recurrence_stage1": true,
+  "paper085_source": "docs/papers/paper0_85/results/recurrence_stage1_v2",
+  "paper085_dataset_hash": "pair_split_seed_8502_shared64_no_query_target",
+  "symbol_count": 64,
+  "pair_split_seed": 8502,
+  "test_pair_fraction": 0.2,
+  "test_depths": [1, 2, 3, 4, 6, 8],
+  "eval_per_depth": 64,
+  "machines": ["M0", "M1", "M2", "M3", "M4"],
+  "tool_strengths": ["T1", "T2", "T3"],
+  "model_seeds": [11, 23, 37],
+  "architecture_grid": {"layers": [2], "widths": [64], "heads": [4], "budgets": [1]},
+  "smoke_grid": {"layers": [2], "widths": [64], "heads": [4], "budgets": [1]}
+}

@@ -1,0 +1,7 @@
+K4_acquisition_probability,machine,measured_frontier,paper085_condition,recurrence_gain_vs_M0,result_status,supervision
+0.0,M0,3,O0,0,observed_learned_model,final_only
+0.0,M1,3,O1,0,observed_learned_model,free_trace
+0.0,M2,0,O2,-3,observed_learned_model,structured_no_state_labels
+0.0,M2,3,O3,0,observed_learned_model,full_teacher_forced
+,M3,,,,planned_accelerator,tool_action
+,M4,,,,planned_accelerator,tool_action

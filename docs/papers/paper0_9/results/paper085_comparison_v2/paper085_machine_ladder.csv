@@ -1,0 +1,16 @@
+budget,dataset_hash,heads,layers,learned_model_result,machine,seed,status,supervision,width
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M0,11,planned_accelerator,final_answer,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M1,11,planned_accelerator,free_ar,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M2,11,planned_accelerator,derivation,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M3,11,planned_accelerator,tool_action,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M4,11,planned_accelerator,tool_action,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M0,23,planned_accelerator,final_answer,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M1,23,planned_accelerator,free_ar,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M2,23,planned_accelerator,derivation,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M3,23,planned_accelerator,tool_action,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M4,23,planned_accelerator,tool_action,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M0,37,planned_accelerator,final_answer,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M1,37,planned_accelerator,free_ar,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M2,37,planned_accelerator,derivation,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M3,37,planned_accelerator,tool_action,64
+1,pair_split_seed_8502_shared64_no_query_target,4,2,False,M4,37,planned_accelerator,tool_action,64

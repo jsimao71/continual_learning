@@ -1,0 +1,12 @@
+{
+  "all_reference_harness_runs_correct": true,
+  "dataset_fingerprint": "c0b94ad7ee0277a244790ca6b95bb0c5f294f12ff274a7c48d810c36c4af5e2c",
+  "learned_model_results": false,
+  "matched_test_examples": 384,
+  "oracle_controller": true,
+  "paper085_dataset_hash": "pair_split_seed_8502_shared64_no_query_target",
+  "planned_accelerator_runs": 15,
+  "reference_runs": 1152,
+  "schema_version": "paper09.paper085_comparison_v2.v1",
+  "smoke": false
+}

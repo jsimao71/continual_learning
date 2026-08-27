@@ -1,0 +1,8 @@
+{
+  "depth_cells": 18,
+  "figure": "figures/paper085_reference_execution_cost.png",
+  "learned_model_results": false,
+  "reference_rows": 1152,
+  "result_type": "reference_oracle",
+  "schema_version": "paper09.paper085_analysis_v1"
+}

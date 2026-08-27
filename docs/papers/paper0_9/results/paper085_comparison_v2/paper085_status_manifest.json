@@ -1,0 +1,17 @@
+{
+  "M0_frontier": 3,
+  "M1_frontier": 3,
+  "learned_M3_M4_results": false,
+  "observed_machines": [
+    "M0",
+    "M1",
+    "M2"
+  ],
+  "pending_machines": [
+    "M3",
+    "M4"
+  ],
+  "recurrence_gain": 0,
+  "reference_controller_results_are_learned_results": false,
+  "schema_version": "paper09.paper085_status_v1"
+}
