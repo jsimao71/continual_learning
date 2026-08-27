@@ -1,2 +1,2 @@
-tokens,target,prediction,correct,logit_margin
-B,C,B,False,1.0
+tokens,target,prediction,correct,winner_runner_up_margin,signed_target_margin,logit_margin
+B,C,B,False,1.0,-1.0,1.0

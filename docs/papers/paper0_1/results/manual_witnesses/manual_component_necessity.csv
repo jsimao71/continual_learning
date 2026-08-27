@@ -3,4 +3,4 @@ successor,ff_only,False,True,False,False,sa_only:fail;ff_only:pass;sa_ff:pass
 pair_lookup,sa_only,True,False,False,False,sa_only:pass;ff_only:fail;sa_ff:pass
 grandparent,sa_only,True,False,False,False,sa_only:pass;ff_only:fail;sa_ff:pass;sa_only_1layer:fail
 root_recurrence,sa_only,True,False,True,False,sa_only:pass;ff_only:fail;sa_ff:pass
-implication_recurrence,sa_only,True,False,True,False,sa_only:pass;ff_only:fail;sa_ff:pass
+unary_chain_recurrence,sa_only,True,False,True,False,sa_only:pass;ff_only:fail;sa_ff:pass

@@ -2,7 +2,7 @@
 
 ## Scope
 
-Milestone 1 provides deterministic fixed-weight constructions for three M0/C0 tasks. No optimization or fitting occurs. These results establish only that the declared architectures can implement the tasks under the declared encodings. They do not establish architectural minimality, weight uniqueness, SGD acquisition, robustness outside the legal domain, or a cognitively canonical mechanism.
+Milestone 1 provides deterministic fixed-weight constructions for three M0 witnesses executed with the Paper 0.1 C0 fixed-pass protocol. No optimization or fitting occurs. These results establish only that the declared architectures can implement the tasks under the declared encodings. They do not establish architectural minimality, weight uniqueness, SGD acquisition, robustness outside the legal domain, or a cognitively canonical mechanism.
 
 The implementation uses row-vector weights, causal finite-softmax attention, identity residuals, ReLU FF blocks, zero positional embeddings, and no LayerNorm or dropout. Each topology records all matrices, including explicit zero matrices for absent components. Canonical traces include embeddings, Q, K, raw QK transpose products, scaled/masked scores, probabilities, V, head output, post-SA residual, FF preactivation and activation, post-FF residual, and final logits.
 
@@ -10,20 +10,20 @@ The implementation uses row-vector weights, causal finite-softmax attention, ide
 
 | Task | Controller | Data | Primary topology | L | H | d | Legal domain | Result | Controls |
 |---|---|---|---|---:|---:|---:|---:|---|---|
-| successor | M0/C0 | weights | FF-only | 1 | 0 | 4 | 3 inputs | 3/3, margin 1 | SA-only 0/3; SA+FF 3/3 |
-| associative pair lookup | M0/C0 | context | SA-only | 1 | 1 | 9 | 6 bijections x 3 queries | 18/18, minimum margin 0.99999955 | FF-only 6/18 ties; SA+FF 18/18 |
-| grandparent | M0/C0 | context | SA-only | 2 | 1 | 20 | both depth-2 nodes in fixed tree | 2/2, minimum margin 0.99999955 | FF-only 0/2; SA+FF 2/2; one-layer SA 0/2 |
+| successor | M0 witness / C0 protocol | weights | FF-only | 1 | 0 | 4 | 3 inputs | 3/3, margin 1 | SA-only 0/3; SA+FF 3/3 |
+| associative pair lookup | M0 witness / C0 protocol | context | SA-only | 1 | 1 | 9 | 6 bijections x 3 queries | 18/18, minimum margin 0.99999955 | FF-only 6/18 ties; SA+FF 18/18 |
+| grandparent | M0 witness / C0 protocol | context | SA-only | 2 | 1 | 20 | both depth-2 nodes in fixed tree | 2/2, minimum margin 0.99999955 | FF-only 0/2; SA+FF 2/2; one-layer SA 0/2 |
 
 All passing results use no recurrence, external iteration, information service, or tool. The contextual pair and edge records are atomic tokens with explicitly separated key/value features. This choice makes the circuit readable but is not claimed to be the smallest serialization.
 
 ## Milestone-2 result: bounded autoregressive reuse
 
-Milestone 2 adds two M1 witnesses. Both use the same one-layer, one-head transition circuit (`d_model=15`, `d_head=5`) once per generated token. The weights are fixed across steps; the generated symbol becomes the next query. Atomic map tokens again separate keys and values for readability.
+Milestone 2 adds two M1 witnesses executed with a C1 external autoregressive model loop. The driver appends the model's argmax output and calls the identical one-layer, one-head circuit (`d_model=15`, `d_head=5`) again; it is not a tool and performs no parent or unary transition itself. Atomic map tokens separate keys and values for readability.
 
 | Task | Controller | Data | Primary topology | Tested domain | Result | Controls |
 |---|---|---|---|---|---|---|
-| root traversal | M1 | contextual parent map | SA-only | all 6 three-node orderings x 4 starts; root depths 0--3 | 24/24 exact trajectories; minimum step margin 0.99999910 | FF-only 6/24; SA+FF 24/24 |
-| implication recurrence | M1 | contextual implication map | SA-only | all 24 four-atom orderings x 4 starts; chain lengths 1--4 | 96/96 exact trajectories; minimum step margin 0.99999910 | FF-only 24/96; SA+FF 96/96 |
+| root traversal | M1 witness / C1 protocol | contextual parent map | SA-only | all 6 three-node orderings x 4 starts; root depths 0--3 | 24/24 argmax-correct trajectories; minimum signed target margin 0.99999910 | FF-only 6/24; SA+FF 24/24 |
+| unary chain traversal | M1 witness / C1 protocol | contextual unary map | SA-only | all 24 four-symbol orderings x 4 starts; chain lengths 1--4 | 96/96 argmax-correct trajectories; minimum signed target margin 0.99999910 | FF-only 24/96; SA+FF 96/96 |
 
 For either task, a contextual `MAP_X_Y` token carries `X` in the key subspace and `Y` in the value subspace. A `STATE_X` token carries `X` only in the query subspace. One forward call retrieves `Y`; the autoregressive harness appends `STATE_Y` and invokes the identical block again:
 
@@ -31,9 +31,9 @@ For either task, a contextual `MAP_X_Y` token carries `X` in the key subspace an
 x_(t+1) = transition(x_t; fixed contextual map).
 ```
 
-The desired scaled score is 16 at every step. Previously generated state tokens have zero keys and add finite softmax leakage, so the desired probability decreases slightly with trajectory length. The minimum observed output margin remains 0.99999910. This is finite attention, and every step's actual scores, probabilities, residuals, FF intermediates, and logits are recorded. `STOP` is an explicit terminal mapping. FF-only's 25% trajectory accuracy consists of cases whose correct first output is the deterministic tie-break `STOP`; it has zero margin and cannot read the contextual map.
+The desired scaled score is 16 at every step. Previously generated state tokens have zero keys and add finite softmax leakage, so the desired probability decreases slightly with trajectory length; at the longest declared step it is 0.9999992122543974. The minimum observed signed target margin remains 0.99999910. “Exact” means exhaustive argmax correctness with positive margin, not one-hot softmax. Every step's scores, probabilities, residuals, FF intermediates, logits, winner margin, and signed target margin are recorded. `STOP` is explicit. FF-only's 25% trajectory accuracy consists of deterministic tie-break `STOP` cases with zero margin.
 
-These results demonstrate reuse through the maximum declared root depth three and implication length four. They do not prove arbitrary-depth correctness: increasing length adds zero-score distractors, eventually exceeds the declared positional matrix, and has not been exhaustively tested. They also do not show architectural minimality, that FF is universally unnecessary, or that training will acquire this circuit. Unary successor recurrence was not added because it would only reapply the already-exact local FF successor and would not sharpen the contextual-recurrence comparison.
+These results demonstrate reuse through root depth three and unary-chain length four. Reversed and fixed-shuffle map serializations also pass every case. The legal domain requires one atomic, unique, complete record per key and excludes cycles, missing records, duplicate/conflicting keys, larger vocabularies, non-atomic encodings, and lengths beyond the positional budget. The results do not prove arbitrary-depth correctness, minimality, universal FF dispensability, or acquisition. Unary successor recurrence was not added because it would merely reapply the already-exact local FF successor.
 
 ## Witness 1: local successor
 
@@ -63,7 +63,7 @@ Both finite-softmax layers assign more than 0.99999966 probability to their inte
 
 ## Artifact map and reproducibility
 
-Artifacts live under `results/manual_witnesses/{successor,pair_lookup,grandparent,root_recurrence,implication_recurrence}/{topology}`. Each topology contains embedding, positional, Q/K/V/O, FF, bias, and unembedding CSVs; exhaustive legal-domain results; a canonical example; and traced activations. M1 topology directories additionally contain every exhaustive generation step and canonical per-step trace trees. Each task root contains `construction.md`. Cross-task files are:
+Artifacts live under `results/manual_witnesses/{successor,pair_lookup,grandparent,root_recurrence,unary_chain_recurrence}/{topology}`. Each topology contains embedding, positional, Q/K/V/O, FF, bias, and unembedding CSVs; exhaustive legal-domain results; a canonical example; and traced activations. M1 topology directories additionally contain every exhaustive generation step and canonical per-step trace trees. Each M1 task root also contains tracked reversed and fixed-shuffle serialization controls. Each task root contains `construction.md`. Cross-task files are:
 
 - `manual_witness_summary.csv`: accuracy, margins, and expectation gates;
 - `manual_architectures.csv`: L/H/d, controller, data location, residual, and normalization choices;
@@ -71,7 +71,7 @@ Artifacts live under `results/manual_witnesses/{successor,pair_lookup,grandparen
 - `manual_sa_vs_ff.png`: component comparison;
 - `manual_two_hop_attention.png`: layerwise parent/grandparent selection.
 - `manual_autoregressive_summary.csv`, `manual_autoregressive_architectures.csv`, and `manual_autoregressive_component_necessity.csv`: M1-only gates and architecture metadata;
-- `manual_autoregressive_depth.png`: exact trajectory accuracy by generated transition count.
+- `manual_autoregressive_depth.png`: argmax-correct trajectory accuracy by generated transition count, with distinct line and marker styles.
 
 Regenerate with:
 

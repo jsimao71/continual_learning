@@ -1,7 +1,7 @@
-task,topology,controller,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax
-root_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
-root_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
-root_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True
-implication_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
-implication_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
-implication_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True
+task,topology,controller,machine_stage,controller_protocol,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax,execution_protocol,external_tool_iteration
+root_recurrence,sa_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+root_recurrence,ff_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,0,15,5,omitted,identity,True,autoregressive_model_loop,False
+root_recurrence,sa_ff,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,sa_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,ff_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,0,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,sa_ff,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False

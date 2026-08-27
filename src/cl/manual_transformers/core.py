@@ -99,6 +99,13 @@ class MicroTransformer:
         margin = float(final[order[-1]] - final[order[-2]])
         return self.output_labels[int(order[-1])], margin, trace
 
+    def signed_target_margin(self, trace: dict[str, Array], target: str) -> float:
+        """Target logit minus the best non-target logit (negative when target loses)."""
+        logits = trace["final_logits"][-1]
+        target_index = self.output_labels.index(target)
+        other = np.delete(logits, target_index)
+        return float(logits[target_index] - other.max())
+
 
 def zero_attention(d_model: int, d_head: int) -> AttentionWeights:
     return AttentionWeights(

@@ -62,6 +62,6 @@ def evaluate(model: MicroTransformer) -> list[dict]:
             "sequence": " ".join(tokens), "target": target, "prediction": prediction,
             "correct": prediction == target, "attention_probability": float(probabilities[desired]),
             "attention_probability_margin": float(probabilities[desired] - undesired.max()),
-            "logit_margin": margin,
+            "winner_runner_up_margin": margin, "signed_target_margin": model.signed_target_margin(trace, target), "logit_margin": margin,
         })
     return rows

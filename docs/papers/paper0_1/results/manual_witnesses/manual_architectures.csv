@@ -1,17 +1,17 @@
-task,topology,controller,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax
-successor,sa_only,M0/C0,weights,none,1,1,4,4,omitted,identity,True
-successor,ff_only,M0/C0,weights,none,1,0,4,4,omitted,identity,True
-successor,sa_ff,M0/C0,weights,none,1,1,4,4,omitted,identity,True
-pair_lookup,sa_only,M0/C0,context,none,1,1,9,3,omitted,identity,True
-pair_lookup,ff_only,M0/C0,context,none,1,0,9,3,omitted,identity,True
-pair_lookup,sa_ff,M0/C0,context,none,1,1,9,3,omitted,identity,True
-grandparent,sa_only,M0/C0,context,none,2,1,20,4,omitted,identity,True
-grandparent,ff_only,M0/C0,context,none,2,0,20,4,omitted,identity,True
-grandparent,sa_ff,M0/C0,context,none,2,1,20,4,omitted,identity,True
-grandparent,sa_only_1layer,M0/C0,context,none,1,1,20,4,omitted,identity,True
-root_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
-root_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
-root_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True
-implication_recurrence,sa_only,M1,context,none,1,1,15,5,omitted,identity,True
-implication_recurrence,ff_only,M1,context,none,1,0,15,5,omitted,identity,True
-implication_recurrence,sa_ff,M1,context,none,1,1,15,5,omitted,identity,True
+task,topology,controller,machine_stage,controller_protocol,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax,execution_protocol,external_tool_iteration
+successor,sa_only,M0 witness / C0 protocol,M0,C0_fixed_pass,weights,none,1,1,4,4,omitted,identity,True,single_forward_pass,False
+successor,ff_only,M0 witness / C0 protocol,M0,C0_fixed_pass,weights,none,1,0,4,4,omitted,identity,True,single_forward_pass,False
+successor,sa_ff,M0 witness / C0 protocol,M0,C0_fixed_pass,weights,none,1,1,4,4,omitted,identity,True,single_forward_pass,False
+pair_lookup,sa_only,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,1,1,9,3,omitted,identity,True,single_forward_pass,False
+pair_lookup,ff_only,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,1,0,9,3,omitted,identity,True,single_forward_pass,False
+pair_lookup,sa_ff,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,1,1,9,3,omitted,identity,True,single_forward_pass,False
+grandparent,sa_only,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,2,1,20,4,omitted,identity,True,single_forward_pass,False
+grandparent,ff_only,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,2,0,20,4,omitted,identity,True,single_forward_pass,False
+grandparent,sa_ff,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,2,1,20,4,omitted,identity,True,single_forward_pass,False
+grandparent,sa_only_1layer,M0 witness / C0 protocol,M0,C0_fixed_pass,context,none,1,1,20,4,omitted,identity,True,single_forward_pass,False
+root_recurrence,sa_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+root_recurrence,ff_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,0,15,5,omitted,identity,True,autoregressive_model_loop,False
+root_recurrence,sa_ff,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,sa_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,ff_only,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,0,15,5,omitted,identity,True,autoregressive_model_loop,False
+unary_chain_recurrence,sa_ff,M1 witness / C1 protocol,M1,C1_autoregressive,context,none,1,1,15,5,omitted,identity,True,autoregressive_model_loop,False

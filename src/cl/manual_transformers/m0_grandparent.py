@@ -75,6 +75,7 @@ def evaluate(model: MicroTransformer) -> list[dict]:
         rows.append({
             "sequence": " ".join(tokens), "target": target, "prediction": prediction,
             "correct": prediction == target, "layer1_parent_probability": float(layer1_p[first_edge]),
-            "layer2_grandparent_probability": second_probability, "logit_margin": margin,
+            "layer2_grandparent_probability": second_probability, "winner_runner_up_margin": margin,
+            "signed_target_margin": model.signed_target_margin(trace, target), "logit_margin": margin,
         })
     return rows

@@ -1,3 +1,3 @@
-sequence,target,prediction,correct,layer1_parent_probability,layer2_grandparent_probability,logit_margin
-EDGE_A_R EDGE_B_A EDGE_C_B QUERY_B,R,C,False,0.9999996623945898,0.25,0.0
-EDGE_A_R EDGE_B_A EDGE_C_B QUERY_C,A,C,False,0.9999996623945898,0.25,0.0
+sequence,target,prediction,correct,layer1_parent_probability,layer2_grandparent_probability,winner_runner_up_margin,signed_target_margin,logit_margin
+EDGE_A_R EDGE_B_A EDGE_C_B QUERY_B,R,C,False,0.9999996623945898,0.25,0.0,0.0,0.0
+EDGE_A_R EDGE_B_A EDGE_C_B QUERY_C,A,C,False,0.9999996623945898,0.25,0.0,0.0,0.0

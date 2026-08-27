@@ -98,7 +98,8 @@ def main(output: Path) -> None:
             write_trace(variant_root, trace)
             write_rows(variant_root / "canonical_example.csv", [{
                 "tokens": " ".join(tokens), "target": target, "prediction": prediction,
-                "correct": target == prediction, "logit_margin": canonical_margin,
+                "correct": target == prediction, "winner_runner_up_margin": canonical_margin,
+                "signed_target_margin": model.signed_target_margin(trace, target), "logit_margin": canonical_margin,
             }])
             accuracy = sum(bool(r["correct"]) for r in rows) / len(rows)
             expected = EXPECTED[task][topology]
@@ -106,14 +107,17 @@ def main(output: Path) -> None:
             summaries.append({
                 "task": task, "topology": topology, "legal_cases": len(rows), "correct_cases": int(accuracy*len(rows)),
                 "accuracy": accuracy, "expected_full_pass": expected, "observed_full_pass": passed,
-                "expectation_met": passed == expected, "minimum_logit_margin": min(float(r["logit_margin"]) for r in rows),
+                "expectation_met": passed == expected, "minimum_logit_margin": min(float(r["winner_runner_up_margin"]) for r in rows),
+                "minimum_signed_target_margin": min(float(r["signed_target_margin"]) for r in rows),
                 "claim_scope": "fixed_weight_constructive_representability_only",
             })
             architectures.append({
-                "task": task, "topology": topology, "controller": "M0/C0", "data_location": "weights" if task == "successor" else "context",
+                "task": task, "topology": topology, "controller": "M0 witness / C0 protocol", "machine_stage": "M0",
+                "controller_protocol": "C0_fixed_pass", "data_location": "weights" if task == "successor" else "context",
                 "tool": "none", "layers": len(model.layers), "heads": 1 if any(layer.use_sa for layer in model.layers) else 0,
                 "d_model": model.embeddings.shape[1], "d_head": model.layers[0].attention.W_Q.shape[1],
                 "layernorm": model.layernorm, "residual": model.residual, "finite_softmax": True,
+                "execution_protocol": "single_forward_pass", "external_tool_iteration": False,
             })
         primary = {"successor": "ff_only", "pair_lookup": "sa_only", "grandparent": "sa_only"}[task]
         necessity.append({

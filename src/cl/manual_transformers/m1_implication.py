@@ -1,4 +1,8 @@
-"""M1 implication-chain recurrence via the shared transition circuit."""
+"""M1 unary chain traversal via the shared transition circuit.
+
+The atomic MAP records can be read as unary implications, but this witness
+does not implement rule choice, proof search, conjunction, or logical control.
+"""
 from __future__ import annotations
 
 from itertools import permutations

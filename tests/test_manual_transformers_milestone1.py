@@ -12,7 +12,8 @@ def outcomes(builder, evaluator):
 def test_successor_exhaustive_component_pattern():
     assert outcomes(build_successor_variants, eval_successor) == {"sa_only": False, "ff_only": True, "sa_ff": True}
     rows = eval_successor(build_successor_variants()["ff_only"])
-    assert len(rows) == 3 and min(row["logit_margin"] for row in rows) == 1.0
+    assert len(rows) == 3 and min(row["winner_runner_up_margin"] for row in rows) == 1.0
+    assert min(row["signed_target_margin"] for row in rows) == 1.0
 
 
 def test_associative_lookup_all_bijections_and_queries():
@@ -20,7 +21,8 @@ def test_associative_lookup_all_bijections_and_queries():
     rows = eval_lookup(build_lookup_variants()["sa_only"])
     assert len(rows) == 18
     assert min(row["attention_probability_margin"] for row in rows) > .999
-    assert min(row["logit_margin"] for row in rows) > .999
+    assert min(row["winner_runner_up_margin"] for row in rows) > .999
+    assert min(row["signed_target_margin"] for row in rows) > .999
 
 
 def test_grandparent_complete_legal_domain_and_depth_control():
@@ -31,7 +33,8 @@ def test_grandparent_complete_legal_domain_and_depth_control():
     assert len(rows) == 2
     assert min(row["layer1_parent_probability"] for row in rows) > .999
     assert min(row["layer2_grandparent_probability"] for row in rows) > .999
-    assert min(row["logit_margin"] for row in rows) > .999
+    assert min(row["winner_runner_up_margin"] for row in rows) > .999
+    assert min(row["signed_target_margin"] for row in rows) > .999
 
 
 def test_canonical_traces_are_finite_and_complete():

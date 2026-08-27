@@ -34,6 +34,7 @@ def build_successor_variants() -> dict[str, MicroTransformer]:
 def evaluate(model: MicroTransformer) -> list[dict]:
     rows = []
     for source, target in LEGAL:
-        prediction, margin, _ = model.predict([TOKEN[source]])
-        rows.append({"input": source, "target": target, "prediction": prediction, "correct": prediction == target, "logit_margin": margin})
+        prediction, margin, trace = model.predict([TOKEN[source]])
+        rows.append({"input": source, "target": target, "prediction": prediction, "correct": prediction == target,
+                     "winner_runner_up_margin": margin, "signed_target_margin": model.signed_target_margin(trace, target), "logit_margin": margin})
     return rows

@@ -60,8 +60,11 @@ def build_transition_model(symbols: tuple[str, ...], topology: str, max_position
     return model, vocab
 
 
-def generate(model: MicroTransformer, vocab: TransitionVocabulary, mapping: dict[str, str], start: str, stop: str, max_steps: int = 12):
-    context = [vocab.fact(left, right) for left, right in mapping.items()]
+def generate(model: MicroTransformer, vocab: TransitionVocabulary, mapping: dict[str, str], start: str, stop: str, max_steps: int = 12, context_order: tuple[str, ...] | None = None):
+    order = context_order or tuple(mapping)
+    if set(order) != set(mapping) or len(order) != len(mapping):
+        raise ValueError("context_order must be a permutation of mapping keys")
+    context = [vocab.fact(left, mapping[left]) for left in order]
     sequence = context + [vocab.state(start)]
     generated, steps = [], []
     for step in range(1, max_steps + 1):
@@ -69,10 +72,13 @@ def generate(model: MicroTransformer, vocab: TransitionVocabulary, mapping: dict
         desired_position = context.index(vocab.fact(generated[-1] if generated else start, mapping[generated[-1] if generated else start]))
         probabilities = trace["layer1_probabilities"][-1]
         undesired = np.delete(probabilities, desired_position)
+        target = mapping[generated[-1] if generated else start]
+        signed_target_margin = model.signed_target_margin(trace, target)
         steps.append({
             "step": step, "current": generated[-1] if generated else start,
             "target": mapping[generated[-1] if generated else start], "prediction": prediction,
-            "correct": prediction == mapping[generated[-1] if generated else start],
+            "correct": prediction == target,
+            "winner_runner_up_margin": margin, "signed_target_margin": signed_target_margin,
             "logit_margin": margin, "attention_probability": float(probabilities[desired_position]),
             "attention_probability_margin": float(probabilities[desired_position] - undesired.max()),
             "sequence": " ".join(sequence), "trace": trace,

@@ -1,4 +1,4 @@
-input,target,prediction,correct,logit_margin
-A,B,B,True,1.0
-B,C,C,True,1.0
-C,D,D,True,1.0
+input,target,prediction,correct,winner_runner_up_margin,signed_target_margin,logit_margin
+A,B,B,True,1.0,1.0,1.0
+B,C,C,True,1.0,1.0,1.0
+C,D,D,True,1.0,1.0,1.0
