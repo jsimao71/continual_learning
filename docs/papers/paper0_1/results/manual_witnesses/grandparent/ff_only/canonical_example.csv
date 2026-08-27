@@ -1,0 +1,2 @@
+tokens,target,prediction,correct,logit_margin
+EDGE_A_R EDGE_B_A EDGE_C_B QUERY_C,A,C,False,0.0

@@ -1,0 +1,2 @@
+tokens,target,prediction,correct,logit_margin
+B,C,B,False,1.0

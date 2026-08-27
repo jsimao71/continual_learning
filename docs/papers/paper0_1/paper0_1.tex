@@ -410,6 +410,23 @@ Classical distributed systems supply helpful analogies---message passing, state,
 
 The practical unit of analysis may therefore be a heterogeneous computational network rather than an isolated model. That perspective remains downstream of the core theory: first characterize local machines and interfaces; then ask which compositions the graph can acquire, route, verify, and execute under finite resources.
 
+\section{Constructive representability calibration}
+The framework separates representability from acquisition; fixed-weight witnesses make that distinction concrete. We manually specify three micro-Transformers with identity residuals, causal finite-softmax attention, ReLU FF blocks, zero positional embeddings, and no LayerNorm or dropout. No weight is trained or fitted. Every matrix and canonical forward trace is recorded, and each declared tiny legal domain is exhaustively enumerated.
+
+\begin{table}[H]\centering\small
+\begin{tabularx}{\linewidth}{>{\raggedright\arraybackslash}p{.19\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}>{\raggedright\arraybackslash}p{.12\linewidth}>{\raggedright\arraybackslash}p{.15\linewidth}YY}
+\toprule
+Task / data & Primary machine & $(L,H,d)$ & Full-domain result & Component controls & Constructive interpretation\\\midrule
+Successor / weights & FF-only & $(1,0,4)$ & 3/3; margin 1 & SA 0/3; SA+FF 3/3 & exact local linear/ReLU map\\
+Pair lookup / context & SA-only & $(1,1,9)$ & 18/18; margin $>.9999995$ & FF 6/18 ties; SA+FF 18/18 & finite-softmax key/value transport\\
+Grandparent / context & SA-only & $(2,1,20)$ & 2/2; margin $>.9999995$ & FF 0/2; SA+FF 2/2; one-layer SA 0/2 & bounded two-hop residual composition\\
+\bottomrule
+\end{tabularx}
+\caption{Milestone-1 manually weighted witnesses. ``SA'' and ``FF'' columns are encoding-relative controls, not universal architectural lower bounds.}\label{tab:manual-witnesses}
+\end{table}
+
+For associative lookup, the desired scaled score is 16 and three other final-query scores are zero, giving finite probability $e^{16}/(e^{16}+3)=.999999662395$. Grandparent uses the same finite selector twice: layer one writes the parent into a dedicated state subspace and layer two uses that state to retrieve the grandparent. The failed one-layer control transports only one hop. These constructions establish that the specified architectures can implement the functions under atomic pair/edge encodings. They establish neither minimality, uniqueness, robustness beyond the legal domain, nor that SGD will acquire these weights or mechanisms. Full matrices and forward traces are in the companion manual; exhaustive rows and matrix CSVs are under \path{results/manual_witnesses/}.
+
 \section{Empirical anchors from the series}
 These anchors occur after the framework because none is needed for its definitions or propositions. They are bounded observations, not universal claims.
 

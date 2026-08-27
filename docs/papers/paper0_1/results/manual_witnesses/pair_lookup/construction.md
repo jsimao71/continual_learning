@@ -1,0 +1,5 @@
+# SA-only associative pair lookup construction
+
+This fixed-weight witness represents each contextual pair as one token carrying a key and value; it does not claim a minimal serialization.  `d_model=9`, `L=1`, `H=1`, `d_head=3`; subspaces are `[pair key(3)|query identity(3)|transported output(3)]`.  The final query token has identity only in the query subspace.  `W_Q` maps it to `alpha*sqrt(3)e_q`, `W_K` reads pair keys, `W_V` reads pair values, and `W_O` writes the selected value into the output subspace.  We use finite `alpha=16`, causal softmax, identity residuals, zero positions, no LayerNorm/dropout, and no FF update.
+
+For three pair tokens plus the query, the desired score is 16 and all other final-row scores are 0.  Thus desired probability is `exp(16)/(exp(16)+3)=0.999999662395`; leakage is finite, not hard attention.  Across all 6 bijections of A/B/C and all 3 queries, the correct output logit has a strictly positive margin.  FF-only cannot communicate the contextual map and reaches only tie-breaking chance; SA+FF passes with an explicit zero FF.

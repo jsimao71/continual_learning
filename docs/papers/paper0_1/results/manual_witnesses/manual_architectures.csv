@@ -1,0 +1,11 @@
+task,topology,controller,data_location,tool,layers,heads,d_model,d_head,layernorm,residual,finite_softmax
+successor,sa_only,M0/C0,weights,none,1,1,4,4,omitted,identity,True
+successor,ff_only,M0/C0,weights,none,1,0,4,4,omitted,identity,True
+successor,sa_ff,M0/C0,weights,none,1,1,4,4,omitted,identity,True
+pair_lookup,sa_only,M0/C0,context,none,1,1,9,3,omitted,identity,True
+pair_lookup,ff_only,M0/C0,context,none,1,0,9,3,omitted,identity,True
+pair_lookup,sa_ff,M0/C0,context,none,1,1,9,3,omitted,identity,True
+grandparent,sa_only,M0/C0,context,none,2,1,20,4,omitted,identity,True
+grandparent,ff_only,M0/C0,context,none,2,0,20,4,omitted,identity,True
+grandparent,sa_ff,M0/C0,context,none,2,1,20,4,omitted,identity,True
+grandparent,sa_only_1layer,M0/C0,context,none,1,1,20,4,omitted,identity,True

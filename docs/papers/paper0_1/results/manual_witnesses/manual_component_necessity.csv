@@ -1,0 +1,4 @@
+task,primary_topology,sa_needed_under_encoding,ff_needed_under_encoding,recurrence,external_iteration,control_result
+successor,ff_only,False,True,False,False,sa_only:fail;ff_only:pass;sa_ff:pass
+pair_lookup,sa_only,True,False,False,False,sa_only:pass;ff_only:fail;sa_ff:pass
+grandparent,sa_only,True,False,False,False,sa_only:pass;ff_only:fail;sa_ff:pass;sa_only_1layer:fail

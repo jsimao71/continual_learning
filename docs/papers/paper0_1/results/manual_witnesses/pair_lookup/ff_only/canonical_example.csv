@@ -1,0 +1,2 @@
+tokens,target,prediction,correct,logit_margin
+PAIR_A_B PAIR_B_C PAIR_C_A QUERY_B,C,C,True,0.0
