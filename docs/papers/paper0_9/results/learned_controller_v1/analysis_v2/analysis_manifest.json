@@ -1,0 +1,17 @@
+{
+  "frontiers": {
+    "M3": 3,
+    "M4": 3
+  },
+  "learned_model_results": true,
+  "metric_correction": {
+    "M3_legacy_transition_accuracy": "relabelled_one_call_edge_coverage",
+    "M3_selected_edge_validity": "legacy_rule_selection_accuracy",
+    "M4_transition_accuracy": "retained_as_per_transition_accuracy"
+  },
+  "raw_rows": 2304,
+  "schema_version": "paper09.learned_controller.analysis_v2.v1",
+  "source_predictions_preserved": true,
+  "source_raw": "docs/papers/paper0_9/results/learned_controller_v1/learned_controller_raw.csv",
+  "source_raw_sha256": "d5201f2ca381194201b9029f99eb2f93185b41bbb0e1093d6f51c0e467e55dba"
+}
