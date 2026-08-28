@@ -1,0 +1,24 @@
+{
+  "checkpoint_steps": [
+    1000
+  ],
+  "condition": "O1",
+  "depth": 4,
+  "device": "cpu",
+  "examples_per_seed": 64,
+  "prefix_lengths": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "rows": 768,
+  "schema_version": "paper085.oracle_prefix.v1",
+  "source_stage": "recurrence_stage1_v2",
+  "target_leakage_audit": {
+    "answer_field_in_prompt": false,
+    "final_target_in_forced_prefix": false,
+    "heldout_pair_split": true,
+    "proper_prefix_only": true
+  }
+}
