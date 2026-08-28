@@ -1,0 +1,32 @@
+{
+  "balance": {
+    "F0:test": {
+      "negative": 256,
+      "positive": 256
+    },
+    "F0:train": {
+      "negative": 1024,
+      "positive": 1024
+    },
+    "F0:validation": {
+      "negative": 256,
+      "positive": 256
+    },
+    "P0:test": {
+      "negative": 256,
+      "positive": 256
+    },
+    "P0:train": {
+      "negative": 1024,
+      "positive": 1024
+    },
+    "P0:validation": {
+      "negative": 256,
+      "positive": 256
+    }
+  },
+  "constant_baseline_accuracy": 0.5,
+  "rows": 6144,
+  "split_namespaces_disjoint": true,
+  "valid": true
+}

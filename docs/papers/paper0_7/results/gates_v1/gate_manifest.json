@@ -1,0 +1,11 @@
+{
+  "completed_models": 6,
+  "device": "cpu",
+  "planned_models": 6,
+  "schema_version": "paper07.gates.v1",
+  "smoke": false,
+  "three_seed_gate": {
+    "F0": 1,
+    "P0": 1
+  }
+}

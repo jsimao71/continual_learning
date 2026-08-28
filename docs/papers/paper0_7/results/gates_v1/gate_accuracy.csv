@@ -1,0 +1,13 @@
+binary_accuracy,competent,examples,model_seed,split,stage
+0.98828125,1,512,11,test,F0
+0.994140625,1,512,11,validation,F0
+0.966796875,1,512,23,test,F0
+0.96875,1,512,23,validation,F0
+0.98046875,1,512,37,test,F0
+0.98828125,1,512,37,validation,F0
+0.953125,1,512,11,test,P0
+0.958984375,1,512,11,validation,P0
+0.97265625,1,512,23,test,P0
+0.98046875,1,512,23,validation,P0
+1.0,1,512,37,test,P0
+1.0,1,512,37,validation,P0

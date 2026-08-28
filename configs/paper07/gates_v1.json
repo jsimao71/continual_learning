@@ -1,0 +1,14 @@
+{
+  "schema_version": "paper07.gates.v1",
+  "model_seeds": [11, 23, 37],
+  "split_seeds": {"train": 7011, "validation": 7023, "test": 7037},
+  "examples": {"train": 2048, "validation": 512, "test": 512},
+  "architecture": {"layers": 2, "width": 32, "heads": 2},
+  "base_steps": 400,
+  "steps_by_stage": {"P0": 400, "F0": 3200},
+  "batch_size": 64,
+  "learning_rate": 0.003,
+  "vocab_size": 64,
+  "sequence_length": 20,
+  "competence_threshold": 0.95
+}
