@@ -4,6 +4,7 @@
 \usepackage{hyperref}
 \usepackage[T1]{fontenc}\usepackage{lmodern}
 \setlist{nosep,leftmargin=*}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hypertexnames=false}
 \title{The Inception of In-Context Learning:\\Minimal Training Structure for Contextual Candidate Promotion}
 \author{Paper 0.8 --- Controlled ICL Mechanism Research Line}
 \date{August 2026}
@@ -66,7 +67,7 @@ I(Y;D_{\rm ctx}\mid X)=\log_2 k,
 and Bayes/oracle accuracy one. In the experiments \(k=3\): the mapping space has \(3!=6\) members, each prompt contains two demonstrations, and the context contributes \(\log_2 3\simeq1.585\) bits. Consequently, a selective D4 positive establishes genuine contextual dependence, but specifically for T3 elimination/completion; it is not evidence of a newly inferred function.
 
 \subsection{D5 validity gate}
-We implemented a CPU-only exact-posterior validator for successor, add-\(n\), multiply-by-\(a\), affine, and square functions on \(\mathbb Z_k\), for \(k\in\{5,7,11\}\). Each episode enumerates the declared finite hypothesis family, filters parameters consistent with the demonstrations, computes the induced answer distribution at the query, and rejects the episode unless that answer has zero entropy. It also stores the number of consistent hypotheses and the minimum identifying prefix. Across 360 validation episodes (24 per family/modulus cell), all passed with posterior answer entropy zero; 284 required one demonstration and 76 affine episodes required two. This verifies generator admissibility only. No D5 Transformer has been trained, so the paper offers no behavioral or mechanistic evidence for T5--T7 rule induction.
+We implemented a CPU-only exact-posterior validator for successor, add-\(n\), multiply-by-\(a\), affine, and square functions on \(\mathbb Z_k\), for \(k\in\{5,7,11\}\). Each episode enumerates the declared finite hypothesis family, filters parameters consistent with the demonstrations, computes the induced answer distribution at the query, and rejects the episode unless that answer has zero entropy. It also stores the number of consistent hypotheses and the minimum identifying prefix. Across 360 validation episodes (24 per family/modulus cell), all passed with posterior answer entropy zero; 284 required one demonstration and 76 required two. The latter comprise all 72 affine episodes and four multiply-by-\(a\) episodes. This verifies generator admissibility only. No D5 Transformer has been trained, so the paper offers no behavioral or mechanistic evidence for T5--T7 rule induction.
 
 \section{Dataset and model phase diagrams}
 Search over number of relation families, examples per family, task/mapping entropy, chain length, symbol reuse, template variation, and position variation. Start with
@@ -143,16 +144,28 @@ This is a local instrumentation calibration. Fresh L2/W64/H2 replications at 256
 \section{Answers and limitations}
 Local order alone is not sufficient. Partial/fresh mapping pressure creates local positives, but no tested D4 architecture is seed-stable. D4 is nevertheless information-sufficient: its context determines the held-out value exactly. The failure is therefore acquisition instability rather than dataset ambiguity. Conversely, exact D5 validation makes those proposed episodes admissible but supplies no model evidence that parametric, compositional, or procedural induction has been learned. Where contextual copy is acquired, the smallest measured mechanism is \emph{bind pairs, match the query role, transport the associated value, promote its logit}; second-layer SA is decisive and FF is supportive rather than the final promoter. Increasing copy diversity rescues two seeds, but update-budget scaling is non-monotonic for the remaining seed and does not close the replication gate. We find no need for regression, Bayesian, or implicit-gradient metaphors. We do not yet claim a stable smallest copy or D4 model, nor trace D4 from a selectively chosen seed. The next experiment should alter acquisition reliability---optimizer or curriculum, rather than update count alone---while keeping the leakage, information-sufficiency, and control gates fixed.
 
+\begin{table}[H]\centering\small
+\caption{Final evidence audit. A behavioral positive is not promoted to a stable mechanism unless its stated replication gate passes.}\label{tab:evidence-audit}
+\begin{tabular}{llll}\toprule
+Component & Evidence & Gate & Supported interpretation\\\midrule
+D0--D4 generator & exact audits and controls & pass & valid bounded task ladder\\
+D4 behavior & 16/54 seed-local positives & 0/5 architectures stable & acquisition frontier only\\
+Copy behavior & competent traced checkpoint & fresh three-seed gate fails & local calibration\\
+Copy mechanism & tracing plus causal patches & pass in that checkpoint & pair binding/value routing\\
+D5 & 360 exact-posterior episodes & generator only & admissible future tasks\\
+\bottomrule\end{tabular}
+\end{table}
+
 \section{Reproducibility}
 Generators and phase runners are under \path{src/cl/semantic/} and \path{src/cl/experiments/}. The shared tracer and analysis modules use the \path{paper08_*} prefix. Configurations are under \path{configs/paper08/}. The taxonomy audit is configured by \path{taxonomy_v1.json}; its exact D5 posterior rows and machine-readable D0--D5 classification are under \path{results/taxonomy/}. Tracked artifacts include raw phase/control rows, five three-seed D4 replications, copy replication and exact trace tables, the (E=1024) training-budget diagnostic, compressed Q/K/V matrices, 18 figures, and summaries. Dense checkpoints remain locally reproducible and git-ignored.
 
 \section{Relation to Papers 0.5--0.7}
-Paper 0.5 studies predictive refinement once evidence is accessible. Paper 0.6 studies learned semantic/compositional relations. Paper 0.8 asks how context combines learned relations to create a new prediction without weight updates. Paper 0.7 remains deferred until these mechanisms justify synthesis.
+Paper 0.5 studies predictive refinement once evidence is accessible. Paper 0.6 studies learned semantic/compositional relations. Paper 0.8 asks how context combines learned relations to create a new prediction without weight updates. Paper 0.7 now supplies validated formal-task infrastructure, while its learned formal-model frontier remains pending; no Paper 0.7 result is used as evidence here.
 
 \section{Scaling policy}
 Do not scale merely to improve performance. Scale only if the minimal model cannot express the capability, a mechanistic hypothesis requires additional components, or external validity becomes the explicit question.
 
-\section{Expected contribution}
+\section{Contribution boundary}
 \enlargethispage{2\baselineskip}
-The target contribution is not another demonstration that Transformers perform ICL. It is an account of the \emph{inception} of ICL: the smallest statistical environment and neural architecture in which a frozen Transformer uses context to promote a prediction that its weights alone do not support, together with a causal account of where that probability mass comes from.
+The present contribution is not a stable minimal ICL model. It is a disciplined boundary: an information-valid constraint-completion task whose observed positives remain seed-sensitive, together with a contextual-copy checkpoint in which causal interventions locate the binding and value-routing mechanism. A future positive would need to identify the smallest statistically sufficient environment and architecture across seeds, then give a causal account of where signed target-logit support arises. D5 is intentionally not launched in this audit.
 \end{document}
