@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}\usepackage{lmodern}
 \setlist{nosep,leftmargin=*}\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
 \setlength{\emergencystretch}{2em}
-\input{docs/papers/paper0_5/results/final_experiment_macros.tex}
+\input{results/final_experiment_macros.tex}
 \title{Predictive Refinement Across Transformer Depth:\\Signal, Fluctuation, Information Exposure, and Predictive Order}
 \author{Paper 0.5 --- Residual / Layer-Composition Research Line}
 \date{Final controlled iteration --- August 2026}
@@ -82,8 +82,8 @@ Across the primary three-generator matrix, evaluated on two small Transformer co
 
 Only 7/27 family--seed trajectories contract monotonically; 11 expand then contract and the rest oscillate, contract late, or fail to contract. Mean first/stable boundaries increase modestly with nuisance, but settling delay remains short. Transformer depth is therefore not a sequence of independent estimators or guaranteed denoisers.
 \begin{figure}[H]\centering
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_target_margin_vs_depth.png}\hfill
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_signal_dispersion_phase_plane.png}
+\includegraphics[width=.48\linewidth]{results/three_parts/figures/g1_target_margin_vs_depth.png}\hfill
+\includegraphics[width=.48\linewidth]{results/three_parts/figures/g1_signal_dispersion_phase_plane.png}
 \caption{Competent controlled Transformer families across residual depth (two architectures, two seeds): correct-target margin and the signal--fluctuation trajectory. Correct contrast grows despite finite and sometimes increasing nuisance-conditioned variation.}\end{figure}
 
 \subsection{Result 2: refinement includes correlated repair and is globally nonlinear}
@@ -91,8 +91,8 @@ Mean boundary progress is positive, yet only 73.7\% of family/seed/noise transit
 
 Local JVPs predict nuisance and signal directions well over one block. Across 85 Dataset V2 pairs filtered by held-out behavioral correctness, cumulative horizon is the independent variable: directional cosine drops from 0.782 at one block to 0.552 at two and 0.335 at four; relative error rises from 0.624 to 1.047. Piecewise re-linearization improves on the frozen product. Local directional structure is real, but a single frozen globally linear composition is falsified.
 \begin{figure}[H]\centering
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/results/three_parts/figures/g1_layer_update_covariance.png}\hfill
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/dataset_v2_jacobian/c_cumulative_error_vs_horizon.png}
+\includegraphics[width=.48\linewidth]{results/three_parts/figures/g1_layer_update_covariance.png}\hfill
+\includegraphics[width=.48\linewidth]{figures/dataset_v2_jacobian/c_cumulative_error_vs_horizon.png}
 \caption{Competence-filtered controlled Transformers: cross-boundary update covariance and cumulative-JVP error versus horizon. Negative covariance implements repair; frozen linearization deteriorates with horizon.}\end{figure}
 
 \subsection{Result 3: information exposure changes refinement burden}
@@ -100,8 +100,8 @@ The two-seed controlled Transformer window grid varies dependency span, attentio
 
 Selective masking provides the cleaner causal contrast. Blocking nuisance keys preserves 1.000 accuracy, increases mean target margin by 0.229 logits, and reduces nuisance-conditioned margin variance from 1.864 to 1.109 (40.5\%). Blocking predictive keys collapses accuracy to 0.249. SA and FF both change variance, and median repair fraction is 0.812. Less context helps only when exclusion respects the learned signal path.
 \begin{figure}[H]\centering
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/group25/g25_accuracy_surface.png}\hfill
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/group25/g25_selective_masking.png}
+\includegraphics[width=.48\linewidth]{figures/group25/g25_accuracy_surface.png}\hfill
+\includegraphics[width=.48\linewidth]{figures/group25/g25_selective_masking.png}
 \caption{Two-seed controlled Transformer window and key-mask interventions. Reachability does not guarantee learned transport; on competent full-context models, selective nuisance exclusion reduces burden without deleting signal.}\end{figure}
 
 \subsection{Result 4: predictive order, not surface burden, binds competence}
@@ -110,20 +110,20 @@ In the competence-gated nested study, redundant accuracy stays 0.961--1.000 and 
 \PhaseResult
 Architectural depth is not an independently monotonic resource under fixed training conditions: depth 8 is competent at order two, depths 12/16 are poor, and depth 24 recovers. Optimization also moves the frontier rather than merely sharpening an already fixed boundary: at depth 8/width 64, order-three accuracy rises from 0.634 to 0.927 and 0.972 under 1x, 2x, and 4x training. These are one-seed phase estimates and do not identify a universal depth law.
 
-The matched stress test resolves the controlled comparison. At the nominal 1x budget only two of six architecture/seed baselines are competent; exact-prefix 2x training rescues five, and 4x rescues all six to 1.000 held-out accuracy. We therefore interpret factor slopes only at 4x. Both architectures have the same measured frontier, $p^*_{\max}=2$: their minimum-seed accuracy falls below the 0.80 gate at $p^*=3$ and remains below it through 12. In contrast, every seed is perfect for every tested raw length through $n=24$ and nuisance count through $k=32$. Span remains competent through $s=32$ (minimum 0.969), and contiguous, skip-gram, and necessary-pattern generators all pass. Mean stable boundary changes only from 1.39 to 1.42 layers over $k=0\to32$ for L2/W64 and from 2.76 to 2.96 for L8/W32. Within this bounded regime, surface extent and nuisance neither reduce accuracy nor materially delay stabilization; jointly necessary predictive variables do.
+The matched stress test resolves the controlled comparison. At the nominal 1x budget only two of six architecture/seed baselines are competent; exact-prefix 2x training rescues five, and 4x rescues all six to 1.000 held-out accuracy. We therefore interpret factor slopes only at 4x. Both architectures have the same measured acquisition frontier, $p^*_{\max}=2$: their minimum-seed accuracy falls below the 0.80 gate at $p^*=3$ and remains below it through 12. In contrast, every seed is perfect for every tested raw length through $n=24$ and nuisance count through $k=32$. Span remains competent through $s=32$ (minimum 0.969), and contiguous, skip-gram, and necessary-pattern generators all pass. Mean stable boundary changes only from 1.39 to 1.42 layers over $k=0\to32$ for L2/W64 and from 2.76 to 2.96 for L8/W32. Within this bounded regime, surface extent and nuisance neither reduce accuracy nor materially delay stabilization; jointly necessary predictive variables do.
 
 \begin{figure}[H]\centering
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/stress_frontier/stress_budget_rescue.png}\hfill
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/stress_frontier/stress_factor_frontiers.png}
+\includegraphics[width=.48\linewidth]{figures/stress_frontier/stress_budget_rescue.png}\hfill
+\includegraphics[width=.48\linewidth]{figures/stress_frontier/stress_factor_frontiers.png}
 \caption{Three-seed matched stress test. Left: exact-prefix budget rescue of the $p^*=2$ baseline; the full interpretation gate opens only at 4x. Right: minimum-seed accuracy at 4x. Predictive order binds at two, whereas all tested length, nuisance, and span cells remain competent.}\end{figure}
 
 Training rescue establishes that both architectures can acquire the baseline under this optimizer and exposure; it does not show that additional updates create a larger representational class. Nor does the shared frontier prove depth and width interchangeable beyond these two approximately matched models. It shows only that eight narrow layers do not extend the measured order frontier relative to two wider layers here.
 
-\RNNResult
+\RNNResult\par
 The matched models contain approximately 40.9k Transformer, 16.6k vanilla-RNN, 33.3k GRU, and 41.6k LSTM parameters; all receive 1,200 updates and 12.288M training tokens. Parameter matching is approximate, and the shared optimizer/batch schedule is a controlled comparison rather than architecture-specific exhaustive tuning. The GRU result shows that predictive refinement is not Transformer-specific. Gated recurrence can realize the controlled integration task extremely effectively, indicating that the broader computational principle may be iterative state transformation rather than self-attention itself. The vanilla RNN shows a transport limitation; the GRU does not, the LSTM is strong, and the Transformer is not universally superior on these generators.
 \begin{figure}[H]\centering
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/rnn_comparison/rnn_transformer_accuracy_vs_length.png}\hfill
-\includegraphics[width=.48\linewidth]{docs/papers/paper0_5/figures/rnn_comparison/rnn_transformer_accuracy_vs_span.png}
+\includegraphics[width=.48\linewidth]{figures/rnn_comparison/rnn_transformer_accuracy_vs_length.png}\hfill
+\includegraphics[width=.48\linewidth]{figures/rnn_comparison/rnn_transformer_accuracy_vs_span.png}
 \caption{Two-seed Transformer/RNN/GRU/LSTM sensitivity to raw length and indispensable-token span at matched 1,200-update/12.288M-token exposure. Parameter matching is approximate; predictive-order/nuisance curves are reported in the appendix.}\end{figure}
 
 Target-preserving nested replacement supplies complementary causal evidence. Short-pattern donors are less damaging than nonequivalent donors, while block/head overlap remains partial. This supports reuse of a short computation under competent extension, not a fixed semantic circuit or a general hierarchy.
@@ -139,7 +139,7 @@ Global frozen-Jacobian composition&falsified&horizon-dependent JVP failure\\
 Reachability is sufficient&falsified&reachable optimization failure\\
 Selective nuisance exclusion helps&supported&paired key masking\\
 Raw length controls competence/settling depth&not supported&three-seed $n\le24$ null\\
-Predictive order binds the measured competence frontier&supported&three-seed $p^*_{\max}=2$\\
+Predictive order binds the measured acquisition frontier&supported&three-seed $p^*_{\max}=2$\\
 Nuisance necessarily delays decisions&not supported&competent $k\le32$ null\\
 Stable head motifs explain utility&not supported&repeated motif--causal null\\
 RNNs are more length/span sensitive&\RNNStatus&matched controlled curves\\\bottomrule
@@ -161,7 +161,7 @@ The main limitations are synthetic modular generators, small custom models, high
 Transformer depth is not well described as monotonic denoising or computation proportional to context length. In these controlled tasks, depth performs nonlinear predictive refinement: correct evidence grows relative to realization-dependent fluctuation and competitors, later layers repair earlier deviations, and information exposure constrains but does not determine the learned computation. The matched stress frontier sharpens the separation: order two is acquired across every tested surface extension, while order three is not reliably acquired by either parameter-matched architecture. Training budget controls whether this comparison is observable, but does not by itself identify the representational limit. The resulting theory is deliberately conditional and competence-gated: structured predictive distinctions, not token count alone, determine the burden that remains after context becomes accessible.
 
 \appendix
-\input{docs/papers/paper0_5/appendix.tex}
+\input{appendix.tex}
 
 \begin{thebibliography}{20}
 \bibitem{vaswani2017attention} A. Vaswani et al. Attention Is All You Need. \emph{NeurIPS}, 2017.

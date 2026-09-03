@@ -84,9 +84,10 @@ Paper~0.5 neither implements nor validates continual learning. Stable predictive
 PYTHONPATH=src python -m cl.experiments.paper05_predictive_order_phase
 PYTHONPATH=src python -m cl.analysis.paper05_predictive_order_phase
 PYTHONPATH=src python -m cl.experiments.paper05_stress_run \
-  --device mps --tranche rescue_t4 --resume
+  --device mps --tranche rescue_t4 --resume \
+  --output docs/papers/paper0_5/results/stress_frontier/learned_v4_matched
 PYTHONPATH=src python -m cl.experiments.paper05_stress_analyze \
-  --input results/stress_frontier/learned_v4_matched
+  --input docs/papers/paper0_5/results/stress_frontier/learned_v4_matched
 PYTHONPATH=src python -m cl.experiments.paper05_stress_figures
 PYTHONPATH=src python -m cl.experiments.paper05_rnn_comparison
 PYTHONPATH=src python -m cl.analysis.paper05_rnn_comparison
