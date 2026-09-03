@@ -80,21 +80,45 @@ def stress_example(config:dict, *, split:str, predicate:str, total_depth:int,
 
 def stress_design(config:dict, model_seed:int, examples:int=2)->list[StressExample]:
     """Factorized controls: vary one of D/d, b, or N around a common anchor."""
-    out=[]; common=dict(split="test",model_seed=model_seed,template=0,position_mode="aligned")
+    out=[]; common=dict(split="test",model_seed=model_seed)
+    def presentation(i:int)->dict:
+        templates=config.get("templates",[0]);positions=config.get("position_modes",["aligned"])
+        return {"template":templates[i%len(templates)],
+                "position_mode":positions[(i//len(templates))%len(positions)]}
     for predicate in config["predicates"]:
       for D in config["test_tree_depths"]:
        hops=config["test_hops"] if predicate in ("ancestor_k","isAncestor","sameAncestorAtLevel_k") else [None]
        for d in hops:
         if d is not None and d>D: continue
         for tree in config["tree_seeds"]:
-         for i in range(examples):out.append(stress_example(config,**common,predicate=predicate,total_depth=D,required_path=d,branching=2,distractors=4,index=i,tree_seed=tree))
+         for i in range(examples):out.append(stress_example(config,**common,**presentation(i),predicate=predicate,total_depth=D,required_path=d,branching=2,distractors=4,index=i,tree_seed=tree))
       for b in config["branching_factors"]:
        for tree in config["tree_seeds"]:
-        for i in range(examples):out.append(stress_example(config,**common,predicate=predicate,total_depth=8,required_path=3,branching=b,distractors=4,index=10_000+i,tree_seed=tree))
+        for i in range(examples):out.append(stress_example(config,**common,**presentation(i),predicate=predicate,total_depth=8,required_path=3,branching=b,distractors=4,index=10_000+i,tree_seed=tree))
       for N in config["distractor_counts"]:
        for tree in config["tree_seeds"]:
-        for i in range(examples):out.append(stress_example(config,**common,predicate=predicate,total_depth=8,required_path=3,branching=2,distractors=N,index=20_000+i,tree_seed=tree))
+        for i in range(examples):out.append(stress_example(config,**common,**presentation(i),predicate=predicate,total_depth=8,required_path=3,branching=2,distractors=N,index=20_000+i,tree_seed=tree))
     return out
+
+def training_batch(config:dict,rng:random.Random,model_seed:int,predicates:list[str]|None=None,
+                   batch_size:int|None=None)->list[StressExample]:
+    """Sample a balanced shallow-training batch under the v6 serialization."""
+    allowed=predicates or config["predicates"];size=batch_size or config.get("batch_size",64)
+    predicate=rng.choice(allowed);depth=rng.choice(config["train_tree_depths"])
+    if predicate in ("grandparent","sameGrandparent") and depth<2:depth=2
+    hops=[h for h in config["train_hops"] if h<=depth]
+    hop=rng.choice(hops) if predicate in ("ancestor_k","isAncestor","sameAncestorAtLevel_k") else None
+    branching=rng.choice(config["branching_factors"]);distractors=rng.choice((0,4,16))
+    template=rng.choice(config["templates"]);position=rng.choice(config["position_modes"])
+    tree_seed=rng.choice(config["tree_seeds"]);base=rng.randrange(1_000_000)
+    rows=[]
+    for i in range(size):
+        positive=i%2 if predicate in (*PAIRWISE,"isAncestor") else None
+        rows.append(stress_example(config,split="train",predicate=predicate,total_depth=depth,
+            required_path=hop,branching=branching,distractors=distractors,template=template,
+            position_mode=position,index=base+i,tree_seed=tree_seed,model_seed=model_seed,
+            positive=positive))
+    return rows
 
 def axis(example:StressExample)->str:
     i=int(example.example_id.rsplit(":i",1)[1])

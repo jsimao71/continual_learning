@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
-from cl.semantic.predicate_stress import PAIRWISE,axis,stress_design,stress_example,validate_stress
+import random
+from cl.semantic.predicate_stress import PAIRWISE,axis,stress_design,stress_example,training_batch,validate_stress
+from cl.experiments.paper06_stress_analyze import contiguous_frontier
 
 CONFIG=json.loads(Path("configs/paper06/stress_v6.json").read_text())
 
@@ -19,3 +21,15 @@ def test_stress_design_is_factorized_and_balanced():
     for p in (*PAIRWISE,"isAncestor"):
         targets=[r.target for r in rows if r.predicate==p];assert targets.count(27)==targets.count(28)
     assert validate_stress(CONFIG)["passed"]
+
+def test_stress_design_cycles_presentations_and_training_is_balanced():
+    rows=stress_design(CONFIG,11,8)
+    assert {r.template_id for r in rows}==set(CONFIG["templates"])
+    assert {r.position_mode for r in rows}==set(CONFIG["position_modes"])
+    batch=training_batch(CONFIG,random.Random(5),11,["isAncestor"],8)
+    assert len(batch)==8 and {r.predicate for r in batch}=={"isAncestor"}
+    assert [r.positive for r in batch].count(0)==[r.positive for r in batch].count(1)==4
+
+def test_frontier_requires_a_contiguous_competent_prefix():
+    assert contiguous_frontier([(1,.91),(2,.83),(4,.79),(8,.95)],.8)==2
+    assert contiguous_frontier([(1,.79),(2,.99)],.8) is None

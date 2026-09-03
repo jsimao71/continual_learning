@@ -16,5 +16,17 @@
   "position_modes": ["aligned", "randomized"],
   "label_modes": ["arbitrary"],
   "competence_threshold": 0.8,
-  "preferred_threshold": 0.9
+  "preferred_threshold": 0.9,
+  "position_encoding": "sinusoidal",
+  "batch_size": 64,
+  "learning_rate": 0.003,
+  "log_every": 100,
+  "save_every": 100,
+  "frontier_training_steps": 1000,
+  "frontier_eval_examples": 8,
+  "frontier_predicates": ["isAncestor"],
+  "frontier_architectures": [
+    {"name":"baseline","layers":4,"width":64,"heads":4},
+    {"name":"depth8","layers":8,"width":64,"heads":4}
+  ]
 }
