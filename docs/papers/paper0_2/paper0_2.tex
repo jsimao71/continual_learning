@@ -19,16 +19,16 @@
 \maketitle
 
 \begin{abstract}
-What changes when the relevant computational unit is not one learned model, but a network of learned models, humans, tools, services, and persistent memory? We propose a typed, stateful graph formalism for this question. A node exposes an interface-level transition and a multidimensional descriptor of capability, cost, latency, reliability, adaptability, memory, and iteration characteristics. Edges specify admissible message transformations; a router constructs a stateful execution under finite budgets. This abstraction permits system-level accounting without asserting that humans, language models, databases, and interpreters are internally or cognitively equivalent. It also separates five claims often collapsed in discussions of agents: component competence, route availability, route acquisition, execution reliability, and resource-bounded system closure. We develop reliability and verification accounting, locate task-defining computation in representative workflows, and connect the framework to distributed cognition, cognitive artifacts, distributed systems, multi-agent systems, human--AI collaboration, and tool-using language models. This is an inception and measurement framework, not evidence that distribution guarantees greater intelligence, mathematical closure, or any conclusion about consciousness.
+What changes when the relevant computational unit is not one learned model, but a network of learned models, humans, tools, services, and persistent memory? We propose a typed, stateful graph formalism for this question. A node exposes an interface-level transition and a multidimensional descriptor of capability, cost, latency, reliability, adaptability, memory, and iteration characteristics. Edges specify admissible message transformations; a router constructs a stateful execution under finite budgets. This abstraction permits system-level accounting without asserting that humans, language models, databases, and interpreters are internally or cognitively equivalent. It also separates claims often collapsed in discussions of agents: component representability and acquisition, route availability and acquisition, systematic execution and reliability, and resource-bounded system closure. We develop reliability and verification accounting, locate task-defining computation in representative workflows, and connect the framework to distributed cognition, cognitive artifacts, distributed systems, multi-agent systems, human--AI collaboration, and tool-using language models. This is an inception and measurement framework, not evidence that distribution guarantees greater intelligence, mathematical closure, or any conclusion about consciousness.
 \end{abstract}
 
 \section{From learned machines to heterogeneous networks}
 
-Paper 0.1 asks what Transformer-centered machines can represent, acquire, compose, and execute under explicit resources. A deployed computational process is often wider. A scientist supplies goals and judgments; an LLM proposes code; an interpreter executes it; a simulator produces observations; a database preserves state; tests reject some failures; and a human decides whether to continue. No single component realizes the complete workflow.
+Paper 0.1 asks what Transformer-centered machines can represent, acquire, compose, and execute under explicit resources, using the compound machine $M=(F_\theta,C,S,I,T,B)$. Paper 0.2 changes the unit of analysis: each such machine can be a node or subnetwork in a typed heterogeneous graph. A deployed computational process is often wider. A scientist supplies goals and judgments; an LLM proposes code; an interpreter executes it; a simulator produces observations; a database preserves state; tests reject some failures; and a human decides whether to continue. No single component realizes the complete workflow.
 
 The natural unit of analysis is therefore sometimes a heterogeneous computational network. The proposal is operational: record which state transformations occur, which interfaces make them reachable, where task-defining work is performed, and what finite resources and failure modes govern the route. It is not the metaphysical claim that every participating artifact is literally part of a mind.
 
-Three cautions organize the paper. First, a common node notation is an interface abstraction, not an assertion of internal equivalence. Second, adding nodes can add latency, ambiguity, correlated failure, or inaccessible capability; it need not improve the system. Third, a finite network run can support only a resource-bounded system signature, not mathematical closure.
+Three cautions organize the paper. First, a common node notation is an interface abstraction, not an assertion of internal equivalence. Second, adding nodes can add latency, ambiguity, correlated failure, or inaccessible capability; it need not improve the system. Third, a finite network evaluation can support only a resource-bounded system-level closure signature, not mathematical closure.
 
 \section{Typed stateful computational graphs}
 
@@ -158,7 +158,7 @@ and
 \]
 Equality can hold in a degenerate graph. Routed composition can realize a transformation absent from every isolated node, while inaccessible interfaces or bad routing can prevent the network from using a nominally available node function.
 
-Suppose a task family has complexity $K$, such as the number of local transitions. Node $i$ may have a measured contiguous frontier $K_i$. A routed network may have $K_{\mathcal G}>K_i$ because it externalizes memory, delegates transitions, or executes a generated program. This motivates a finite object rather than a universal closure claim.
+Suppose a task family has complexity $K$, such as the number of local transitions. At a declared multi-run gate, node $i$ may have a measured contiguous acquisition-and-execution frontier $K_i$. A routed network may have a measured frontier $K_{\mathcal G}>K_i$ because it externalizes memory, delegates transitions, or executes a generated program. This motivates a finite object rather than a universal closure claim.
 
 \begin{definition}[System-level closure signature]
 For a fixed network, routing protocol, evaluation distribution, and resource budget, define
@@ -169,7 +169,7 @@ For a fixed network, routing protocol, evaluation distribution, and resource bud
 where $K_{\rm prefix}$ is the largest contiguous tested prefix passing a multi-run gate, $\rho$ records routing, transition, and stopping reliability, $g(K)$ is observed trace-length scaling, $f_{\rm fail}$ is the first classified failure, and $C(K)$ is measured resource cost. This signature is finite empirical evidence, not the assertion $\forall K<\infty$.
 \end{definition}
 
-An LLM that fails to compute $f^{1000}$ internally may write a loop that an interpreter executes. If the routed system passes, the system frontier has increased under the tested budget. The LLM contribution may be program synthesis and integration; the interpreter supplies iteration and memory. The conclusion remains bounded by context, calls, runtime, memory, language semantics, and evaluation coverage.
+An LLM that fails to compute $f^{1000}$ internally may write a loop that an interpreter executes. If the routed system passes, its measured system frontier under that routing protocol has increased under the tested budget. The LLM contribution may be program synthesis and integration; the interpreter supplies iteration and memory. The conclusion remains bounded by context, calls, runtime, memory, language semantics, and evaluation coverage.
 
 \section{Reliability, verification, and redundancy}
 
@@ -274,7 +274,7 @@ Heterogeneous networks are a useful computational abstraction when meaningful wo
 \bibitem{lewis2020} P. Lewis et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. \emph{NeurIPS}, 2020.
 \bibitem{karpas2022} E. Karpas et al. MRKL Systems: A Modular, Neuro-Symbolic Architecture That Combines Large Language Models, External Knowledge Sources and Discrete Reasoning. arXiv:2205.00445, 2022.
 \bibitem{schick2023} T. Schick et al. Toolformer: Language Models Can Teach Themselves to Use Tools. \emph{NeurIPS}, 2023.
-\bibitem{gao2023} L. Gao et al. PAL: Program-Aided Language Models. \emph{ICML}, 2023.
+\bibitem{gao2023} L. Gao et al. PAL: Program-aided Language Models. \emph{ICML}, PMLR 202:10764--10799, 2023.
 \bibitem{yao2023} S. Yao et al. ReAct: Synergizing Reasoning and Acting in Language Models. \emph{ICLR}, 2023.
 \bibitem{edge2024} D. Edge et al. From Local to Global: A Graph RAG Approach to Query-Focused Summarization. arXiv:2404.16130, 2024.
 \end{thebibliography}
