@@ -1,0 +1,19 @@
+{
+  "schema_version": "paper07.p1_f1_gate.v1",
+  "model_seeds": [11, 23, 37],
+  "split_seeds": {"train": 7111, "validation": 7123, "test": 7137},
+  "examples": {"train": 3072, "validation": 768, "test": 768},
+  "smoke_examples": 48,
+  "architecture": {"layers": 2, "width": 32, "heads": 2, "mlp_ratio": 2},
+  "steps_by_stage": {"P1": 1200, "F1": 2400},
+  "batch_size": 64,
+  "smoke_steps": 4,
+  "smoke_batch_size": 8,
+  "learning_rate": 0.003,
+  "vocab_size": 64,
+  "sequence_length": 20,
+  "competence_threshold": 0.95,
+  "checkpoint_every": 100,
+  "report_by_template": true,
+  "gate_requires_every_test_template": true
+}
