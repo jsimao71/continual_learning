@@ -1,0 +1,12 @@
+{
+  "completed_models": 6,
+  "device": "cpu",
+  "evaluation_examples": 8,
+  "planned_models": 6,
+  "predicates": [
+    "isAncestor"
+  ],
+  "schema_version": "paper06.stress_v6.frontier.v1",
+  "smoke": false,
+  "training_steps": 1000
+}

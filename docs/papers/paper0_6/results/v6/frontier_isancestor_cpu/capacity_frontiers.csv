@@ -1,0 +1,9 @@
+architecture,control,frontier,largest_contiguous_competent,predicate,tested_values,three_seed_complete,threshold
+baseline,d=1,D_max,32,isAncestor,2;3;4;5;6;8;12;16;24;32,1,0.8
+baseline,D=16,d_max,16,isAncestor,1;2;3;4;6;8;12;16,1,0.8
+baseline,"D=8,d=3,N=4",b_max,8,isAncestor,1;2;4;8,1,0.8
+baseline,"D=8,d=3,b=2",N_max,256,isAncestor,0;4;16;64;256,1,0.8
+depth8,d=1,D_max,32,isAncestor,2;3;4;5;6;8;12;16;24;32,1,0.8
+depth8,D=16,d_max,16,isAncestor,1;2;3;4;6;8;12;16,1,0.8
+depth8,"D=8,d=3,N=4",b_max,8,isAncestor,1;2;4;8,1,0.8
+depth8,"D=8,d=3,b=2",N_max,64,isAncestor,0;4;16;64;256,1,0.8

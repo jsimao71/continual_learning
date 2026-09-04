@@ -4,6 +4,7 @@ import argparse,csv,json
 from collections import defaultdict
 from pathlib import Path
 import numpy as np
+import matplotlib.pyplot as plt
 from cl.common.artifacts import atomic_write_json,write_csv
 
 def read(path):
@@ -61,6 +62,20 @@ def main(args):
         "extrapolation_accuracy":float(np.mean(extrap)),"extrapolation_gap":float(np.mean(shallow)-np.mean(extrap)),
         "shallow_n":len(shallow),"extrapolation_n":len(extrap)})
     write_csv(output/"capacity_extrapolation_gap.csv",gaps)
+    figure_rows=[r for r in stable if r["predicate"]=="isAncestor"]
+    panels=((r"$D_{\max}$","total_depth","depth_path",lambda r:r["required_path"]==1,"total tree depth $D$"),
+      (r"$d_{\max}$","required_path","depth_path",lambda r:r["total_depth"]==16,"required path depth $d$"),
+      (r"$b_{\max}$","branching","branching",lambda r:True,"branching $b$"),
+      (r"$N_{\max}$","distractors","distractors",lambda r:True,"distractors $N$"))
+    fig,axes=plt.subplots(1,4,figsize=(12.2,3.2),sharey=True)
+    for ax,(title,field,kind,keep,xlabel) in zip(axes,panels):
+      for architecture,marker in (("baseline","o"),("depth8","s")):
+        rows=sorted((r for r in figure_rows if r["architecture"]==architecture and
+          r["evaluation_axis"]==kind and keep(r)),key=lambda r:r[field])
+        ax.plot([r[field] for r in rows],[r["worst_seed_accuracy"] for r in rows],marker=marker,label=architecture)
+      ax.axhline(args.threshold,color="black",ls="--",lw=.8);ax.set_title(title);ax.set_xlabel(xlabel);ax.grid(alpha=.2)
+    axes[0].set_ylabel("worst-seed accuracy");axes[0].legend(fontsize=8);fig.tight_layout()
+    fig.savefig(output/"capacity_frontiers.png",dpi=180,bbox_inches="tight");plt.close(fig)
     atomic_write_json(output/"stress_analysis_manifest.json",{"schema_version":"paper06.stress_v6.analysis.v1",
       "threshold":args.threshold,"frontiers":frontiers,"mechanism_followup_eligible":any(
         r["frontier"]=="d_max" and r["largest_contiguous_competent"] not in (None,"",3) and int(r["largest_contiguous_competent"])>3 for r in frontiers)})

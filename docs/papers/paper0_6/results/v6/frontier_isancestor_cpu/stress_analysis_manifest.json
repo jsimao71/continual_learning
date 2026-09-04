@@ -1,0 +1,87 @@
+{
+  "frontiers": [
+    {
+      "architecture": "baseline",
+      "control": "d=1",
+      "frontier": "D_max",
+      "largest_contiguous_competent": 32,
+      "predicate": "isAncestor",
+      "tested_values": "2;3;4;5;6;8;12;16;24;32",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "baseline",
+      "control": "D=16",
+      "frontier": "d_max",
+      "largest_contiguous_competent": 16,
+      "predicate": "isAncestor",
+      "tested_values": "1;2;3;4;6;8;12;16",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "baseline",
+      "control": "D=8,d=3,N=4",
+      "frontier": "b_max",
+      "largest_contiguous_competent": 8,
+      "predicate": "isAncestor",
+      "tested_values": "1;2;4;8",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "baseline",
+      "control": "D=8,d=3,b=2",
+      "frontier": "N_max",
+      "largest_contiguous_competent": 256,
+      "predicate": "isAncestor",
+      "tested_values": "0;4;16;64;256",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "depth8",
+      "control": "d=1",
+      "frontier": "D_max",
+      "largest_contiguous_competent": 32,
+      "predicate": "isAncestor",
+      "tested_values": "2;3;4;5;6;8;12;16;24;32",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "depth8",
+      "control": "D=16",
+      "frontier": "d_max",
+      "largest_contiguous_competent": 16,
+      "predicate": "isAncestor",
+      "tested_values": "1;2;3;4;6;8;12;16",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "depth8",
+      "control": "D=8,d=3,N=4",
+      "frontier": "b_max",
+      "largest_contiguous_competent": 8,
+      "predicate": "isAncestor",
+      "tested_values": "1;2;4;8",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    },
+    {
+      "architecture": "depth8",
+      "control": "D=8,d=3,b=2",
+      "frontier": "N_max",
+      "largest_contiguous_competent": 64,
+      "predicate": "isAncestor",
+      "tested_values": "0;4;16;64;256",
+      "three_seed_complete": 1,
+      "threshold": 0.8
+    }
+  ],
+  "mechanism_followup_eligible": true,
+  "schema_version": "paper06.stress_v6.analysis.v1",
+  "threshold": 0.8
+}

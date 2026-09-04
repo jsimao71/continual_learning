@@ -1,0 +1,19 @@
+{
+  "example_hash": "4643dd8b017944d610f4b2ae98e0c9c236ebe542f79bbf3236c5452fab901181",
+  "explicit_topology_edges": true,
+  "factorized_controls": true,
+  "maximum_sequence_length": 411,
+  "pairwise_target_entropy_bits": 1.0,
+  "passed": true,
+  "predicates": [
+    "ancestor_k",
+    "grandparent",
+    "isAncestor",
+    "parent",
+    "root",
+    "sameAncestorAtLevel_k",
+    "sameGrandparent",
+    "sameParent"
+  ],
+  "schema_version": "paper06.stress_v6.validation.v1"
+}
