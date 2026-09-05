@@ -1,5 +1,5 @@
 import random,torch
-from cl.experiments.paper09_learned_controller_v1 import context,training_batch
+from cl.experiments.paper09_learned_controller_v1 import context,evaluate_m4,train,training_batch
 from cl.experiments.paper09_learned_controller_analyze import aggregate, corrected_row
 from cl.semantic.recurrence_chains import ANSWER,generate_chains,recurrence_pair_split
 
@@ -42,3 +42,20 @@ def test_frontier_requires_contiguous_all_seed_machine_specific_gate():
         rows.append(row)
     _,_,frontiers=aggregate(rows)
     assert {r["machine"]:r["contiguous_frontier"] for r in frontiers} == {"M3":3,"M4":3}
+
+
+def test_cpu_resume_exactly_replays_uninterrupted_training(tmp_path):
+    _,train_pairs,test_pairs=recurrence_pair_split(16,8502,.2)
+    cfg={"train_depths":[1,2,3],"max_length":48,"model":{"width":16,"layers":1,"heads":1,"mlp_ratio":2},
+         "learning_rate":.001,"log_every":1,"checkpoint_every":2}
+    device=torch.device("cpu")
+    full,full_losses=train("M4",11,cfg,device,tmp_path/"full.pt",train_pairs,4,6)
+    train("M4",11,cfg,device,tmp_path/"resume.pt",train_pairs,2,6)
+    resumed,resumed_losses=train("M4",11,cfg,device,tmp_path/"resume.pt",train_pairs,4,6)
+    assert full_losses == resumed_losses
+    assert all(torch.equal(full.state_dict()[key],resumed.state_dict()[key]) for key in full.state_dict())
+    rows=generate_chains(test_pairs,3,8,9903,"test")
+    assert evaluate_m4(full,rows,device,2) == evaluate_m4(resumed,rows,device,2)
+    payload=torch.load(tmp_path/"resume.pt",map_location="cpu",weights_only=False)
+    assert payload["master_stream_cursor"] == 24
+    assert {"python_rng","data_rng","numpy_rng","torch_rng","config_sha256","dataset_sha256"} <= payload.keys()

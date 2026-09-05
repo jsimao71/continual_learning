@@ -1,6 +1,6 @@
 """Learned M3/M4 controllers over corrected Paper 0.85 chains and T1."""
 from __future__ import annotations
-import argparse,csv,json,random
+import argparse,csv,hashlib,json,random
 from pathlib import Path
 import numpy as np
 import torch
@@ -20,6 +20,24 @@ def context(row,history):
 
 def make_model(cfg,device):return TinyTransformerLM(VOCAB_SIZE,cfg["max_length"],cfg["model"]["width"],cfg["model"]["layers"],cfg["model"]["heads"],cfg["model"]["mlp_ratio"]).to(device)
 
+def stable_sha256(value):
+    return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(",",":"),default=list).encode()).hexdigest()
+
+def dataset_sha256(pairs):
+    return stable_sha256([list(pair) for pair in pairs])
+
+def capture_replay_state(rng,step,batch_size,device):
+    state={"python_rng":random.getstate(),"data_rng":rng.getstate(),"numpy_rng":np.random.get_state(),
+           "torch_rng":torch.get_rng_state(),"master_stream_cursor":step*batch_size}
+    if device.type=="mps":
+        state["mps_rng_if_available"]=torch.mps.get_rng_state()
+    return state
+
+def restore_replay_state(payload,rng,device):
+    random.setstate(payload["python_rng"]);rng.setstate(payload["data_rng"]);np.random.set_state(payload["numpy_rng"])
+    torch.set_rng_state(payload["torch_rng"])
+    if device.type=="mps" and "mps_rng_if_available" in payload:torch.mps.set_rng_state(payload["mps_rng_if_available"])
+
 def training_batch(machine,pairs,cfg,rng,batch_size,device):
     samples=[]
     for i in range(batch_size):
@@ -36,11 +54,15 @@ def training_batch(machine,pairs,cfg,rng,batch_size,device):
 
 def train(machine,seed,cfg,device,checkpoint,pairs,updates,batch_size):
     torch.manual_seed(seed);rng=random.Random(seed+(300 if machine=="M3" else 400));model=make_model(cfg,device);opt=torch.optim.AdamW(model.parameters(),lr=cfg["learning_rate"]);start=0;losses=[]
+    config_hash=stable_sha256(cfg);data_hash=dataset_sha256(pairs)
     if checkpoint.exists():
         p=torch.load(checkpoint,map_location="cpu",weights_only=False);model.load_state_dict(p["model"]);opt.load_state_dict(p["optimizer"]);start=p["step"];losses=p.get("losses",[])
+        if p.get("config_sha256")!=config_hash or p.get("dataset_sha256")!=data_hash:raise RuntimeError("checkpoint config/dataset hash mismatch")
+        if p.get("master_stream_cursor")!=start*batch_size:raise RuntimeError("checkpoint data cursor mismatch")
         for state in opt.state.values():
             for key,value in state.items():
                 if torch.is_tensor(value):state[key]=value.to(device)
+        restore_replay_state(p,rng,device)
     model.train()
     for step in range(start,updates):
         x,y,lengths=training_batch(machine,pairs,cfg,rng,batch_size,device);opt.zero_grad(set_to_none=True);logits,_=model(x)
@@ -48,7 +70,9 @@ def train(machine,seed,cfg,device,checkpoint,pairs,updates,batch_size):
         loss.backward();torch.nn.utils.clip_grad_norm_(model.parameters(),1);opt.step()
         if step==0 or (step+1)%cfg["log_every"]==0 or step+1==updates:losses.append({"step":step+1,"loss":float(loss.detach())})
         if (step+1)%cfg["checkpoint_every"]==0 or step+1==updates:
-            checkpoint.parent.mkdir(parents=True,exist_ok=True);torch.save({"model":model.state_dict(),"optimizer":opt.state_dict(),"step":step+1,"losses":losses,"machine":machine,"seed":seed},checkpoint)
+            checkpoint.parent.mkdir(parents=True,exist_ok=True);torch.save({"model":model.state_dict(),"optimizer":opt.state_dict(),"step":step+1,
+                "losses":losses,"machine":machine,"seed":seed,"config_sha256":config_hash,"dataset_sha256":data_hash,
+                **capture_replay_state(rng,step+1,batch_size,device)},checkpoint)
     return model.eval(),losses
 
 @torch.no_grad()
