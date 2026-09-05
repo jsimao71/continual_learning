@@ -1,0 +1,13 @@
+accuracy,competent,examples,model_seed,split,stage,worst_template_accuracy
+1.0,1,768,11,test,F1,1.0
+1.0,1,768,11,validation,F1,1.0
+1.0,1,768,23,test,F1,1.0
+1.0,1,768,23,validation,F1,1.0
+1.0,1,768,37,test,F1,1.0
+1.0,1,768,37,validation,F1,1.0
+1.0,1,768,11,test,P1,1.0
+1.0,1,768,11,validation,P1,1.0
+0.9817708333333334,1,768,23,test,P1,0.98046875
+0.9817708333333334,1,768,23,validation,P1,0.96484375
+1.0,1,768,37,test,P1,1.0
+1.0,1,768,37,validation,P1,1.0

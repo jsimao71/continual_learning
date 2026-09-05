@@ -1,0 +1,69 @@
+{
+  "F1_symbol_baseline_accuracy": 0.08333333333333333,
+  "P1_constant_baseline_accuracy": 0.5,
+  "checks": {
+    "F1:test:target_balanced": true,
+    "F1:test:target_in_prompt": true,
+    "F1:test:templates": true,
+    "F1:train:target_balanced": true,
+    "F1:train:target_in_prompt": true,
+    "F1:train:templates": true,
+    "F1:validation:target_balanced": true,
+    "F1:validation:target_in_prompt": true,
+    "F1:validation:templates": true,
+    "P1:test:balanced": true,
+    "P1:test:consequent_match:balanced": true,
+    "P1:test:fact_match:balanced": true,
+    "P1:test:rule_lhs_match:balanced": true,
+    "P1:test:templates": true,
+    "P1:train:balanced": true,
+    "P1:train:consequent_match:balanced": true,
+    "P1:train:fact_match:balanced": true,
+    "P1:train:rule_lhs_match:balanced": true,
+    "P1:train:templates": true,
+    "P1:validation:balanced": true,
+    "P1:validation:consequent_match:balanced": true,
+    "P1:validation:fact_match:balanced": true,
+    "P1:validation:rule_lhs_match:balanced": true,
+    "P1:validation:templates": true,
+    "split_namespaces_disjoint": true,
+    "unique_ids": true
+  },
+  "rows": 9216,
+  "template_counts": {
+    "F1:test": {
+      "canonical": 192,
+      "constant_distractor": 192,
+      "predicate_distractor": 192,
+      "reversed": 192
+    },
+    "F1:train": {
+      "canonical": 768,
+      "constant_distractor": 768,
+      "predicate_distractor": 768,
+      "reversed": 768
+    },
+    "F1:validation": {
+      "canonical": 192,
+      "constant_distractor": 192,
+      "predicate_distractor": 192,
+      "reversed": 192
+    },
+    "P1:test": {
+      "consequent_match": 256,
+      "fact_match": 256,
+      "rule_lhs_match": 256
+    },
+    "P1:train": {
+      "consequent_match": 1024,
+      "fact_match": 1024,
+      "rule_lhs_match": 1024
+    },
+    "P1:validation": {
+      "consequent_match": 256,
+      "fact_match": 256,
+      "rule_lhs_match": 256
+    }
+  },
+  "valid": true
+}
