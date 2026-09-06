@@ -1,0 +1,13 @@
+audit_provenance,condition,examples_seen,high_diversity,observed_distinct_latent_chains,observed_unique_transitions,partial_starts,processed_token_budget,sampling_policy,seed,supervised_target_tokens_last_invocation,token_budget_definition,updates
+deterministic_sampling_replay,baseline,96000,False,42717,3226,False,4512000,fresh_online_stage1_matched,11,288000,examples times fixed padded causal length; identical across conditions,1000
+deterministic_sampling_replay,baseline,96000,False,42749,3226,False,4512000,fresh_online_stage1_matched,23,288000,examples times fixed padded causal length; identical across conditions,1000
+deterministic_sampling_replay,baseline,96000,False,42790,3226,False,4512000,fresh_online_stage1_matched,37,288000,examples times fixed padded causal length; identical across conditions,1000
+deterministic_sampling_replay,partial_starts,96000,False,53660,3226,True,4512000,fresh_online_stage1_matched,11,288000,examples times fixed padded causal length; identical across conditions,1000
+deterministic_sampling_replay,partial_starts,96000,False,53921,3226,True,4512000,fresh_online_stage1_matched,23,288000,examples times fixed padded causal length; identical across conditions,1000
+deterministic_sampling_replay,partial_starts,96000,False,53888,3226,True,4512000,fresh_online_stage1_matched,37,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,high_diversity,96000,True,44138,3226,False,4512000,online_nonrepeating_depth_gt1,11,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,high_diversity,96000,True,44066,3226,False,4512000,online_nonrepeating_depth_gt1,23,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,high_diversity,96000,True,44078,3226,False,4512000,online_nonrepeating_depth_gt1,37,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,partial_diversity,96000,True,54116,3226,True,4512000,online_nonrepeating_depth_gt1,11,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,partial_diversity,96000,True,54207,3226,True,4512000,online_nonrepeating_depth_gt1,23,288000,examples times fixed padded causal length; identical across conditions,1000
+training_run,partial_diversity,96000,True,54270,3226,True,4512000,online_nonrepeating_depth_gt1,37,288000,examples times fixed padded causal length; identical across conditions,1000

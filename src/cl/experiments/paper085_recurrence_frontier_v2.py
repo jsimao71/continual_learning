@@ -42,6 +42,11 @@ def _latent_to_examples(row,partial: bool,train_depths: tuple[int,...]) -> list[
         for a,b in zip(row.chain,row.chain[1:]):prompt.extend((RULE,a,ARROW,b))
         prompt.append(QUERY)
         examples.append(FrontierExample(chain,tuple(prompt),residual,row.depth,start,row.chain))
+        if partial:
+            complete=[BOS,FACT,chain[0]]
+            for a,b in zip(chain,chain[1:]):complete.extend((RULE,a,ARROW,b))
+            complete.append(QUERY)
+            examples.append(FrontierExample(chain,tuple(complete),residual,residual,0,chain))
     return examples
 
 
@@ -49,13 +54,13 @@ def build_training_pool(pairs,condition,cfg,seed):
     partial=condition in {"partial_starts","partial_diversity"}
     high=condition in {"high_diversity","partial_diversity"}
     count=cfg["high_diversity_latent_chains"] if high else cfg["low_diversity_latent_chains"]
-    rng=random.Random(seed+sum(map(ord,condition)));examples=[];latent=[]
+    rng=random.Random(seed+sum(map(ord,condition)));examples=[];latent=[];seen=set()
     while len(latent)<count:
         if partial:depth=rng.choice(cfg["partial_latent_depths"])
         else:depth=rng.choice(cfg["train_depths"])
         row=generate_chains(pairs,depth,1,rng.randrange(2**31),"train")[0]
-        if row.chain in {item.chain for item in latent}:continue
-        latent.append(row);examples.extend(_latent_to_examples(row,partial,tuple(cfg["train_depths"])))
+        if row.chain in seen:continue
+        seen.add(row.chain);latent.append(row);examples.extend(_latent_to_examples(row,partial,tuple(cfg["train_depths"])))
     by_depth={depth:[row for row in examples if row.residual_depth==depth] for depth in cfg["train_depths"]}
     if any(not rows for rows in by_depth.values()):raise RuntimeError("training pool lacks a requested residual depth")
     return by_depth,{"condition":condition,"partial_starts":partial,"high_diversity":high,
@@ -78,13 +83,43 @@ def batch_from_pool(pool,batch_size,rng,max_length,device):
         torch.tensor(masks,device=device),rows)
 
 
+def online_training_pool(pairs,condition,cfg,batch_size,rng,diversity_seen=None):
+    """Reproduce Stage-1 fresh-chain sampling, optionally from latent-chain suffixes."""
+    partial=condition in {"partial_starts","partial_diversity"};high=condition in {"high_diversity","partial_diversity"}
+    per=max(1,batch_size//len(cfg["train_depths"]));by_depth={}
+    for residual in cfg["train_depths"]:
+        rows=[]
+        for _ in range(per):
+            if partial and len(rows)%2:
+                choices=[depth for depth in cfg["partial_latent_depths"] if depth>=residual]
+                while True:
+                    latent=generate_chains(pairs,rng.choice(choices),1,rng.randrange(2**31),"train")[0]
+                    key=("latent",latent.chain)
+                    if not high or diversity_seen is None or key not in diversity_seen:break
+                if high and diversity_seen is not None:diversity_seen.add(key)
+                rows.append([item for item in _latent_to_examples(latent,True,(residual,)) if item.residual_depth==residual][0])
+            else:
+                while True:
+                    base=generate_chains(pairs,residual,1,rng.randrange(2**31),"train")[0]
+                    key=("complete",base.chain)
+                    # The finite depth-one pair set must repeat; deeper chains need not.
+                    if not high or residual==1 or diversity_seen is None or key not in diversity_seen:break
+                if high and residual>1 and diversity_seen is not None:diversity_seen.add(key)
+                rows.extend(_latent_to_examples(base,False,(residual,)))
+        by_depth[residual]=rows
+    return by_depth
+
+
 def _fingerprint(cfg,condition,seed,smoke):
     payload=json.dumps({"cfg":cfg,"condition":condition,"seed":seed,"smoke":smoke},sort_keys=True).encode()
     return hashlib.sha256(payload).hexdigest()
 
 
 def train(condition,seed,cfg,device,checkpoint,smoke):
-    pool,audit=build_training_pool(recurrence_pair_split(cfg["symbol_count"],cfg["pair_split_seed"],cfg["test_pair_fraction"])[1],condition,cfg,seed)
+    train_pairs=recurrence_pair_split(cfg["symbol_count"],cfg["pair_split_seed"],cfg["test_pair_fraction"])[1]
+    high=condition in {"high_diversity","partial_diversity"};pool=None
+    audit={"condition":condition,"partial_starts":condition in {"partial_starts","partial_diversity"},"high_diversity":high,
+        "sampling_policy":"online_nonrepeating_depth_gt1" if high else "fresh_online_stage1_matched"}
     updates=cfg["smoke_updates"] if smoke else cfg["updates"];batch=cfg["smoke_batch_size"] if smoke else cfg["batch_size"]
     fingerprint=_fingerprint(cfg,condition,seed,smoke);torch.manual_seed(seed);rng=random.Random(seed+701)
     net=model(cfg,device);optimizer=torch.optim.AdamW(net.parameters(),lr=cfg["learning_rate"]);start=0;losses=[]
@@ -95,9 +130,13 @@ def train(condition,seed,cfg,device,checkpoint,smoke):
         for state in optimizer.state.values():
             for key,value in state.items():
                 if torch.is_tensor(value):state[key]=value.to(device)
-    net.train();supervised=0
+    net.train();supervised=0;seen_chains=set();seen_transitions=set();diversity_seen=set()
     for step in range(start,updates):
-        x,y,mask,_=batch_from_pool(pool,batch,rng,cfg["max_length"],device);supervised+=int(mask.sum())
+        step_pool=online_training_pool(train_pairs,condition,cfg,batch,rng,diversity_seen)
+        train_length=cfg.get("training_sequence_length",cfg["max_length"])
+        x,y,mask,batch_rows=batch_from_pool(step_pool,batch,rng,train_length,device);supervised+=int(mask.sum())
+        seen_chains.update(row.latent_chain for row in batch_rows)
+        seen_transitions.update(edge for row in batch_rows for edge in zip(row.chain,row.chain[1:]))
         optimizer.zero_grad(set_to_none=True);logits,_=net(x);loss=torch.nn.functional.cross_entropy(logits[mask],y[mask])
         loss.backward();torch.nn.utils.clip_grad_norm_(net.parameters(),1);optimizer.step()
         if step==0 or (step+1)%cfg["log_every"]==0 or step+1==updates:losses.append({"step":step+1,"loss":float(loss.detach())})
@@ -105,8 +144,9 @@ def train(condition,seed,cfg,device,checkpoint,smoke):
             checkpoint.parent.mkdir(parents=True,exist_ok=True);torch.save({"model":net.state_dict(),"optimizer":optimizer.state_dict(),
                 "step":step+1,"losses":losses,"fingerprint":fingerprint,"condition":condition,"seed":seed},checkpoint)
     audit.update({"updates":updates,"examples_seen":updates*batch,
-        "processed_token_budget":updates*batch*(cfg["max_length"]-1),"supervised_target_tokens_last_invocation":supervised,
-        "token_budget_definition":"examples times fixed padded causal length; identical across conditions"})
+        "processed_token_budget":updates*batch*(cfg.get("training_sequence_length",cfg["max_length"])-1),"supervised_target_tokens_last_invocation":supervised,
+        "token_budget_definition":"examples times fixed padded causal length; identical across conditions",
+        "observed_distinct_latent_chains":len(seen_chains),"observed_unique_transitions":len(seen_transitions)})
     return net.eval(),losses,audit
 
 
@@ -135,7 +175,12 @@ def main(args):
     smoke=args.smoke;depths=cfg["smoke_test_depths"] if smoke else cfg["test_depths"];eval_per=cfg["smoke_eval_per_depth"] if smoke else cfg["eval_per_depth"]
     conditions=cfg["conditions"];seeds=cfg["model_seeds"][:1] if smoke else cfg["model_seeds"]
     cells=_read(out/"condition_seed_results.csv") if args.resume else [];raw=_read(out/"frontier_raw.csv") if args.resume else []
-    losses=_read(out/"training_loss.csv") if args.resume else [];audits=[];done={(r["condition"],int(r["seed"])) for r in cells}
+    losses=_read(out/"training_loss.csv") if args.resume else [];audits=[]
+    invalid={(condition,int(seed)) for condition,seed in cfg.get("invalidated_cells",[])}
+    cells=[r for r in cells if (r["condition"],int(r["seed"])) not in invalid]
+    raw=[r for r in raw if (r["condition"],int(r["seed"])) not in invalid]
+    losses=[r for r in losses if (r["condition"],int(r["seed"])) not in invalid]
+    done={(r["condition"],int(r["seed"])) for r in cells}
     for condition in conditions:
       for seed in seeds:
         if (condition,seed) in done:continue

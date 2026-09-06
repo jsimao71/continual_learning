@@ -1,0 +1,41 @@
+{
+  "checkpoint_resume": true,
+  "completed_condition_seeds": 12,
+  "conditions": [
+    "baseline",
+    "partial_starts",
+    "high_diversity",
+    "partial_diversity"
+  ],
+  "device": "mps",
+  "exact_processed_token_matching": true,
+  "gates": {
+    "final": 0.95,
+    "termination": 0.95,
+    "trajectory": 0.9
+  },
+  "o0_gate": "run only if O1 reaches unseen K>=4",
+  "output_regime": "O1_free_trace",
+  "planned_condition_seeds": 12,
+  "schema_version": "paper085.recurrence_frontier_v2.v1",
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "smoke": false,
+  "test_depths": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8
+  ],
+  "train_depths": [
+    1,
+    2,
+    3
+  ]
+}

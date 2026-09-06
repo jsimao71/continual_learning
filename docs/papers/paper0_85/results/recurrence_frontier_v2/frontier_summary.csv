@@ -1,0 +1,13 @@
+condition,k_ar,o1_only,seed
+baseline,3,1,11
+baseline,3,1,23
+baseline,3,1,37
+partial_starts,3,1,11
+partial_starts,3,1,23
+partial_starts,3,1,37
+high_diversity,3,1,11
+high_diversity,3,1,23
+high_diversity,3,1,37
+partial_diversity,3,1,11
+partial_diversity,3,1,23
+partial_diversity,3,1,37

@@ -1,0 +1,32 @@
+{
+  "all_p_acquire_k4_zero": true,
+  "conditions": [
+    "baseline",
+    "partial_starts",
+    "high_diversity",
+    "partial_diversity"
+  ],
+  "exact_processed_token_budget": 4512000,
+  "examples_per_run": 96000,
+  "excluded_from_aggregation": [
+    "smoke/",
+    "invalid_low_diversity_baseline/",
+    "recurrence_stage1_v1/ query-target-leakage pilot"
+  ],
+  "invalid_design_pilots_excluded": [
+    "invalid_low_diversity_baseline",
+    "invalid_partial_only",
+    "superseded_padding127"
+  ],
+  "o0_followup_gate_open": false,
+  "official_cells": 84,
+  "schema_version": "paper085.recurrence_frontier_v2.analysis.v1",
+  "stable_frontiers": {
+    "baseline": 3,
+    "high_diversity": 3,
+    "partial_diversity": 3,
+    "partial_starts": 3
+  },
+  "three_seed_complete": true,
+  "unique_cells": 84
+}

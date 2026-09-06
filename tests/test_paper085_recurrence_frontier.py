@@ -27,7 +27,7 @@ def test_partial_starts_change_absolute_start_without_target_leakage():
     cfg["low_diversity_latent_chains"]=6;cfg["high_diversity_latent_chains"]=8
     _,train,_=recurrence_pair_split(32,8502,.2)
     pool,audit=build_training_pool(train,"partial_starts",cfg,11)
-    assert audit["partial_starts"] and max(audit["start_indices"])>0
+    assert audit["partial_starts"] and min(audit["start_indices"])==0 and max(audit["start_indices"])>0
     for rows in pool.values():
         for row in rows:
             assert row.chain[-1] not in row.prompt[len(row.prompt):]
@@ -41,5 +41,5 @@ def test_fixed_padding_makes_processed_budget_condition_invariant():
     shapes=[]
     for condition in cfg["conditions"]:
         pool,_=build_training_pool(train,condition,cfg,11)
-        x,_,_,_=batch_from_pool(pool,6,random.Random(1),cfg["max_length"],torch.device("cpu"));shapes.append(tuple(x.shape))
-    assert shapes==[(6,cfg["max_length"]-1)]*4
+        x,_,_,_=batch_from_pool(pool,6,random.Random(1),cfg["training_sequence_length"],torch.device("cpu"));shapes.append(tuple(x.shape))
+    assert shapes==[(6,cfg["training_sequence_length"]-1)]*4

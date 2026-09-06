@@ -3,13 +3,13 @@
 \usepackage{amsmath,amssymb,booktabs,microtype,enumitem,hyperref,graphicx,float}
 \usepackage[T1]{fontenc}\usepackage{lmodern}
 \setlist{nosep,leftmargin=*}
-\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue}
+\hypersetup{colorlinks=true,linkcolor=blue,urlcolor=blue,hypertexnames=false}
 \title{Autoregressive Inference Before Tools:\\The Multi-Token Computational Frontier of Tiny Transformers}
 \author{Paper 0.85 --- Multi-Token Inference Research Line}
-\date{Stage-1 results --- August 2026}
+\date{Stage-1 and recurrence-frontier results --- September 2026}
 \begin{document}\maketitle
 \begin{abstract}
-A one-token Transformer is a fixed-depth circuit, but a decoder generating multiple tokens is already an iterative machine: each generated token becomes writable state, and subsequent steps can attend to the full trajectory. Before attributing systematic reasoning gains to external agents or tools, we measure how much computation ordinary autoregressive generation learns by itself. A leakage-audited local gate first establishes one-step implication over held-out ordered pairs with shared, fully trained lexical support: all three L2/W64/H4 seeds exceed 98.8\% on positive and negative controls. We then train proof chains only at $K\le3$ and test $K\in\{1,2,3,4,6,8\}$. One-token answers (O0), free traces (O1), and fully teacher-forced structured traces (O3) are perfect in range but fail abruptly at $K=4$ for every seed. Thus $K_{\rm internal}=K_{\rm AR}=K_{\rm O3}=3$ and measured recurrence gain is zero. Structured grammar/final supervision without intermediate state labels (O2) learns formatting but no exact trajectories. An earlier fully disjoint-symbol run is retained only as a lexical-transfer stress, and a query-target leakage pilot is quarantined. The result is a stable finite train-short/test-long boundary, not a closure signature, and supplies the model-only baseline for Paper 0.9.
+A one-token Transformer is a fixed-depth circuit, but a decoder generating multiple tokens is already an iterative machine: each generated token becomes writable state, and subsequent steps can attend to the full trajectory. Before attributing systematic reasoning gains to external agents or tools, we measure how much computation ordinary autoregressive generation learns by itself. A leakage-audited local gate first establishes one-step implication over held-out ordered pairs with shared, fully trained lexical support: all three L2/W64/H4 seeds exceed 98.8\% on positive and negative controls. We then train proof chains only at $K\le3$. One-token answers (O0), free traces (O1), and fully teacher-forced structured traces (O3) reach a three-seed frontier of three but fail abruptly at the first unseen depth. A second, token-matched 12-run O1 experiment tests random partial starts, higher chain diversity, and their combination. Every condition again has stable $K_{\rm AR}=3$ and $P_{\rm acquire}(K=4)=0/3$; partial-start conditions fail mainly by premature termination. Correct-prefix injection does not rescue the original $K=4$ failures and instead exposes strong absolute-step dependence. Thus recurrence is constructively representable (Paper 0.1) but is not acquired under these recurrence-targeted curricula. This is bounded evidence against reusable learned recurrence in the tested regime, not evidence against autoregressive expressivity or a claim of mathematical non-closure.
 \end{abstract}
 
 \section{Motivation}
@@ -146,7 +146,7 @@ O2 separates syntax from semantics. Across depths its seed-level aggregate final
 
 \begin{figure}[H]\centering
 \includegraphics[width=.72\linewidth]{../paper0_85/results/recurrence_stage1_v2/figures/one_token_vs_multitoken_depth.png}
-\caption{Mean three-seed final accuracy for the corrected Stage-1 comparison. The dashed line marks the maximum training depth. The sharp shared boundary, rather than gradual accumulated error, is inconsistent with a measured closure signature.}
+\caption{Mean three-seed final accuracy for the corrected Stage-1 comparison. The dashed line marks the maximum training depth. The sharp shared boundary, rather than gradual accumulated error, provides no evidence for reusable recurrence beyond the training range.}
 \end{figure}
 
 Consequently,
@@ -155,6 +155,49 @@ K_{\rm internal}=K_{\rm AR}=K_{\rm O3}=3,
 \qquad G_{\rm recurrence}=0
 \]
 over the tested architecture, supervision, and depths. This is a finite empirical statement. It neither proves that autoregression cannot expand the frontier under another curriculum/architecture nor licenses infinite-closure claims.
+
+\section{What changes the recurrence frontier?}
+\subsection{Matched intervention design}
+The next iteration tests whether the original solution is bound to complete-trajectory starts or to repeated chain templates. We retain O1, L2/W64/H4, seeds 11/23/37, 1,000 updates, and $K_{\rm train}\le3$, and evaluate the same 64 held-out-pair chains per seed at $K\in\{1,2,3,4,5,6,8\}$. Four conditions cross complete versus random partial starts with ordinary versus nonrepeating high-diversity sampling. Partial examples begin at internal states of latent chains with depth 4, 5, 6, or 8 while exposing only residual lengths 1--3; complete starts remain in the mixture. High-diversity sampling prevents repeats for depth above one, where the finite depth-one pair set must repeat.
+
+Every condition processes exactly 96,000 examples and 4,512,000 fixed-padded causal positions per seed. Deterministic sampling audits find mean distinct latent-chain counts of 42,752 (baseline), 53,823 (partial starts), 44,094 (high diversity), and 54,198 (partial plus diversity); all conditions cover all 3,226 training transitions. Thus the intervention changes start-position and chain-repetition statistics under matched optimizer exposure, but the fresh-online baseline is already diverse. The labels ``high diversity'' and ``partial starts'' name sampling policies, not assumptions that they must improve generalization.
+
+\subsection{Frontier and failure results}
+\begin{table}[H]\centering\small
+\begin{tabular}{lcccc}
+\toprule
+O1 condition & Seed frontiers & Stable $K_{\rm AR}$ & $P_{\rm acquire}(K=4)$ & Mean $K=4$ transition\\\midrule
+Baseline & 3/3/3 & 3 & 0/3 & .305\\
+Partial starts & 3/3/3 & 3 & 0/3 & .008\\
+High diversity & 3/3/3 & 3 & 0/3 & .305\\
+Partial starts + diversity & 3/3/3 & 3 & 0/3 & .003\\
+\bottomrule
+\end{tabular}
+\caption{Corrected recurrence-frontier experiment. A frontier is the largest contiguous depth passing final $\ge.95$, termination $\ge.95$, and exact trajectory $\ge.90$ in that seed; the stable frontier is the minimum across seeds.}
+\label{tab:recurrence-v2}
+\end{table}
+
+All 12 cells remain competent through the training range, but every condition has zero final accuracy at $K=4$. High diversity leaves the boundary transition mean numerically unchanged at .305. Partial starts do not merely fail to rescue extrapolation: at $K=4$ their mean transition accuracy is .008 without the diversity constraint and .003 with it. Both partial-start conditions terminate prematurely on every boundary example, whereas baseline and high-diversity conditions mostly terminate late (mean delayed-termination rates .844 and .771). These distinct failure modes show that endpoint collapse alone is not a sufficient mechanism description. They do not show that partial starts are intrinsically harmful: this particular mixture may strengthen a learned residual-length stop policy, and no curriculum-weight or explicit termination objective was varied.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.49\linewidth]{../paper0_85/results/recurrence_frontier_v2/frontier_by_condition.png}\hfill
+\includegraphics[width=.49\linewidth]{../paper0_85/results/recurrence_frontier_v2/intervention_transition_accuracy.png}
+\caption{Three-seed O1 results under matched training exposure. Left: every condition crosses the training boundary at $K=3\to4$. Right: partial-start conditions sharply reduce conditional transition accuracy out of range; enforced diversity alone closely tracks baseline. Dashed vertical position marks the first unseen depth.}
+\label{fig:recurrence-v2}
+\end{figure}
+
+\subsection{Oracle-prefix diagnostic}
+To distinguish accumulated early errors from an absolute-step failure, we evaluate the original corrected Stage-1 O1 checkpoints on $K=4$ while injecting proper target prefixes of length zero through three. The final answer is never included in a forced prefix, the query contains no answer field, and evaluation uses held-out implication pairs. With no injection, the first next state is correct on .964 of examples on average, yet the remaining trajectory is never exact. After forcing one, two, and three correct states, accuracy on the next required state falls to .146, .099, and .005; final accuracy remains zero except .005 at prefix length three. Termination accuracy stays between .010 and .036.
+
+\begin{figure}[H]\centering
+\includegraphics[width=.58\linewidth]{../paper0_85/results/recurrence_frontier_v2/oracle_prefix/oracle_prefix_rescue.png}
+\caption{Leakage-audited oracle-prefix diagnostic at $K=4$ (three seeds, 64 examples each). Correct prefixes do not rescue continuation; performance worsens as the required prediction moves to a later absolute output position.}
+\label{fig:oracle-prefix}
+\end{figure}
+
+The diagnostic argues against ordinary error propagation as the main explanation for the sharp boundary. It is consistent with an absolute-step or total-length template: the first local move is usually available, but the same semantic move is not reused at later generated positions even after the preceding state is supplied correctly. Because absolute step and remaining total length are not independently randomized in this diagnostic, it does not identify which cue controls the failure.
+
+The preregistered gate for a matched O0 follow-up required an O1 condition to reach unseen $K\ge4$; no condition did, so that follow-up was not opened. Accordingly this iteration does not change $K_{\rm internal}$ or establish $G_{\rm recurrence}>0$. It strengthens the narrower conclusion: a reusable fixed-weight recurrence exists constructively in Paper 0.1, while SGD here acquires a bounded trajectory policy even after two targeted data interventions.
 
 \section{Closure signatures}
 Train on $K\le2$ or $3$ and test much larger $K$. Evidence for reusable recurrence strengthens when:
@@ -182,7 +225,7 @@ Start with
 \[
 L\in\{1,2,3,4\},\quad W\in\{16,32,64\},\quad H\in\{1,2,4\},
 \]
-and training budgets $T\in\{1,2,4\}\times$. This diagnostic grid, four output conditions, and three model seeds enumerates 1,296 possible phase cells, not completed evidence. Stage 1 runs only the 12-cell passing R0 architecture slice. Deeper $L\in\{6,8\}$ and wider $W=128$ cells remain conditional expansions. The next justified step is a narrow boundary/curriculum test, followed by shuffled rules, distractors, and branching only if recurrence becomes competent.
+and training budgets $T\in\{1,2,4\}\times$. This diagnostic grid, four output conditions, and three model seeds enumerates 1,296 possible phase cells, not completed evidence. Stage 1 runs only the 12-cell passing R0 architecture slice, and the recurrence-frontier iteration adds 12 O1 data-intervention cells at the same architecture. Deeper $L\in\{6,8\}$ and wider $W=128$ cells remain conditional expansions. The next discriminating experiment is local next-state/termination supervision or a $K_{\rm train}^{\max}=4$ transfer test, not a broad architecture sweep.
 
 \section{Mechanistic measurements}
 At every generation step record next-token distribution, correct-next-state rank/margin, Q/K/V, attention role mass, SA/FF residual increments, representation similarity across recurrence steps, and attention to original rules versus generated state.
@@ -238,8 +281,8 @@ Paper 0.7 measures one-pass formal computation. Paper 0.85 adds self-generated i
 \]
 Only this can distinguish class expansion from improved learnability/reliability.
 
-\section{Expected contribution}
-The strongest positive result would show tiny Transformers trained only on short proofs acquiring a reusable autoregressive transition that extrapolates to much longer chains while one-token performance remains bounded. The strongest negative result would show reliable local implication but bounded or seed-fragile recurrent trajectories. Either outcome locates a computational boundary between fixed-depth composition and explicit external iteration.
+\section{Contribution and remaining question}
+The present negative result combines reliable local implication, a three-seed train-short/test-long boundary, two recurrence-targeted data interventions, and a leakage-audited prefix diagnostic. It locates a learned boundary between having autoregressive writable state and acquiring a transition that reuses it systematically. It does not reduce the theoretical expressivity of autoregressive Transformers: Paper 0.1's handcrafted fixed-weight witness supplies the relevant representability contrast. The remaining question is which supervision or curriculum, if any, produces $K_{\rm AR}>K_{\rm internal}$ under a matched model and budget.
 
 \section{Reproducibility and evidence status}
 The executable components are:
@@ -252,8 +295,11 @@ The executable components are:
 \item recurrence runner: \path{paper085_recurrence_stage1.py};
 \item recurrence analysis: \path{paper085_recurrence_analyze.py};
 \item recurrence configuration: \path{recurrence_stage1_v2.json}.
+\item recurrence-frontier runner: \path{paper085_recurrence_frontier_v2.py};
+\item recurrence-frontier analysis: \path{paper085_recurrence_frontier_analyze_v2.py};
+\item recurrence-frontier configuration: \path{recurrence_frontier_v2.json}.
 \end{itemize}
-Machine-readable artifacts are under \path{docs/papers/paper0_85/results}. The broad phase manifest explicitly labels its 11,200 exact traces as reference results rather than learned evidence. Learned R0-v1, R0-v2, and corrected Stage1-v2 occupy isolated directories; the Stage1-v1 manifest is quarantined because of query-target leakage. Tracked dense checkpoints are locally reproducible and may remain ignored. Planned long-depth, context-limit, role-invariance, causal, shuffled-rule, distractor, branching, and ICL experiments are not stated as findings.
+Machine-readable artifacts are under \path{docs/papers/paper0_85/results}. The authoritative second-iteration aggregate contains exactly 84 condition--seed--depth cells and 12 sampling-audit cells; its manifest records the four conditions, three-seed completeness, matched 4,512,000-position budget, and closed O0 follow-up gate. The broad phase manifest explicitly labels its 11,200 exact traces as reference results rather than learned evidence. Learned R0-v1, R0-v2, corrected Stage1-v2, and recurrence-frontier-v2 occupy isolated directories; Stage1-v1 is quarantined because of query-target leakage. The recurrence-frontier \path{smoke/} and \path{invalid_low_diversity_baseline/} directories are explicitly excluded from aggregation, as are superseded pilot designs. Tracked dense checkpoints are locally reproducible and may remain ignored. Planned context-limit, role-invariance, causal, shuffled-rule, distractor, branching, and ICL experiments are not stated as findings.
 
 \begin{thebibliography}{99}
 \bibitem{li2024} Z. Li, H. Liu, D. Zhou, and T. Ma. Chain of Thought Empowers Transformers to Solve Inherently Serial Problems. arXiv:2402.12875, 2024.

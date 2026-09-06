@@ -1,0 +1,5 @@
+condition,delta_frontier_vs_baseline,p_acquire_k4,seed_frontiers,stable_k_ar
+baseline,0,0.0,3;3;3,3
+partial_starts,0,0.0,3;3;3,3
+high_diversity,0,0.0,3;3;3,3
+partial_diversity,0,0.0,3;3;3,3
