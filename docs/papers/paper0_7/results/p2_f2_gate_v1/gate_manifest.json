@@ -1,0 +1,133 @@
+{
+  "completed_models": 6,
+  "config_hash": "9695207e8fb6653a1c8c27bd4da03a4a0fc089ec839c3c7cb3f525fabed6a36f",
+  "dataset_audit": {
+    "F2_fail_baseline_accuracy": 0.5,
+    "P2_constant_baseline_accuracy": 0.5,
+    "checks": {
+      "F2:test:canonical_functor_control:bindings_balanced": true,
+      "F2:test:canonical_functor_control:oracles": true,
+      "F2:test:canonical_functor_control:status_balanced": true,
+      "F2:test:canonical_predicate_control:bindings_balanced": true,
+      "F2:test:canonical_predicate_control:oracles": true,
+      "F2:test:canonical_predicate_control:status_balanced": true,
+      "F2:test:reversed_functor_control:bindings_balanced": true,
+      "F2:test:reversed_functor_control:oracles": true,
+      "F2:test:reversed_functor_control:status_balanced": true,
+      "F2:test:reversed_predicate_control:bindings_balanced": true,
+      "F2:test:reversed_predicate_control:oracles": true,
+      "F2:test:reversed_predicate_control:status_balanced": true,
+      "F2:test:templates": true,
+      "F2:train:canonical_functor_control:bindings_balanced": true,
+      "F2:train:canonical_functor_control:oracles": true,
+      "F2:train:canonical_functor_control:status_balanced": true,
+      "F2:train:canonical_predicate_control:bindings_balanced": true,
+      "F2:train:canonical_predicate_control:oracles": true,
+      "F2:train:canonical_predicate_control:status_balanced": true,
+      "F2:train:reversed_functor_control:bindings_balanced": true,
+      "F2:train:reversed_functor_control:oracles": true,
+      "F2:train:reversed_functor_control:status_balanced": true,
+      "F2:train:reversed_predicate_control:bindings_balanced": true,
+      "F2:train:reversed_predicate_control:oracles": true,
+      "F2:train:reversed_predicate_control:status_balanced": true,
+      "F2:train:templates": true,
+      "F2:validation:canonical_functor_control:bindings_balanced": true,
+      "F2:validation:canonical_functor_control:oracles": true,
+      "F2:validation:canonical_functor_control:status_balanced": true,
+      "F2:validation:canonical_predicate_control:bindings_balanced": true,
+      "F2:validation:canonical_predicate_control:oracles": true,
+      "F2:validation:canonical_predicate_control:status_balanced": true,
+      "F2:validation:reversed_functor_control:bindings_balanced": true,
+      "F2:validation:reversed_functor_control:oracles": true,
+      "F2:validation:reversed_functor_control:status_balanced": true,
+      "F2:validation:reversed_predicate_control:bindings_balanced": true,
+      "F2:validation:reversed_predicate_control:oracles": true,
+      "F2:validation:reversed_predicate_control:status_balanced": true,
+      "F2:validation:templates": true,
+      "P2:test:cp_antecedent_polarity:balanced": true,
+      "P2:test:cp_consequent_polarity:balanced": true,
+      "P2:test:cp_direction:balanced": true,
+      "P2:test:mt_fact_polarity:balanced": true,
+      "P2:test:mt_query_polarity:balanced": true,
+      "P2:test:mt_rule_direction:balanced": true,
+      "P2:test:templates": true,
+      "P2:train:cp_antecedent_polarity:balanced": true,
+      "P2:train:cp_consequent_polarity:balanced": true,
+      "P2:train:cp_direction:balanced": true,
+      "P2:train:mt_fact_polarity:balanced": true,
+      "P2:train:mt_query_polarity:balanced": true,
+      "P2:train:mt_rule_direction:balanced": true,
+      "P2:train:templates": true,
+      "P2:validation:cp_antecedent_polarity:balanced": true,
+      "P2:validation:cp_consequent_polarity:balanced": true,
+      "P2:validation:cp_direction:balanced": true,
+      "P2:validation:mt_fact_polarity:balanced": true,
+      "P2:validation:mt_query_polarity:balanced": true,
+      "P2:validation:mt_rule_direction:balanced": true,
+      "P2:validation:templates": true,
+      "split_namespaces_disjoint": true,
+      "unique_ids": true
+    },
+    "rows": 9216,
+    "template_counts": {
+      "F2:test": {
+        "canonical_functor_control": 192,
+        "canonical_predicate_control": 192,
+        "reversed_functor_control": 192,
+        "reversed_predicate_control": 192
+      },
+      "F2:train": {
+        "canonical_functor_control": 768,
+        "canonical_predicate_control": 768,
+        "reversed_functor_control": 768,
+        "reversed_predicate_control": 768
+      },
+      "F2:validation": {
+        "canonical_functor_control": 192,
+        "canonical_predicate_control": 192,
+        "reversed_functor_control": 192,
+        "reversed_predicate_control": 192
+      },
+      "P2:test": {
+        "cp_antecedent_polarity": 128,
+        "cp_consequent_polarity": 128,
+        "cp_direction": 128,
+        "mt_fact_polarity": 128,
+        "mt_query_polarity": 128,
+        "mt_rule_direction": 128
+      },
+      "P2:train": {
+        "cp_antecedent_polarity": 512,
+        "cp_consequent_polarity": 512,
+        "cp_direction": 512,
+        "mt_fact_polarity": 512,
+        "mt_query_polarity": 512,
+        "mt_rule_direction": 512
+      },
+      "P2:validation": {
+        "cp_antecedent_polarity": 128,
+        "cp_consequent_polarity": 128,
+        "cp_direction": 128,
+        "mt_fact_polarity": 128,
+        "mt_query_polarity": 128,
+        "mt_rule_direction": 128
+      }
+    },
+    "valid": true
+  },
+  "dataset_hash": "2bd2f2064a502378ae932d5b0b1d5d834896906a16a6124ed0c4eb8ade995777",
+  "decoding": {
+    "F2": "argmax over 12 binding symbols plus FAIL",
+    "P2": "argmax over {YES,NO}",
+    "unrestricted_argmax_also_recorded": true
+  },
+  "device": "cpu",
+  "planned_models": 6,
+  "schema_version": "paper07.p2_f2_gate.v1",
+  "smoke": false,
+  "template_stratified": true,
+  "three_seed_gate": {
+    "F2": 0,
+    "P2": 1
+  }
+}
