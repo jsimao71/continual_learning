@@ -24,6 +24,7 @@ def _seed_fixture(root, seed):
     seed_dir = root / "seeds" / f"seed-{seed}"
     config = {
         "seed": seed, "per_split": CONFIG["per_split"], "candidates": 12,
+        "replacement_pool_multiplier": CONFIG["replacement_pool_multiplier"],
         "budgets": [2, 4, 6], "chunk_tokens": 32,
         "causal_examples_per_split": CONFIG["causal_examples_per_split"],
         "model_id": CONFIG["model_id"], "model_revision": CONFIG["model_revision"],
@@ -66,6 +67,7 @@ def test_frozen_command_preserves_protocol(tmp_path):
                            CONFIG["sampling_seeds"][0], "mps")
     joined = " ".join(command)
     assert "--per-split 24" in joined and "--candidates 12" in joined
+    assert "--replacement-pool-multiplier 2" in joined
     assert "--budgets 2 4 6" in joined and "--causal-examples 6" in joined
 
 

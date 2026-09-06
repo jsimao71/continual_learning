@@ -247,10 +247,19 @@ def _write_outputs(output, aggregate, paired, causal, predictions, traces, rows,
 
 def run(args):
     repo, output, cache = Path(args.repo).resolve(), Path(args.output).resolve(), Path(args.cache).resolve()
-    datasets = {
-        "hotpotqa": load_hotpotqa(per_split=args.per_split, seed=args.seed, cache_dir=cache / "hotpotqa"),
-        "qasper": load_qasper(per_split=args.per_split, seed=args.seed, cache_dir=cache / "qasper"),
-    }
+    loaders = {"hotpotqa": load_hotpotqa, "qasper": load_qasper}
+    datasets = {}
+    for name, loader in loaders.items():
+        primary = loader(per_split=args.per_split, seed=args.seed, cache_dir=cache / name)
+        reserve = loader(
+            per_split=args.per_split * args.replacement_pool_multiplier,
+            seed=args.seed,
+            cache_dir=cache / name,
+        )
+        primary_ids = {example.example_id for example in primary}
+        datasets[name] = primary + tuple(
+            example for example in reserve if example.example_id not in primary_ids
+        )
     if not all(identity_disjoint(values) for values in datasets.values()):
         raise RuntimeError("identity leakage across validation and test")
     adapter = FrozenQwenNaturalAdapter(MODEL_ID, MODEL_REVISION, args.device)
@@ -258,12 +267,16 @@ def run(args):
     candidate_rows = []
     for dataset, examples in datasets.items():
         values = []
+        accepted = {"validation": 0, "test": 0}
         for example in examples:
+            if accepted[example.split] >= args.per_split:
+                continue
             try:
                 bundle = adapter.extract(example, maximum_candidates=args.candidates)
             except ValueError:
                 continue
             values.append((example, bundle))
+            accepted[example.split] += 1
             for index, candidate in enumerate(bundle.candidates):
                 candidate_rows.append({
                     "dataset": dataset, "split": example.split, "example_id": example.example_id,
@@ -272,9 +285,15 @@ def run(args):
                     "token_length": bundle.token_lengths[index],
                     **{name: float(value) for name, value in zip(FEATURE_NAMES, bundle.features[index])},
                 })
+        if any(accepted[split] != args.per_split for split in accepted):
+            raise RuntimeError(
+                f"{dataset} has insufficient usable identities after deterministic replacement: "
+                f"{accepted}; requested {args.per_split} per split"
+            )
         bundles[dataset] = values
     config = {
         "seed": args.seed, "per_split": args.per_split, "candidates": args.candidates,
+        "replacement_pool_multiplier": args.replacement_pool_multiplier,
         "budgets": args.budgets, "chunk_tokens": 32, "causal_examples_per_split": args.causal_examples,
         "model_id": MODEL_ID, "model_revision": MODEL_REVISION, "device": str(adapter.device),
         "selectors": list(SELECTORS), "retain_full_attention": False,
@@ -308,6 +327,7 @@ def parse_args():
     parser.add_argument("--device", default="auto")
     parser.add_argument("--seed", type=int, default=20260822)
     parser.add_argument("--per-split", type=int, default=3)
+    parser.add_argument("--replacement-pool-multiplier", type=int, default=2)
     parser.add_argument("--candidates", type=int, default=12)
     parser.add_argument("--budgets", type=int, nargs="+", default=[2, 4, 6])
     parser.add_argument("--causal-examples", type=int, default=1)

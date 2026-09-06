@@ -37,6 +37,7 @@ def validate_seed_output(seed_dir: Path, config: dict, seed: int) -> dict:
     expected = {
         "seed": seed,
         "per_split": config["per_split"],
+        "replacement_pool_multiplier": config["replacement_pool_multiplier"],
         "candidates": config["candidates"],
         "budgets": config["budget_chunks"],
         "chunk_tokens": config["chunk_tokens"],
@@ -78,6 +79,7 @@ def seed_command(config_path: Path, config: dict, output: Path, cache: Path,
         sys.executable, "-u", "-m", "cl.experiments.paper1_natural_gate",
         "--repo", ".", "--output", str(output), "--cache", str(cache),
         "--device", device, "--seed", str(seed), "--per-split", str(config["per_split"]),
+        "--replacement-pool-multiplier", str(config["replacement_pool_multiplier"]),
         "--candidates", str(config["candidates"]), "--budgets",
         *[str(value) for value in config["budget_chunks"]],
         "--causal-examples", str(config["causal_examples_per_split"]),
@@ -239,7 +241,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="configs/paper1/natural_replication_v2.json")
     parser.add_argument("--output", default="docs/papers/paper1/results/natural_replication_v2")
-    parser.add_argument("--cache", default="tmp/natural_replication_v2_cache")
+    parser.add_argument("--cache", default="tmp/natural_cache")
     parser.add_argument("--device", default="auto")
     parser.add_argument("--max-seeds", type=int)
     parser.add_argument("--aggregate-only", action="store_true")
