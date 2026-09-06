@@ -1,0 +1,26 @@
+{
+  "schema_version": "paper06.compositional_frontier_v7.v1",
+  "ontology_seed": 6707,
+  "model_seeds": [11, 23, 37],
+  "tree_seeds": [101, 211, 307],
+  "vocab_size": 1024,
+  "max_length": 144,
+  "train_depths": [1, 2, 3],
+  "test_depths": [1, 2, 3, 4, 6, 8, 12, 16],
+  "templates": [0, 1, 2, 3],
+  "position_modes": ["aligned", "randomized"],
+  "architectures": [
+    {"name": "L2_W64_H4", "layers": 2, "width": 64, "heads": 4},
+    {"name": "L4_W64_H4", "layers": 4, "width": 64, "heads": 4},
+    {"name": "L8_W64_H4", "layers": 8, "width": 64, "heads": 4}
+  ],
+  "training_steps": 1200,
+  "batch_size": 64,
+  "learning_rate": 0.003,
+  "evaluation_examples_per_cell": 16,
+  "smoke_examples_per_cell": 4,
+  "competence_threshold": 0.8,
+  "preferred_threshold": 0.9,
+  "checkpoint_every": 100,
+  "position_encoding": "sinusoidal"
+}
