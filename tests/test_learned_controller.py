@@ -66,11 +66,21 @@ def test_stage_a_gate_uses_preregistered_machine_specific_metrics():
     rows=[]
     for machine in ("M3","M4"):
       for seed in (11,23,37):
-       for depth in (1,2):
+       for depth in (1,2,3,4,6,8):
         base={"snapshot_updates":2000,"machine":machine,"seed":seed,"depth":depth,"example_id":0,
               "final_correct":1,"invalid_call":0,"nontermination":0}
         if machine=="M3":base.update(selected_edge_valid=1,one_call_edge_coverage=1/depth,post_tool_answer_correct=1)
         else:base.update(per_transition_accuracy=1,exact_trajectory_correct=1,termination_correct=1)
         rows.append(base)
     _,gates=summarize(rows)
-    assert {r["machine"]:r["contiguous_frontier"] for r in gates} == {"M3":1,"M4":2}
+    assert {r["machine"]:r["contiguous_frontier"] for r in gates} == {"M3":1,"M4":8}
+
+
+def test_stage_a_interim_gate_never_invents_unrun_conditions():
+    rows=[{"snapshot_updates":2000,"machine":"M3","seed":11,"depth":1,"example_id":0,"final_correct":1,
+           "invalid_call":0,"nontermination":0,"selected_edge_valid":1,"one_call_edge_coverage":1,
+           "post_tool_answer_correct":1}]
+    _,gates=summarize(rows)
+    assert len(gates)==1 and gates[0]["machine"]=="M3"
+    assert gates[0]["gate_complete"]==0 and gates[0]["contiguous_frontier"]==""
+    assert gates[0]["all_seed_K4"]=="" and gates[0]["worst_seed_K4_final"]==""

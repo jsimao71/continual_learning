@@ -45,15 +45,20 @@ def summarize(rows, threshold=.95):
     for updates in sorted({r["snapshot_updates"] for r in seed_depth}):
       for machine in ("M3","M4"):
         values=[r for r in seed_depth if r["snapshot_updates"]==updates and r["machine"]==machine]
+        if not values: continue
+        seeds_observed=len({r["seed"] for r in values});depths_observed=len({r["depth"] for r in values})
+        gate_complete=seeds_observed==3 and depths_observed==6
         frontier=0
         for depth in sorted({r["depth"] for r in values}):
             cells=[r for r in values if r["depth"]==depth]
-            if depth==frontier+1 and len(cells)==3 and all(r["seed_pass"] for r in cells):frontier=depth
+            if len(cells)==3 and all(r["seed_pass"] for r in cells):frontier=depth
             else:break
         k4=[r for r in values if r["depth"]==4]
-        gates.append({"snapshot_updates":updates,"machine":machine,"contiguous_frontier":frontier,
-                      "all_seed_K4":int(len(k4)==3 and all(r["seed_pass"] for r in k4)),
-                      "worst_seed_K4_final":min((r["final_accuracy"] for r in k4),default=0.0)})
+        gates.append({"snapshot_updates":updates,"machine":machine,"gate_complete":int(gate_complete),
+                      "seeds_observed":seeds_observed,"depths_observed":depths_observed,
+                      "contiguous_frontier":frontier if gate_complete else "",
+                      "all_seed_K4":int(all(r["seed_pass"] for r in k4)) if len(k4)==3 else "",
+                      "worst_seed_K4_final":min((r["final_accuracy"] for r in k4)) if len(k4)==3 else ""})
     return seed_depth,gates
 
 
