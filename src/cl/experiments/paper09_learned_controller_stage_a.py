@@ -12,7 +12,7 @@ import torch
 
 from cl.common.artifacts import atomic_write_json, write_csv
 from cl.experiments.paper05_predictive_order_phase import resolve_device
-from cl.experiments.paper09_learned_controller_v1 import evaluate_m3, evaluate_m4, train
+from cl.experiments.paper09_learned_controller_v1 import dataset_sha256, evaluate_m3, evaluate_m4, stable_sha256, train
 from cl.semantic.recurrence_chains import generate_chains, recurrence_pair_split
 
 
@@ -72,7 +72,10 @@ def main(args=None):
          "learning_rate":common["learning_rate"],"log_every":50,"checkpoint_every":common["checkpoint_every"]}
     cfg["model"]={key:cfg["model"][key] for key in ("layers","width","heads","mlp_ratio")}
     raw=read_csv(output/"stage_a_raw.csv") if ns.resume else [];loss_rows=read_csv(output/"stage_a_loss.csv") if ns.resume else []
-    done={(int(r["snapshot_updates"]),r["machine"],int(r["seed"])) for r in raw}
+    expected_cell_rows=len(dataset["test_depths"])*dataset["eval_per_depth_per_seed"]
+    counts=defaultdict(int)
+    for row in raw:counts[(int(row["snapshot_updates"]),row["machine"],int(row["seed"]))]+=1
+    done={key for key,count in counts.items() if count==expected_cell_rows}
     targets=plan["stages"]["A"]["snapshot_updates"]
     for machine in common["machines"]:
       for seed in common["model_seeds"]:
@@ -80,6 +83,7 @@ def main(args=None):
         for target in targets:
           key=(target,machine,seed)
           if key in done: continue
+          raw=[r for r in raw if (int(r["snapshot_updates"]),r["machine"],int(r["seed"]))!=key]
           model,losses=train(machine,seed,cfg,device,working,train_pairs,target,common["batch_size"])
           snapshot=output/"snapshots"/f"{machine}_baseline_seed{seed}_step{target}.pt";snapshot.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(working,snapshot)
           for depth in dataset["test_depths"]:
@@ -92,9 +96,13 @@ def main(args=None):
           seed_depth,gates=summarize(raw,plan["gates"]["competence_threshold"]);write_csv(output/"stage_a_by_seed_depth.csv",seed_depth);write_csv(output/"stage_a_gates.csv",gates)
           print(f"{machine} seed={seed} snapshot={target} complete",flush=True)
     seed_depth,gates=summarize(raw,plan["gates"]["competence_threshold"]);write_csv(output/"stage_a_by_seed_depth.csv",seed_depth);write_csv(output/"stage_a_gates.csv",gates)
-    complete=len({(int(r["snapshot_updates"]),r["machine"],int(r["seed"])) for r in raw})==len(targets)*len(common["machines"])*len(common["model_seeds"])
+    required={(target,machine,seed) for target in targets for machine in common["machines"] for seed in common["model_seeds"]}
+    final_counts=defaultdict(int)
+    for row in raw:final_counts[(int(row["snapshot_updates"]),row["machine"],int(row["seed"]))]+=1
+    complete=all(final_counts[key]==expected_cell_rows for key in required) and set(final_counts)==required
     atomic_write_json(output/"stage_a_manifest.json",{"schema_version":"paper09.learned_controller.stage_a.v1","device":str(device),"exact_resume":True,
-      "snapshots":targets,"completed":complete,"raw_rows":len(raw),"gates":gates,"later_stages_launched":False})
+      "snapshots":targets,"completed":complete,"raw_rows":len(raw),"expected_rows_per_cell":expected_cell_rows,
+      "config_sha256":stable_sha256(plan),"dataset_sha256":dataset_sha256(train_pairs),"gates":gates,"later_stages_launched":False})
 
 
 if __name__=="__main__":main()

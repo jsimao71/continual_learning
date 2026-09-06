@@ -25,7 +25,7 @@ def _load(root,stage):
 
 def validate_chain(root,plan):
  loaded={stage:_load(root,stage) for stage in "ABCDE"};plan_hash=stable_sha256(plan)
- for stage in "BCDE":
+ for stage in "ABCDE":
   if loaded[stage][1].get("config_sha256")!=plan_hash:raise RuntimeError(f"Stage {stage} config hash mismatch")
  a_hash=stable_sha256(loaded["A"][1]);b=loaded["B"][1]
  if b.get("stage_a_prerequisite",{}).get("manifest_hash")!=a_hash:raise RuntimeError("Stage B -> A hash mismatch")
@@ -41,6 +41,7 @@ def validate_chain(root,plan):
  source={row["stage"]:row for row in d_selection.get("sources",[])}
  for stage in ("B","C"):
   if source.get(stage,{}).get("manifest_hash")!=stable_sha256(loaded[stage][1]):raise RuntimeError(f"Stage D -> {stage} hash mismatch")
+  if source.get(stage,{}).get("frontier_hash")!=stable_sha256(loaded[stage][2]):raise RuntimeError(f"Stage D -> {stage} frontier hash mismatch")
  e_selection=json.loads((loaded["E"][0]/"stage_e_selection_manifest.json").read_text())
  if e_selection.get("stage_d_manifest_hash")!=stable_sha256(loaded["D"][1]):raise RuntimeError("Stage E -> D manifest hash mismatch")
  if e_selection.get("stage_d_selection_hash")!=stable_sha256(d_selection):raise RuntimeError("Stage E -> D selection hash mismatch")

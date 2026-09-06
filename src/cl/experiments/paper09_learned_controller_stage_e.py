@@ -31,6 +31,8 @@ def main(args=None):
  if ns.prepare_only:return
  def protocol(spec,machine,seed,draws,smoke):
   shared=min(plan["stages"]["E"]["shared_prefix_draws"],draws) if smoke else plan["stages"]["E"]["shared_prefix_draws"]
-  return {"kind":"train_boundary","train_kmax":int(spec["train_kmax"]),"matched_draws":draws,"shared_prefix_draws":shared,"shared_prefix_depths":[1,2,3]}
+  pool_size=int(selection["scores"][selection["selected_diversity"]]["pool_size"])
+  if smoke:pool_size=min(pool_size,draws)
+  return {"kind":"train_boundary","train_kmax":int(spec["train_kmax"]),"pool_size":pool_size,"selected_diversity":selection["selected_diversity"],"matched_draws":draws,"shared_prefix_draws":shared,"shared_prefix_depths":[1,2,3]}
  run_cells("E",plan,specs,selection,out,ns.device,ns.resume,ns.smoke,protocol)
 if __name__=="__main__":main()

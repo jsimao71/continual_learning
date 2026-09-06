@@ -21,10 +21,10 @@ def build(root):
   frontier_path=d/f"{prefix}_{'gates' if stage=='A' else 'frontiers'}.csv";write_csv(frontier_path,front);write_csv(d/f"{prefix}_by_seed_depth.csv",depth);write_csv(d/f"{prefix}_raw.csv",raw)
   from cl.experiments.paper09_learned_controller_stage_a import read_csv
   loaded[stage]=(d,read_csv(frontier_path))
- a={"completed":True};(loaded["A"][0]/"stage_a_manifest.json").write_text(json.dumps(a))
+ a={"completed":True,"config_sha256":ph};(loaded["A"][0]/"stage_a_manifest.json").write_text(json.dumps(a))
  b={"completed":True,"config_sha256":ph,"stage_a_prerequisite":{"manifest_hash":stable_sha256(a)}};(loaded["B"][0]/"stage_b_manifest.json").write_text(json.dumps(b))
  cs={"stage_b_manifest_hash":stable_sha256(b),"stage_b_frontiers_hash":stable_sha256(loaded["B"][1])};(loaded["C"][0]/"stage_c_selection_manifest.json").write_text(json.dumps(cs));c={"completed":True,"config_sha256":ph,"selection_manifest_hash":stable_sha256(cs)};(loaded["C"][0]/"stage_c_manifest.json").write_text(json.dumps(c))
- ds={"sources":[{"stage":"B","manifest_hash":stable_sha256(b)},{"stage":"C","manifest_hash":stable_sha256(c)}]};(loaded["D"][0]/"stage_d_selection_manifest.json").write_text(json.dumps(ds));d={"completed":True,"config_sha256":ph,"selection_manifest_hash":stable_sha256(ds)};(loaded["D"][0]/"stage_d_manifest.json").write_text(json.dumps(d))
+ ds={"sources":[{"stage":"B","manifest_hash":stable_sha256(b),"frontier_hash":stable_sha256(loaded["B"][1])},{"stage":"C","manifest_hash":stable_sha256(c),"frontier_hash":stable_sha256(loaded["C"][1])}]};(loaded["D"][0]/"stage_d_selection_manifest.json").write_text(json.dumps(ds));d={"completed":True,"config_sha256":ph,"selection_manifest_hash":stable_sha256(ds)};(loaded["D"][0]/"stage_d_manifest.json").write_text(json.dumps(d))
  es={"stage_d_manifest_hash":stable_sha256(d),"stage_d_selection_hash":stable_sha256(ds),"stage_d_frontiers_hash":stable_sha256(loaded["D"][1])};(loaded["E"][0]/"stage_e_selection_manifest.json").write_text(json.dumps(es));e={"completed":True,"config_sha256":ph,"selection_manifest_hash":stable_sha256(es)};(loaded["E"][0]/"stage_e_manifest.json").write_text(json.dumps(e))
 
 def test_analysis_validates_chain_and_writes_separate_outputs(tmp_path):

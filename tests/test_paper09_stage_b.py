@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from cl.experiments.paper09_learned_controller_stage_b import summarize, validate_stage_a
+from cl.experiments.paper09_learned_controller_v1 import stable_sha256
 
 
 PLAN = json.loads(Path("configs/paper09/learned_controller_v3_staged.json").read_text())
@@ -12,7 +13,7 @@ PLAN = json.loads(Path("configs/paper09/learned_controller_v3_staged.json").read
 
 def _gate_fixture(root, *, completed=True, omit=None):
     root.mkdir(parents=True, exist_ok=True)
-    (root / "stage_a_manifest.json").write_text(json.dumps({"completed": completed}))
+    (root / "stage_a_manifest.json").write_text(json.dumps({"completed": completed, "config_sha256": stable_sha256(PLAN)}))
     rows = [{"snapshot_updates": snapshot, "machine": machine, "gate_complete": 1}
             for snapshot in PLAN["stages"]["A"]["snapshot_updates"]
             for machine in PLAN["common"]["machines"]

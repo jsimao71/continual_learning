@@ -31,9 +31,10 @@ def test_d_prefix_pool_and_e_shared_prefix_indices():
  d24={"kind":"diversity","pool_size":24000};d48={"kind":"diversity","pool_size":48000}
  assert [protocol_index(d24,i)[0] for i in (0,23999,24000,47999)]==[0,23999,0,23999]
  assert [protocol_index(d48,i)[0] for i in (0,23999)]==[0,23999]
- e3={"kind":"train_boundary","train_kmax":3,"shared_prefix_draws":72000};e4={"kind":"train_boundary","train_kmax":4,"shared_prefix_draws":72000}
+ e3={"kind":"train_boundary","train_kmax":3,"pool_size":48000,"shared_prefix_draws":72000};e4={"kind":"train_boundary","train_kmax":4,"pool_size":48000,"shared_prefix_draws":72000}
  assert protocol_index(e3,71999)==protocol_index(e4,71999)
  assert protocol_index(e3,72000)[1]==[1,2,3] and protocol_index(e4,72000)[1]==[1,2,3,4]
+ assert protocol_index(e3,48000)[0]==0
 
 def test_e_requires_complete_d_and_selects_frontier(tmp_path):
  from cl.experiments.paper09_learned_controller_staged import stable_sha256

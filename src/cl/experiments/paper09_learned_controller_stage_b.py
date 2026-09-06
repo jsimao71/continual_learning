@@ -38,6 +38,8 @@ def validate_stage_a(stage_a: Path, plan: dict) -> dict:
     manifest = json.loads(manifest_path.read_text())
     if manifest.get("completed") is not True:
         raise RuntimeError("Stage A prerequisite is partial")
+    if manifest.get("config_sha256") != stable_sha256(plan):
+        raise RuntimeError("Stage A prerequisite config hash mismatch")
     gates = read_csv(gates_path)
     expected = {
         (int(snapshot), machine)
@@ -130,6 +132,9 @@ def main(args=None):
     device = resolve_device(ns.device)
     _, train_pairs, test_pairs = recurrence_pair_split(
         dataset["symbol_count"], dataset["pair_split_seed"], dataset["test_pair_fraction"])
+    stage_a_manifest = json.loads((Path(ns.stage_a) / "stage_a_manifest.json").read_text())
+    if stage_a_manifest.get("dataset_sha256") != dataset_sha256(train_pairs):
+        raise RuntimeError("Stage A prerequisite dataset hash mismatch")
     machines = common["machines"][:1] if ns.smoke else common["machines"]
     seeds = common["model_seeds"][:1] if ns.smoke else common["model_seeds"]
     specifications = specifications[:1] if ns.smoke else specifications

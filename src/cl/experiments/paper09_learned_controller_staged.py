@@ -55,8 +55,9 @@ def _sample(machine,pairs,depths,seed,index):
 def protocol_index(protocol,absolute):
     if protocol["kind"]=="diversity":return absolute%protocol["pool_size"],[1,2,3]
     shared=protocol["shared_prefix_draws"]
-    if absolute<shared:return absolute,[1,2,3]
-    return absolute,[1,2,3,4] if protocol["train_kmax"]==4 else [1,2,3]
+    index=absolute%protocol["pool_size"]
+    if absolute<shared:return index,[1,2,3]
+    return index,[1,2,3,4] if protocol["train_kmax"]==4 else [1,2,3]
 
 def train_protocol(machine,seed,cfg,device,checkpoint,pairs,updates,batch_size,protocol):
     torch.manual_seed(seed);model=make_model(cfg,device);opt=torch.optim.AdamW(model.parameters(),lr=cfg["learning_rate"]);start=0;losses=[]
