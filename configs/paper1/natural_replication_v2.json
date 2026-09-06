@@ -1,0 +1,42 @@
+{
+  "schema_version": "paper1.natural_replication.v2",
+  "model_id": "Qwen/Qwen3-0.6B",
+  "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "sampling_seeds": [20260906, 20260917, 20260929],
+  "per_split": 24,
+  "causal_examples_per_split": 6,
+  "candidates": 12,
+  "chunk_tokens": 32,
+  "budget_chunks": [2, 4, 6],
+  "budget_tokens": [64, 128, 192],
+  "selectors": [
+    "base_topk",
+    "budget_tuned_topk",
+    "power_sharpen",
+    "entropy_adaptive_sharpen",
+    "persistence",
+    "agreement",
+    "community",
+    "bridge_preserving",
+    "combined_structural",
+    "oracle_evidence"
+  ],
+  "primary_comparison": "bridge_preserving_minus_base_topk",
+  "primary_endpoint": "paired_answer_logprob_delta",
+  "secondary_endpoints": [
+    "answer_token_accuracy",
+    "evidence_recall",
+    "complete_evidence",
+    "materialized_kv_bytes",
+    "materialization_time_ns",
+    "end_to_end_time_ns",
+    "peak_device_bytes"
+  ],
+  "gate": {
+    "frontier": "identity-bootstrap lower bound above zero on both datasets at one or more preregistered budgets per dataset",
+    "causal_prediction": "mean seedwise held-out R2 delta above zero and at least two of three seedwise deltas positive on both datasets",
+    "persistent_learning_requires_either": true
+  },
+  "bootstrap_samples": 10000,
+  "retain_full_attention": false
+}
