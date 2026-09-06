@@ -1,5 +1,6 @@
 import random,torch
 from cl.experiments.paper09_learned_controller_v1 import context,evaluate_m4,train,training_batch
+from cl.experiments.paper09_learned_controller_stage_a import summarize
 from cl.experiments.paper09_learned_controller_analyze import aggregate, corrected_row
 from cl.semantic.recurrence_chains import ANSWER,generate_chains,recurrence_pair_split
 
@@ -59,3 +60,17 @@ def test_cpu_resume_exactly_replays_uninterrupted_training(tmp_path):
     payload=torch.load(tmp_path/"resume.pt",map_location="cpu",weights_only=False)
     assert payload["master_stream_cursor"] == 24
     assert {"python_rng","data_rng","numpy_rng","torch_rng","config_sha256","dataset_sha256"} <= payload.keys()
+
+
+def test_stage_a_gate_uses_preregistered_machine_specific_metrics():
+    rows=[]
+    for machine in ("M3","M4"):
+      for seed in (11,23,37):
+       for depth in (1,2):
+        base={"snapshot_updates":2000,"machine":machine,"seed":seed,"depth":depth,"example_id":0,
+              "final_correct":1,"invalid_call":0,"nontermination":0}
+        if machine=="M3":base.update(selected_edge_valid=1,one_call_edge_coverage=1/depth,post_tool_answer_correct=1)
+        else:base.update(per_transition_accuracy=1,exact_trajectory_correct=1,termination_correct=1)
+        rows.append(base)
+    _,gates=summarize(rows)
+    assert {r["machine"]:r["contiguous_frontier"] for r in gates} == {"M3":1,"M4":2}
