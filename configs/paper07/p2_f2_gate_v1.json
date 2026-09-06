@@ -1,0 +1,18 @@
+{
+  "schema_version": "paper07.p2_f2_gate.v1",
+  "model_seeds": [11, 23, 37],
+  "split_seeds": {"train": 7211, "validation": 7223, "test": 7237},
+  "examples": {"train": 3072, "validation": 768, "test": 768},
+  "smoke_examples": 96,
+  "architecture": {"layers": 2, "width": 32, "heads": 2, "mlp_ratio": 2},
+  "steps_by_stage": {"P2": 1600, "F2": 3200},
+  "batch_size": 64,
+  "smoke_steps": 4,
+  "smoke_batch_size": 8,
+  "learning_rate": 0.003,
+  "vocab_size": 64,
+  "sequence_length": 24,
+  "competence_threshold": 0.95,
+  "checkpoint_every": 100,
+  "gate_requires_every_test_template": true
+}
