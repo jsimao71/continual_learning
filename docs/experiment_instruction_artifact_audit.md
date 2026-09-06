@@ -20,13 +20,15 @@ not imply that every suggested future extension was run.
 
 ## Findings
 
-The three already identified active/deferred experiments remain genuine requirements:
+Two already identified active/deferred experiments remain genuine requirements:
 
 1. Paper 0.9's bounded staged A--E resource study. Its v3 artifact is plan-only.
 2. Paper 1's larger unchanged natural bridge-versus-base replication. Its frozen
    three-seed design is committed but unrun.
-3. Paper 0.8's learned D5 structured-rule experiment. Exact generator/posterior
-   validation is complete, but there is no model result.
+
+Paper 0.8's learned D5 structured-rule experiment has since completed as a three-seed
+gated null. All 12 planned cells and 51,456 evaluation rows are tracked, but no seed
+passes; downstream D5 mechanism work therefore remains stopped.
 
 One additional required experimental gap was visible at audit time and is now closed:
 
