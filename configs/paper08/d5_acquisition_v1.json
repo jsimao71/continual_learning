@@ -1,0 +1,29 @@
+{
+  "schema_version": "paper08.d5_acquisition.v1",
+  "moduli": [5, 7, 11],
+  "dataset_seed": 8085,
+  "parameter_test_fraction": 0.25,
+  "train_episodes_per_hypothesis": 8,
+  "test_episodes_per_hypothesis": 4,
+  "unseen_family_test_episodes": 32,
+  "max_demonstrations": 10,
+  "vocab_size": 64,
+  "max_length": 43,
+  "model_grid": {"layers": [1, 2, 3, 4, 6], "widths": [8, 16, 32, 64, 128], "heads": [1, 2, 4], "variants": ["sa_only", "sa_ff"]},
+  "first_pass_cells": [
+    {"layers": 1, "width": 32, "heads": 1, "variant": "sa_only"},
+    {"layers": 1, "width": 32, "heads": 1, "variant": "sa_ff"},
+    {"layers": 2, "width": 64, "heads": 4, "variant": "sa_only"},
+    {"layers": 2, "width": 64, "heads": 4, "variant": "sa_ff"}
+  ],
+  "model_seeds": [11, 23, 37],
+  "mlp_ratio": 2,
+  "updates": 1200,
+  "batch_size": 64,
+  "learning_rate": 0.001,
+  "log_every": 50,
+  "competence_accuracy": 0.95,
+  "minimum_selectivity": 0.20,
+  "smoke_updates": 3,
+  "device": "mps"
+}
