@@ -1,0 +1,35 @@
+{
+  "claim_boundary": "L_min(d) is descriptive only; depth is not parameter matched",
+  "completed_models": 9,
+  "config_hash": "816c98a20ce188a11f367bba0ed6daa5ed6e6c02c0bc4e52a7d224b487c1b4c1",
+  "device": "cpu",
+  "frontiers": [
+    {
+      "architecture": "L2_W64_H4",
+      "competent_depths": "",
+      "largest_contiguous_competent": 0,
+      "layers": 2,
+      "three_seed_threshold": 0.8
+    },
+    {
+      "architecture": "L4_W64_H4",
+      "competent_depths": "",
+      "largest_contiguous_competent": 0,
+      "layers": 4,
+      "three_seed_threshold": 0.8
+    },
+    {
+      "architecture": "L8_W64_H4",
+      "competent_depths": "",
+      "largest_contiguous_competent": 0,
+      "layers": 8,
+      "three_seed_threshold": 0.8
+    }
+  ],
+  "generator_hash": "97fd577f6fda7c9854998fd776d56f578e9dfd868ee280845a32fbe7cfa13ba8",
+  "lmin_eligible": false,
+  "lmin_required_extrapolation_points": 4,
+  "planned_models": 9,
+  "schema_version": "paper06.compositional_frontier_v7.v1",
+  "smoke": false
+}

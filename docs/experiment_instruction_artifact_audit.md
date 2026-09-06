@@ -28,17 +28,20 @@ The three already identified active/deferred experiments remain genuine requirem
 3. Paper 0.8's learned D5 structured-rule experiment. Exact generator/posterior
    validation is complete, but there is no model result.
 
-One additional required experimental gap is visible:
+One additional required experimental gap was visible at audit time and is now closed:
 
-- **Paper 0.6 needs a cue-free compositional predicate frontier.** The completed v6
+- **Paper 0.6 cue-free compositional predicate frontier: completed gated null.** The completed v6
   `isAncestor` stress run is valid as a presentation/lookup robustness frontier, but
   its own manuscript and instruction completion criteria note that the positive
   endpoint is present among path records. Consequently its measured `d_max=16` cannot
-  establish iterative ancestor composition or `L_min(d)`. A corrected generator must
-  remove that endpoint-membership cue before those required questions can be answered.
+  establish iterative ancestor composition or `L_min(d)`. The corrected v7 generator
+  matches candidate membership and endpoint roles across labels. All nine CPU models
+  completed, but none of L2/L4/L8 was competent even at trained depth one. The
+  compositional acquisition prerequisite fails, so `L_min(d)` is not estimable and
+  deeper scaling is a registered gated stop.
 
-This is separate from rerunning the already complete v6 grid. It should be designed as
-a narrow corrected frontier, not a broad rescue sweep.
+This result is separate from the already complete v6 grid and closes the gap with a
+narrow corrected frontier rather than a broad rescue sweep.
 
 ## Important non-gaps
 

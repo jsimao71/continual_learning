@@ -1,0 +1,13 @@
+{
+  "architecture": {
+    "heads": 4,
+    "layers": 8,
+    "name": "L8_W64_H4",
+    "width": 64
+  },
+  "artifact_hash": "3fda76e855a4dd418a50011cb9bf24ae298506e1b22f47336ff768b901095f2c",
+  "model_seed": 37,
+  "raw_rows": 6144,
+  "seconds": 271.65700876899064,
+  "steps": 1200
+}

@@ -1,0 +1,4 @@
+architecture,competent_depths,largest_contiguous_competent,layers,three_seed_threshold
+L2_W64_H4,,0,2,0.8
+L4_W64_H4,,0,4,0.8
+L8_W64_H4,,0,8,0.8
