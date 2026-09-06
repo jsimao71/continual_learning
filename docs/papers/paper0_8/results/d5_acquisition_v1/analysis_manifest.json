@@ -1,0 +1,11 @@
+{
+  "all_information_valid": true,
+  "any_passing_seed": false,
+  "invalid_or_smoke_inputs_excluded": true,
+  "official_cells": 12,
+  "passing_architecture_split_cells": 0,
+  "raw_rows": 51456,
+  "schema_version": "paper08.d5_acquisition.analysis.v1",
+  "summary_rows": 36,
+  "three_seed_complete": true
+}

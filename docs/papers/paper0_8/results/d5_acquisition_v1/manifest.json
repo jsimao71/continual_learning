@@ -1,0 +1,48 @@
+{
+  "checkpoints_ignored": true,
+  "completed_cells": 12,
+  "controls": [
+    "none",
+    "shuffled",
+    "wrong_rule"
+  ],
+  "device": "cpu",
+  "generic_family_free_serialization": true,
+  "heldout_family": "square",
+  "learned_experiment": true,
+  "model_seeds": [
+    11,
+    23,
+    37
+  ],
+  "moduli": [
+    5,
+    7,
+    11
+  ],
+  "parameter_split_seed": 8085,
+  "planned_cells": 12,
+  "schema_version": "paper08.d5_acquisition.v1",
+  "smoke": false,
+  "train_families": [
+    "successor",
+    "add_n",
+    "multiply_a",
+    "affine"
+  ],
+  "updates": 1200,
+  "validity_gate": {
+    "all_answer_entropy_zero": true,
+    "bayes_oracle_ceiling": 1.0,
+    "episode_id_overlap": 0,
+    "heldout_parameter_overlap": 0,
+    "max_identifying_examples": 3,
+    "seen_parameter_episodes": 736,
+    "serialized_episode_overlap": 0,
+    "square_training_episodes": 0,
+    "target_query_pair_explicit_in_demonstrations": false,
+    "train_episodes": 1472,
+    "unseen_family_episodes": 96,
+    "unseen_parameter_episodes": 240
+  }
+}

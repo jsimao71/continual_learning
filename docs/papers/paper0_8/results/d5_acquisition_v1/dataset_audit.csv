@@ -1,0 +1,5 @@
+all_answer_entropy_zero,bayes_oracle_ceiling,episode_id_overlap,episodes,heldout_parameter_overlap,max_identifying_examples,mean_identifying_examples,seen_parameter_episodes,serialized_episode_overlap,split,square_training_episodes,target_query_pair_explicit_in_demonstrations,train_episodes,unseen_family_episodes,unseen_parameter_episodes
+True,1.0,0,1472,0,3,2.0176630434782608,736,0,train,0,False,1472,96,240
+True,1.0,0,736,0,3,2.020380434782609,736,0,seen_parameter,0,False,1472,96,240
+True,1.0,0,240,0,3,2.0083333333333333,736,0,unseen_parameter,0,False,1472,96,240
+True,1.0,0,96,0,3,3.0,736,0,unseen_family,0,False,1472,96,240
