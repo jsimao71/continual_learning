@@ -1,0 +1,5 @@
+architecture,contiguous_frontier,depths_observed,gate_complete,machine,seeds_observed
+train_kmax3,1,6,1,M3,3
+train_kmax3,2,6,1,M4,3
+train_kmax4,1,6,1,M3,3
+train_kmax4,1,6,1,M4,3

@@ -1,0 +1,31 @@
+{
+  "conditions": [
+    "train_kmax3",
+    "train_kmax4"
+  ],
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "rule": "maximize minimum M3/M4 frontier, then sum, then minimize pool size, then lexical name",
+  "schema_version": "paper09.learned_controller.stage_e.selection.v1",
+  "scores": {
+    "diversity_24k": {
+      "min_frontier": 1,
+      "pool_size": 24000,
+      "sum_frontier": 3
+    },
+    "diversity_48k": {
+      "min_frontier": 1,
+      "pool_size": 48000,
+      "sum_frontier": 2
+    },
+    "diversity_96k": {
+      "min_frontier": 1,
+      "pool_size": 96000,
+      "sum_frontier": 3
+    }
+  },
+  "selected_architecture": "narrow",
+  "selected_diversity": "diversity_24k",
+  "stage_d_frontiers_hash": "597c2be725f62a0de40c6e9dc25a9dad1f5b44ae5d6fbe14ba16b8a49420e6f7",
+  "stage_d_manifest_hash": "b08abb6c5e806cd6b8008a8e8e2de7cc53603931a1fe7b521f51961955b6cda0",
+  "stage_d_selection_hash": "1a2edbdb6491106423fc2fe9f1348ad727195071775203adae4b7f789f45f5fd"
+}

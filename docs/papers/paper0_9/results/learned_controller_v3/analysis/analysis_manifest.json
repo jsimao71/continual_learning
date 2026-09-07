@@ -1,0 +1,19 @@
+{
+  "authoritative_only": true,
+  "error_hash": "c98d3ba328bc5a8d9fc5093d327d9f74a4359b72e644bbc960d7b830accc4df0",
+  "error_rows": 168,
+  "frontier_hash": "778e1e16616586da597d4ff7d69f137b1a1c51fe0605b3fb55ab48a8cfb49697",
+  "frontier_rows": 28,
+  "schema_version": "paper09.learned_controller.staged_analysis.v1",
+  "source_audit": {
+    "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+    "stage_manifest_hashes": {
+      "A": "abbbd3c57d662f37466341b83dc27337aaffacc86abcdf7820be8cd27e653a7d",
+      "B": "d9bece06479c67a028f127d495e545d00d4bef94581701edfd9064baac5fe522",
+      "C": "b08337512eace3a54aa011b4067d25593aa4e2d4be95ce55f932b2fea329af60",
+      "D": "b08abb6c5e806cd6b8008a8e8e2de7cc53603931a1fe7b521f51961955b6cda0",
+      "E": "2d6ba5cafe2c8fd4de496f5fd64781ace6c8fb23f80c53803f5ab5e9dbbc6d18"
+    },
+    "valid": true
+  }
+}
