@@ -11,7 +11,7 @@
 \author{Paper 0.1 --- Position and Formal Framework}\date{August 2026}
 \begin{document}\maketitle
 \begin{abstract}
-Classical expressivity asks what an idealized Transformer can compute; benchmark studies ask whether a trained model succeeds. Between them lies the theory of a \emph{learned} Transformer machine. We formalize task structure, information sufficiency, machine resources, acquisition probability, one-pass and autoregressive composition, and resource-scheduled closure. The operational object is compound, $\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B)$. Five executable fixed-weight witnesses calibrate representability under explicit finite encodings. Their contrast with Paper 0.85---where trained one-token and autoregressive machines share frontier $K=3$ and fail at unseen $K=4$---makes the central distinction concrete: representability is not reliable acquisition. Empirical papers appear only as late, nonessential anchors.
+Classical expressivity asks what an idealized Transformer can compute; benchmark studies ask whether a trained model succeeds. Between them lies the theory of a \emph{learned} Transformer machine. We formalize task structure, information sufficiency, machine resources, acquisition probability, one-pass and autoregressive composition, and resource-scheduled closure. The operational object is compound, $\mathcal M=(F_\theta,C,S,I,\mathbb T,\mathcal B)$. Five executable fixed-weight witnesses calibrate representability under explicit finite encodings. Their contrast with Paper 0.85---where trained one-token and autoregressive machines, including corrected data interventions, share frontier $K=3$ and have zero three-seed acquisition at unseen $K=4$---makes the central distinction concrete: representability is not reliable acquisition. Empirical papers appear only as late, nonessential anchors.
 \end{abstract}
 
 \section{Introduction}
@@ -89,7 +89,7 @@ Representability asks whether $\exists W^*$ such that $\mathcal M(W^*)$ implemen
 \begin{tabularx}{\linewidth}{lccccY}\toprule Witness&Protocol&((L,H,d))&Legal result&Main control&Scope\\\midrule
 Successor&$C_0$&$(1,0,4)$&3/3, margin 1&SA 0/3&local weight map\\ Pair lookup&$C_0$&$(1,1,9)$&18/18&FF 6/18 ties&atomic pairs\\ Grandparent&$C_0$&$(2,1,20)$&2/2&one-layer SA 0/2&fixed two-hop chain\\ Root&$C_1$&$(1,1,15)$&24/24&FF 6/24&depth 0--3\\ Unary chain&$C_1$&$(1,1,15)$&96/96&FF 24/96&length 1--4\\\bottomrule\end{tabularx}
 \caption{Fixed-weight calibration. Exact means exhaustive argmax correctness, not one-hot attention; no witness is claimed minimal.}\end{table}
-Paper 0.85 supplies the learned contrast. On its corrected dataset, one-token O0, free-trace O1, and supervised structured O3 have contiguous frontier three; O2 has none. Every condition has zero three-seed acquisition probability at $K=4$. Thus $K_{\rm internal}=K_{\rm AR}=3$ in that phase despite a handcrafted recurrent transition under a different atomic encoding: representability does not imply acquisition.
+Paper 0.85 supplies the learned contrast. On its corrected Stage-1 dataset, one-token O0, free-trace O1, and supervised structured O3 have contiguous frontier three; O2 has none. Its subsequent leakage-corrected recurrence study changes partial-start and training-diversity conditions while matching processed-token budget: all four conditions retain frontier three, all have zero three-seed acquisition probability at $K=4$, and the O0 follow-up gate stays closed. Thus $K_{\rm internal}=K_{\rm AR}=3$ in these phases despite a handcrafted recurrent transition under a different atomic encoding: representability does not imply acquisition.
 
 \section{Composition and resource-scheduled closure}
 For legal set $R_K$, per-$K$ solvability $\forall K\exists(\mathcal M_K,\mathcal B_K)$ differs from
@@ -126,16 +126,44 @@ For information $I_s$, acquisition $Q$, and execution $E$, $P(I_s\cap Q\cap E)=P
 
 \section{Late empirical anchors}
 \begin{table}[H]\centering\small
-\begin{tabularx}{\linewidth}{lYY}\toprule Paper&Axis&Status/illustration\\\midrule 0.5&internal composition&evidence; non-monotone depth, distributed heads\\ 0.6&semantic frontier&evidence; budget--allocation interaction\\ 0.7&formal inference&infrastructure; learned frontier pending\\ 0.8&information/ICL&evidence; sufficiency vs acquisition\\ 0.85&AR recurrence&Stage 1; no $K=4$ acquisition or AR gain\\ 0.9&tools/harness&pending\\\bottomrule\end{tabularx}
+\begin{tabularx}{\linewidth}{lYY}\toprule Paper&Axis&Status/illustration\\\midrule 0.5&internal composition&evidence; non-monotone depth, distributed heads\\ 0.6&semantic composition&v7 gated null; cue-free acquisition fails\\ 0.7&formal inference&P2 passes; F2 fails the three-seed gate\\ 0.8&information/ICL&D5 gated null after valid identification\\ 0.85&AR recurrence&corrected conditions retain $K_{\rm prefix}=3$\\ 0.9&tools/harness&pending; no result imported\\\bottomrule\end{tabularx}
 \caption{The framework does not depend on these bounded series results.}\end{table}
+
+Paper 0.6 illustrates why a measured frontier must identify the operation being
+measured. Its v6 \texttt{isAncestor} path-length result exposed the candidate directly
+among path records and therefore measured contextual membership. In v7, two disjoint
+equal-length chains match candidate exposure and endpoint roles across labels. Across
+$L\in\{2,4,8\}$ and three seeds, mean accuracies are .496, .502, and .498; no model
+passes even $d=1$. The cue-free compositional prerequisite fails, all measured
+frontiers are zero, and $L_{\min}(d)$ is ineligible. This is an acquisition failure in
+the tested regime, not a representational impossibility.
+
+Paper 0.7 supplies a syntax-sensitive separation. P2, which distinguishes modus
+tollens from contraposition controls, passes at all three seeds (test accuracies .993,
+1.000, and .999). F2 unary-functor binding does not: seed 23 reaches only .917 overall
+and .901 in its worst test template. The registered all-seed, all-template gate
+therefore stops the deeper unification ladder. Paper 0.8 makes the information/acquisition
+distinction independently: its D5 generator is exactly identifiable and leakage-free,
+yet none of 12 learned architecture--seed cells passes any split across 51,456
+evaluation rows. Neither negative establishes an architectural lower bound; both
+block mechanism claims from selectively successful cells.
+
+Finally, Paper 0.85 tests whether serialized output or data intervention moves a
+learned recurrence boundary. In the corrected recurrence-v2 study, baseline,
+partial-start, high-diversity, and partial-diversity conditions all have contiguous
+frontier three over 84 official cells. For every condition,
+$P_{\rm acquire}(K=4)=0$ across the three seeds. The observed recurrence gain is thus
+zero in this regime even though the fixed-weight witness above implements reusable
+transition under its declared encoding. Paper 0.9 remains pending and contributes no
+empirical premise here.
 
 \section{Conjectures and status}
 \begin{table}[H]\centering\small
-\begin{tabularx}{\linewidth}{p{.06\linewidth}p{.44\linewidth}Y}\toprule&Conjecture&Status\\\midrule C1&local acquisition need not imply composition&consistent with 0.6/0.85\\ C2&trained models often have bounded one-pass frontiers&consistent with 0.5/0.6\\ C3&multi-token state expands the measured frontier&not supported in 0.85 Stage 1; construction is representability only\\ C4&competent recurrence shifts failure toward control&pending\\ C5&context separates knowledge from procedure&consistent as design principle/0.8 taxonomy\\ C6&harnesses may improve reliability before expressivity&pending 0.9\\\bottomrule\end{tabularx}
+\begin{tabularx}{\linewidth}{p{.06\linewidth}p{.44\linewidth}Y}\toprule&Conjecture&Status\\\midrule C1&local acquisition need not imply composition&consistent with 0.6 v6/v7 and 0.85\\ C2&trained models often have bounded one-pass frontiers&consistent with 0.5; 0.6 v7 fails before a frontier\\ C3&multi-token state expands the measured frontier&not supported through 0.85 recurrence v2; construction is representability only\\ C4&competent recurrence shifts failure toward control&pending; no learned $K=4$ recurrence competence\\ C5&context separates knowledge from procedure&consistent with information-valid 0.8 D5 acquisition null\\ C6&harnesses may improve reliability before expressivity&pending 0.9\\\bottomrule\end{tabularx}
 \caption{Falsifiable conjectures with bounded status language.}\end{table}
 
 \section{Discussion and conclusion}
-Validate identifiability; establish local competence; measure contiguous composition and recurrence frontiers; only then interpret mechanism. Fixed weights calibrate representability, while learned experiments measure acquisition. Resource-scheduled closure is a quantified property of one reusable procedure, not a long successful trace.
+Validate identifiability; establish local competence; measure contiguous composition and recurrence frontiers; only then interpret mechanism. The current anchors demonstrate every early stopping point: information can be sufficient while acquisition fails (0.8 D5), a local formal operator can pass while the next syntactic class is seed-unstable (0.7 P2/F2), a shortcut-sensitive frontier can disappear under a cue-free control (0.6 v7), and explicit output recurrence can leave the train-short/test-long boundary unchanged (0.85). Fixed weights calibrate representability, while learned experiments measure acquisition. Resource-scheduled closure is a quantified property of one reusable procedure, not a long successful trace.
 
 \appendix
 \section{Fixed-weight micro-Transformer constructions}
@@ -210,7 +238,7 @@ Report both $A(1)$ and $A(n,G)$. Majority/plurality, probability averaging, cons
 
 For binary independent runs with odd $n$ and per-run correctness $p>.5$,
 \[
-A_{\rm maj}(n)=\sum_{j=(n+1)/2}^{n}{n\choose j}p^j(1-p)^{n-j}\longrightarrow1.
+A_{\rm maj}(n)=\sum_{j=(n+1)/2}^{n}\binom{n}{j}p^j(1-p)^{n-j}\longrightarrow1.
 \]
 This is intuition under iid assumptions, not a forecast for language-model samples; correctness-majority also coincides with label-majority only for binary outcomes or a single wrong label. Runs can share a wrong interpretation, shortcut, training bias, prompt-induced failure, or decoding mode. Useful diagnostics include pairwise answer agreement, correctness correlation, answer-histogram entropy, effective answer count, and the saturation curve $A(n)$. Repeated identical wrong answers are not stronger evidence. If $q_\theta=q_0$, there is no side-information verifier, and aggregation is label-symmetric, repetitions with no complementary information create no missing task information.
 
