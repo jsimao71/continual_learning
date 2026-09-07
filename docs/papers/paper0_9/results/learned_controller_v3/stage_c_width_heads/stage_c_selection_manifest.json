@@ -1,0 +1,23 @@
+{
+  "allocation_unresolved": true,
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "control_rationale": "",
+  "control_required": false,
+  "enabled": true,
+  "schema_version": "paper09.learned_controller.stage_c.selection.v1",
+  "stage_b_frontiers": "docs/papers/paper0_9/results/learned_controller_v3/stage_b_depth/stage_b_frontiers.csv",
+  "stage_b_frontiers_hash": "0ad4f2de822d20a880920353c6126a089b5158f77e5ba0446dbf29d4c4c97af2",
+  "stage_b_manifest": "docs/papers/paper0_9/results/learned_controller_v3/stage_b_depth/stage_b_manifest.json",
+  "stage_b_manifest_hash": "d9bece06479c67a028f127d495e545d00d4bef94581701edfd9064baac5fe522",
+  "winner_sets": {
+    "M3": [
+      "deep_full",
+      "deep_matched"
+    ],
+    "M4": [
+      "deep_full",
+      "deep_matched",
+      "shallow_matched"
+    ]
+  }
+}

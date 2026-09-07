@@ -1,0 +1,96 @@
+{
+  "architectures": [
+    "narrow",
+    "wide",
+    "one_head",
+    "eight_heads"
+  ],
+  "cell_spec_sha256": "d36375f1d957326f5172e18de5b8828e7be345c7cd22a00c228edd04cdda7889",
+  "complete_cells": 24,
+  "completed": true,
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "dataset_sha256": "e92b084e7440e1f5a6ac92d2524834735486c0fbc7df87cb1e997a06f7a5deb4",
+  "device": "mps",
+  "exact_resume": true,
+  "frontiers": [
+    {
+      "architecture": "eight_heads",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "eight_heads",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "narrow",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "narrow",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "one_head",
+      "contiguous_frontier": 0,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "one_head",
+      "contiguous_frontier": 0,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "wide",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "wide",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    }
+  ],
+  "machines": [
+    "M3",
+    "M4"
+  ],
+  "raw_rows": 9216,
+  "required_cells": 24,
+  "schema_version": "paper09.learned_controller.stage_c.v1",
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "selection_manifest_hash": "ce3b32b6a79cc50e75ea415a50a4732e5f6bab83b4b4794a61a867745eb772c5",
+  "smoke": false,
+  "updates": 1000
+}

@@ -1,0 +1,9 @@
+architecture,contiguous_frontier,depths_observed,gate_complete,machine,seeds_observed
+eight_heads,1,6,1,M3,3
+eight_heads,3,6,1,M4,3
+narrow,1,6,1,M3,3
+narrow,3,6,1,M4,3
+one_head,0,6,1,M3,3
+one_head,0,6,1,M4,3
+wide,1,6,1,M3,3
+wide,3,6,1,M4,3
