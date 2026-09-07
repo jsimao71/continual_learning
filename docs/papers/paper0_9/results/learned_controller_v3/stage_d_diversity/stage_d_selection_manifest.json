@@ -1,0 +1,63 @@
+{
+  "conditions": [
+    "diversity_24k",
+    "diversity_48k",
+    "diversity_96k"
+  ],
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "rule": "maximize minimum M3/M4 frontier, then sum, then minimize parameters, then lexical name",
+  "schema_version": "paper09.learned_controller.stage_d.selection.v1",
+  "scores": {
+    "deep_full": {
+      "min_frontier": 1,
+      "parameters": 147072,
+      "sum_frontier": 4
+    },
+    "deep_matched": {
+      "min_frontier": 1,
+      "parameters": 85728,
+      "sum_frontier": 4
+    },
+    "eight_heads": {
+      "min_frontier": 1,
+      "parameters": 80128,
+      "sum_frontier": 4
+    },
+    "narrow": {
+      "min_frontier": 1,
+      "parameters": 23680,
+      "sum_frontier": 4
+    },
+    "one_head": {
+      "min_frontier": 0,
+      "parameters": 80128,
+      "sum_frontier": 0
+    },
+    "shallow_matched": {
+      "min_frontier": 0,
+      "parameters": 81048,
+      "sum_frontier": 3
+    },
+    "wide": {
+      "min_frontier": 1,
+      "parameters": 169344,
+      "sum_frontier": 4
+    }
+  },
+  "selected_architecture": "narrow",
+  "sources": [
+    {
+      "frontier_hash": "0ad4f2de822d20a880920353c6126a089b5158f77e5ba0446dbf29d4c4c97af2",
+      "manifest_hash": "d9bece06479c67a028f127d495e545d00d4bef94581701edfd9064baac5fe522",
+      "selection_hash": "",
+      "stage": "B"
+    },
+    {
+      "frontier_hash": "8423e0ff4eeddbb4cfffb5e0fdfe870643842ec7b8e9d71a2535cbf5c1cf1884",
+      "manifest_hash": "b08337512eace3a54aa011b4067d25593aa4e2d4be95ce55f932b2fea329af60",
+      "selection_hash": "ce3b32b6a79cc50e75ea415a50a4732e5f6bab83b4b4794a61a867745eb772c5",
+      "stage": "C"
+    }
+  ],
+  "substituted_architecture": "narrow"
+}

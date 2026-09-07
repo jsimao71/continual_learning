@@ -1,0 +1,80 @@
+{
+  "cell_spec_sha256": "1a30a9d384be8c0449de571be392cc99c53078bcc2d9a5de7af481e6821eb3a8",
+  "complete_cells": 18,
+  "completed": true,
+  "conditions": [
+    "diversity_24k",
+    "diversity_48k",
+    "diversity_96k"
+  ],
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "dataset_sha256": "e92b084e7440e1f5a6ac92d2524834735486c0fbc7df87cb1e997a06f7a5deb4",
+  "device": "mps",
+  "exact_resume": true,
+  "frontiers": [
+    {
+      "architecture": "diversity_24k",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "diversity_24k",
+      "contiguous_frontier": 2,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "diversity_48k",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "diversity_48k",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "diversity_96k",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "diversity_96k",
+      "contiguous_frontier": 2,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    }
+  ],
+  "machines": [
+    "M3",
+    "M4"
+  ],
+  "matched_draws": 96000,
+  "raw_rows": 6912,
+  "required_cells": 18,
+  "schema_version": "paper09.learned_controller.stage_d.v1",
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "selection_manifest_hash": "1a2edbdb6491106423fc2fe9f1348ad727195071775203adae4b7f789f45f5fd",
+  "smoke": false,
+  "updates": 1000
+}

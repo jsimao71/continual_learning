@@ -1,0 +1,7 @@
+architecture,contiguous_frontier,depths_observed,gate_complete,machine,seeds_observed
+diversity_24k,1,6,1,M3,3
+diversity_24k,2,6,1,M4,3
+diversity_48k,1,6,1,M3,3
+diversity_48k,1,6,1,M4,3
+diversity_96k,1,6,1,M3,3
+diversity_96k,2,6,1,M4,3
