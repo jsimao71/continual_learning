@@ -1,0 +1,5 @@
+all_seed_K4,contiguous_frontier,depths_observed,gate_complete,machine,seeds_observed,snapshot_updates,worst_seed_K4_final
+0,1,6,1,M3,3,2000,0.0
+0,3,6,1,M4,3,2000,0.0
+0,1,6,1,M3,3,4000,0.0
+0,3,6,1,M4,3,4000,0.0
