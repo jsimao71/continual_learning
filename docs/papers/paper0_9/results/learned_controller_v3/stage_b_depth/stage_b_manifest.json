@@ -1,0 +1,83 @@
+{
+  "architectures": [
+    "deep_full",
+    "deep_matched",
+    "shallow_matched"
+  ],
+  "cell_spec_sha256": "892656f697089c039965ef3eabcd7682a73d48b5a144b716b6bbf839e4796182",
+  "complete_cells": 18,
+  "completed": true,
+  "config_sha256": "7623fca9e04556d3057cf0996bcbb2fd4eec5fc53d7e33055d2c1ba6313efc74",
+  "dataset_sha256": "e92b084e7440e1f5a6ac92d2524834735486c0fbc7df87cb1e997a06f7a5deb4",
+  "device": "mps",
+  "exact_resume": true,
+  "frontiers": [
+    {
+      "architecture": "deep_full",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "deep_full",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "deep_matched",
+      "contiguous_frontier": 1,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "deep_matched",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "shallow_matched",
+      "contiguous_frontier": 0,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M3",
+      "seeds_observed": 3
+    },
+    {
+      "architecture": "shallow_matched",
+      "contiguous_frontier": 3,
+      "depths_observed": 6,
+      "gate_complete": 1,
+      "machine": "M4",
+      "seeds_observed": 3
+    }
+  ],
+  "machines": [
+    "M3",
+    "M4"
+  ],
+  "raw_rows": 6912,
+  "required_cells": 18,
+  "schema_version": "paper09.learned_controller.stage_b.v1",
+  "seeds": [
+    11,
+    23,
+    37
+  ],
+  "smoke": false,
+  "stage_a_prerequisite": {
+    "complete_gate_cells": 4,
+    "manifest": "docs/papers/paper0_9/results/learned_controller_v3/stage_a_budget/stage_a_manifest.json",
+    "manifest_hash": "abbbd3c57d662f37466341b83dc27337aaffacc86abcdf7820be8cd27e653a7d"
+  },
+  "updates": 1000
+}

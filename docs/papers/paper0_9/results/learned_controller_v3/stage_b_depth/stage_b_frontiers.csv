@@ -1,0 +1,7 @@
+architecture,contiguous_frontier,depths_observed,gate_complete,machine,seeds_observed
+deep_full,1,6,1,M3,3
+deep_full,3,6,1,M4,3
+deep_matched,1,6,1,M3,3
+deep_matched,3,6,1,M4,3
+shallow_matched,0,6,1,M3,3
+shallow_matched,3,6,1,M4,3
