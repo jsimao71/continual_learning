@@ -1,0 +1,14 @@
+\begin{table}[H]\centering\small
+\begin{tabular}{llrrr}\toprule
+Dataset & Budget & Base & Bridge & Paired delta (95\% CI) \\
+\midrule
+HOTPOTQA & 64 & -3.569 & -3.810 & -0.241 [-1.426, +0.791] \\
+HOTPOTQA & 128 & -3.101 & -3.060 & +0.041 [-0.795, +0.903] \\
+HOTPOTQA & 192 & -2.779 & -2.737 & +0.042 [-0.553, +0.638] \\
+QASPER & 64 & -4.490 & -4.176 & +0.314 [-0.258, +0.890] \\
+QASPER & 128 & -4.031 & -4.189 & -0.158 [-0.575, +0.187] \\
+QASPER & 192 & -4.178 & -4.048 & +0.130 [-0.122, +0.427] \\
+\bottomrule\end{tabular}
+\caption{Frozen-Qwen natural candidate intervention. Quality is mean answer-token log probability; all budgets use measured native K/V.}
+\label{tab:paper1-natural}
+\end{table}

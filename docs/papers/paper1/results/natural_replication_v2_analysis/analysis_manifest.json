@@ -1,0 +1,44 @@
+{
+  "causal_hash": "8c18b53a60e1c9dbca156039e7f51ea0555dcfb91218e3db0aefd1703a88f155",
+  "complete_only": true,
+  "completed_seeds": 3,
+  "config_hash": "d89d2cec0e79b7ece5fa43c2006a5b4bb2de3f93e5218a1cbe7b111022c18e36",
+  "gate_decision": {
+    "causal_prediction_by_dataset": {
+      "hotpotqa": false,
+      "qasper": false
+    },
+    "frontier_by_dataset": {
+      "hotpotqa": false,
+      "qasper": false
+    },
+    "persistent_learning_gate": 0
+  },
+  "identity_overlap_hash": "49a0eea890f6cb46112a983ef2100da99cab46b6b92fc97a96456629b3f0e1d7",
+  "paired_hash": "755ebc1de0f47ef205c268dd7338d23430a400c0c3588814b814c2a33f6f397f",
+  "pooled_selector_rows": 4320,
+  "schema_version": "paper1.natural_replication.analysis.v1",
+  "seed_audits": [
+    {
+      "device": "mps",
+      "manifest_hash": "3aa880c9b2404d059c8965987c230a31948c1caf78ea579eba420bdbddf29d14",
+      "removal_rows": 288,
+      "seed": 20260906,
+      "selector_rows": 1440
+    },
+    {
+      "device": "mps",
+      "manifest_hash": "7daeb277c09218ba29b6b8ff5a0aea5271636fb318074a90b0188dce1f7b5ddf",
+      "removal_rows": 288,
+      "seed": 20260917,
+      "selector_rows": 1440
+    },
+    {
+      "device": "mps",
+      "manifest_hash": "634a46ba1f550dc298481cd34098b0192aa63a5ff7774affb26e48416625cb9b",
+      "removal_rows": 288,
+      "seed": 20260929,
+      "selector_rows": 1440
+    }
+  ]
+}

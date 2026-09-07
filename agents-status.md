@@ -1,6 +1,6 @@
 # Codex Handoff Status
 
-Last updated: 2026-08-22
+Last updated: 2026-09-07
 
 Repository: `D:\git\rd\continual_learning`
 
@@ -121,8 +121,12 @@ Key measured results:
 - Bridge-minus-base answer-logprob deltas are positive in all six cells: HotpotQA `+1.086/+0.413/+0.640`; QASPER `+0.542/+0.011/+0.503`.
 - Every paired 95% bootstrap interval includes zero. The combined structural selector is negative in five of six cells.
 - Natural candidate-removal prediction has negative held-out `R^2` with and without structure on both datasets.
+- Preregistered natural replication v2 is complete across sampling seeds `20260906/20260917/20260929`: 4,320 selector rows, 71 unique HotpotQA and 63 unique QASPER test identities.
+- Bridge-minus-base means remain positive in all six replication cells, but every unique-identity 95% bootstrap interval crosses zero.
+- Structural-minus-surface causal-utility `R^2` is negative for every seed on both datasets (means `-0.398` HotpotQA and `-83.652` QASPER).
+- The authoritative replication decision is `persistent_learning_gate=0`; both frontier and causal-prediction branches fail on both datasets.
 
-Interpretation: explicit bridge preservation shifts the controlled frontier and has a directionally consistent natural mean effect, but the diagnostic natural run does not establish reproducibility or learned-selector transfer. The perfect synthetic S5 result remains generator-specific. Paper 2 stays blocked.
+Interpretation: explicit bridge preservation shifts the controlled frontier and has a directionally consistent natural mean effect in both pilot and replication, but the larger fixed replication still does not establish reproducibility or learned-selector transfer. The perfect synthetic S5 result remains generator-specific. Paper 2 stays blocked.
 
 Reproduction command:
 
@@ -153,14 +157,7 @@ Paper 2 prototype/adaptor consolidation is **blocked**. Do not implement an onli
 
 The natural candidate-level frozen-Qwen diagnostic is now complete. It regenerated model-derived candidate features, preserved identity-disjoint Hotpot example/QASPER paper splits, compared B0--B3 and S1--S5 at exact native K/V token budgets, measured answer likelihood/evidence/systems outcomes, and computed a removal-utility subset. Artifacts are under `docs/papers/paper1/results/natural/`.
 
-The exact next work is a preregistered larger replication of the unchanged bridge-versus-base protocol:
-
-1. Increase held-out identities and use multiple seeds without changing candidate construction, feature definitions, selectors, budgets, or endpoints.
-2. Keep 64/128/192-token native K/V budgets and paired answer-logprob differences primary.
-3. Preserve Hotpot example and QASPER paper identity separation; never tune on test identities.
-4. Expand removal utility enough to estimate incremental prediction with uncertainty.
-5. Treat S5's present failure as substantive; do not add flexibility to rescue it.
-6. Proceed to Paper 2 only if the fixed replication resolves a natural frontier improvement or incremental causal-utility prediction.
+The preregistered larger replication is complete and both registered evidence branches failed. Persistent prototypes/adapters, override tests, rollback experiments, and Paper 2 consolidation remain gated stops. Any next experiment requires a new scientific rationale and preregistration; do not tune the frozen selectors or expand learner flexibility in response to this test result.
 
 The gate passes only if at least one result is reproducible on natural held-out data:
 

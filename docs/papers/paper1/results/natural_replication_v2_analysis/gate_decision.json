@@ -1,0 +1,11 @@
+{
+  "causal_prediction_by_dataset": {
+    "hotpotqa": false,
+    "qasper": false
+  },
+  "frontier_by_dataset": {
+    "hotpotqa": false,
+    "qasper": false
+  },
+  "persistent_learning_gate": 0
+}

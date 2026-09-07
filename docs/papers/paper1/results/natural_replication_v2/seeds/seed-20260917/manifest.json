@@ -1,0 +1,36 @@
+{
+  "artifact_hash": "fabdf981916f9959c89d479b3cb5cd896b30fd873724c6668dccab821b6bb379",
+  "candidate_cache_hash": "b17aa802710213e03bebde12c224a9e8df17a636a3e5a6424e6a5e3a53401b36",
+  "config": {
+    "budgets": [
+      2,
+      4,
+      6
+    ],
+    "candidates": 12,
+    "causal_examples_per_split": 6,
+    "chunk_tokens": 32,
+    "device": "mps",
+    "model_id": "Qwen/Qwen3-0.6B",
+    "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+    "per_split": 24,
+    "replacement_pool_multiplier": 2,
+    "retain_full_attention": false,
+    "seed": 20260917,
+    "selectors": [
+      "base_topk",
+      "budget_tuned_topk",
+      "power_sharpen",
+      "entropy_adaptive_sharpen",
+      "persistence",
+      "agreement",
+      "community",
+      "bridge_preserving",
+      "combined_structural",
+      "oracle_evidence"
+    ]
+  },
+  "model_id": "Qwen/Qwen3-0.6B",
+  "model_revision": "c1899de289a04d12100db370d81485cdf75e47ca",
+  "schema_version": "paper1.natural.v1"
+}
