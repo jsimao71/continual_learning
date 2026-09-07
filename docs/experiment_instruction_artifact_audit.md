@@ -1,6 +1,6 @@
 # Instruction-to-artifact experiment audit
 
-Audit date: 2026-09-06. The machine-readable companion is
+Audit date: 2026-09-07. The machine-readable companion is
 [`experiment_instruction_artifact_audit.csv`](experiment_instruction_artifact_audit.csv).
 It covers every repository `AGENTS*.md` plus `agents-status.md`. Rows consolidate
 overlapping instructions when later patches refine an earlier requirement. `Complete`
@@ -20,11 +20,19 @@ not imply that every suggested future extension was run.
 
 ## Findings
 
-Two already identified active/deferred experiments remain genuine requirements:
+The two experiments that remained active at the original audit boundary are now
+complete:
 
-1. Paper 0.9's bounded staged A--E resource study. Its v3 artifact is plan-only.
-2. Paper 1's larger unchanged natural bridge-versus-base replication. Its frozen
-   three-seed design is committed but unrun.
+1. **Paper 0.9 staged A--E resource study: completed bounded null.** All five stages
+   ran with their registered three-seed comparisons. Depth, width/head count, data
+   diversity, and K=4 training exposure did not produce a repeatable M4 procedure;
+   the complete analysis and paper are tracked in commit `934585e`.
+2. **Paper 1 larger natural replication: completed gated null.** The unchanged
+   frozen intervention ran across three sampling seeds, yielding 71 unique HotpotQA
+   and 63 unique QASPER test identities. All six bridge-minus-base point estimates
+   are positive, but every identity-bootstrap interval crosses zero; incremental
+   causal-utility R2 is negative for every seed on both datasets. The authoritative
+   decision is `persistent_learning_gate=0`, tracked in commit `b34c49a`.
 
 Paper 0.8's learned D5 structured-rule experiment has since completed as a three-seed
 gated null. All 12 planned cells and 51,456 evaluation rows are tracked, but no seed
@@ -53,7 +61,7 @@ narrow corrected frontier rather than a broad rescue sweep.
   data interventions did not move the recurrence frontier beyond three.
 - Paper 0.6 S2 mechanism work is blocked by failed held-out competence.
 - Paper 1 persistent consolidation, override-after-learning, and rollback studies are
-  conditional on the larger natural gate and remain forbidden before it passes.
+  stopped because the completed larger natural gate did not pass.
 - Paper 0.5 E7, extra Paper 0.1 M2--M5 witnesses, Paper 0.8 D3-B/C, and pretrained
   appendices are optional or aspirational rather than missing requirements.
 
